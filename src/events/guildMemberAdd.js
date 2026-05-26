@@ -1,13 +1,8 @@
-const { logMemberAdd } = require("../handlers/logger.js");
-const { checkRaid } = require("../handlers/protection.js");
-const { sendWelcome } = require("../handlers/welcome.js");
+const { logInvite } = require("../handlers/inviteLogger");
+
 module.exports = {
   name: "guildMemberAdd",
   async execute(member) {
-    await Promise.all([
-      logMemberAdd(member),
-      checkRaid(member),
-      sendWelcome(member),
-    ]);
-  }
+    await logInvite(member);
+  },
 };

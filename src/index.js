@@ -9,6 +9,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessageReactions,
@@ -71,6 +72,7 @@ app.use(express.json());
 app.use(require("express-session")({ secret: process.env.SESSION_SECRET || "secret", resave: false, saveUninitialized: false, cookie: { secure: false, sameSite: "lax", maxAge: 1000 * 60 * 60 * 8 } }));
 app.get("/", (req, res) => res.redirect("/login"));
 app.use(express.static(path.join(__dirname, 'dashboard/public')));
+app.set('client', client);
 app.use(dashboardRoutes(client, app));
 const PORT = process.env.PORT || process.env.DASHBOARD_PORT || 3001;
 app.listen(PORT, "0.0.0.0", () => console.log('🌐 Dashboard sur http://localhost:' + PORT));

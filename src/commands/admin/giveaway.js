@@ -38,7 +38,13 @@ module.exports = {
         .setDescription(`**${prize}**\n\nCliquez sur le bouton pour participer !\n\n**Fin :** <t:${endsAt}:R>\n**Gagnants :** ${winners}\n**Organisé par :** ${interaction.user}`)
         .setTimestamp(endsAt * 1000);
 
-      const msg = await channel.send({ embeds: [embed], components: [row] });
+      let msg;
+      try {
+        msg = await channel.send({ embeds: [embed], components: [row] });
+      } catch(err) {
+        console.error('[GIVEAWAY ERROR]', err);
+        return interaction.reply({ embeds: [errorEmbed('Erreur : ' + err.message)], ephemeral: true });
+      }
       const result = db.prepare("INSERT INTO giveaways (guild_id, channel_id, message_id, host_id, prize, winners_count, ends_at) VALUES (?, ?, ?, ?, ?, ?, ?)").run(gid, channel.id, msg.id, interaction.user.id, prize, winners, endsAt);
       await interaction.reply({ embeds: [successEmbed("Giveaway lancé !", `ID: **${result.lastInsertRowid}** — Se termine <t:${endsAt}:R>`)], ephemeral: true });
 

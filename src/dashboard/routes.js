@@ -3,16 +3,19 @@ const session = require("express-session");
 const axios = require("axios");
 const path = require("path");
 const router = express.Router();
+const SqliteStore = require("better-sqlite3-session-store")(session);
 
 module.exports = (client, app) => {
   const { db, getGuildSettings } = require("../database/db.js");
 
   app.use(express.static(path.join(__dirname, "public")));
+  const sessionDb = require("better-sqlite3")("./sessions.db");
   app.use(session({
     secret: process.env.SESSION_SECRET || "secret",
+    store: new SqliteStore({ client: sessionDb }),
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 8 }
+    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24, sameSite: 'lax', httpOnly: true }
   }));
 
   function requireAuth(req, res, next) {
@@ -128,7 +131,7 @@ module.exports = (client, app) => {
   router.get("/api/guild/:id", requireAuth, requireGuildAccess, async (req, res) => {
     const { guild } = req;
     await guild.fetch();
-    res.json({ id: guild.id, name: guild.name, icon: guild.iconURL({ size: 256 }), memberCount: guild.memberCount, onlineCount: guild.members.cache.filter(m => m.presence?.status === "online").size, channelCount: guild.channels.cache.size, roleCount: guild.roles.cache.size, settings: getGuildSettings(guild.id) });
+    res.json({ id: guild.id, name: guild.name, icon: guild.iconURL({ size: 256 }), memberCount: guild.memberCount, onlineCount: guild.members.cache.filter(m => ["online","idle","dnd"].includes(m.presence?.status)).size, channelCount: guild.channels.cache.size, roleCount: guild.roles.cache.size, settings: getGuildSettings(guild.id) });
   });
 
   router.get("/api/guilds", requireAuth, (req, res) => {
@@ -320,8 +323,28 @@ module.exports = (client, app) => {
     try { res.json(db.prepare("SELECT * FROM giveaways WHERE guild_id=?").all(req.guild.id)); } catch(e) { res.json([]); }
   });
 
-  router.post("/api/guild/:id/giveaways", requireAuth, requireGuildAccess, (req, res) => {
-    res.json({ success: true });
+  router.post("/api/guild/:id/giveaways", requireAuth, requireGuildAccess, async (req, res) => {
+    try {
+      console.log('[GIVEAWAY BODY]', req.body);
+      const { prize, duration, duration_seconds, winners_count, channel_id, message } = req.body;
+      const dur = duration_seconds || duration;
+      if (!prize || !dur || !channel_id) return res.status(400).json({ error: "Champs manquants" });
+      const endsAt = Math.floor(Date.now() / 1000) + parseInt(dur);
+      const guild = req.guild;
+      const channel = guild.channels.cache.get(channel_id);
+      if (!channel) return res.status(404).json({ error: "Salon introuvable" });
+      const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
+      const btn = new ButtonBuilder().setCustomId("giveaway_join").setLabel("🎉 Participer").setStyle(ButtonStyle.Success);
+      const row = new ActionRowBuilder().addComponents(btn);
+      const embed = new EmbedBuilder()
+        .setColor(0xFFD700)
+        .setTitle("🎉 GIVEAWAY 🎉")
+        .setDescription(`**${prize}**\n\nCliquez sur le bouton pour participer !\n\n**Fin :** <t:${endsAt}:R>\n**Gagnants :** ${winners_count || 1}${message ? "\n\n" + message : ""}`)
+        .setTimestamp(endsAt * 1000);
+      const msg = await channel.send({ embeds: [embed], components: [row] });
+      const result = db.prepare("INSERT INTO giveaways (guild_id, channel_id, message_id, host_id, prize, winners_count, ends_at) VALUES (?, ?, ?, ?, ?, ?, ?)").run(guild.id, channel.id, msg.id, req.session.user.id, prize, winners_count || 1, endsAt);
+      res.json({ success: true, id: result.lastInsertRowid });
+    } catch(e) { console.error("[GIVEAWAY]", e); res.status(500).json({ error: e.message }); }
   });
 
   router.get("/api/guild/:id/webhooks", requireAuth, requireGuildAccess, async (req, res) => {
@@ -465,7 +488,7 @@ module.exports = (client, app) => {
   router.patch('/api/guild/:id/ticket-panels/:pid', requireAuth, requireGuildAccess, (req, res) => {
     try {
       const fields = [], values = [];
-      const allowed = ['name','embed_title','embed_description','embed_color','button_label','button_style','welcome_message'];
+      const allowed = ['name','embed_title','embed_description','embed_color','button_label','button_style','welcome_message','support_role_id','additional_role_id','category_id','closed_category_id','name_format','closed_name_format','two_step_close','buttons_per_row','transcript_channel_id','log_channel_id','auto_close_enabled','auto_close_hours','max_tickets','claiming_enabled','escalate_role_id','form_enabled','form_title'];
       allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); values.push(req.body[k]); } });
       if(fields.length) { values.push(req.params.pid, req.guild.id); db.prepare('UPDATE ticket_panels SET '+fields.join(', ')+' WHERE id=? AND guild_id=?').run(...values); }
       res.json({ success: true });
@@ -500,6 +523,28 @@ module.exports = (client, app) => {
   });
 
   // ── Giveaways DELETE ──
+  router.post('/api/guild/:id/giveaways/:gid/end', requireAuth, requireGuildAccess, async (req, res) => {
+    try {
+      const gaw = db.prepare("SELECT * FROM giveaways WHERE id=? AND guild_id=? AND ended=0").get(req.params.gid, req.guild.id);
+      if (!gaw) return res.status(404).json({ error: "Giveaway introuvable ou déjà terminé" });
+      const { endGiveaway } = require('../commands/admin/giveaway.js');
+      await endGiveaway(gaw, req.app.get('client'));
+      res.json({ success: true });
+    } catch(e) { console.error('[END]', e); res.status(500).json({ error: e.message }); }
+  });
+  router.post('/api/guild/:id/giveaways/:gid/reroll', requireAuth, requireGuildAccess, async (req, res) => {
+    try {
+      const gaw = db.prepare("SELECT * FROM giveaways WHERE id=? AND guild_id=?").get(req.params.gid, req.guild.id);
+      if (!gaw) return res.status(404).json({ error: "Giveaway introuvable" });
+      const entries = JSON.parse(gaw.entries || '[]');
+      if (entries.length === 0) return res.status(400).json({ error: "Aucun participant" });
+      const { EmbedBuilder } = require('discord.js');
+      const winner = entries[Math.floor(Math.random() * entries.length)];
+      const channel = req.guild.channels.cache.get(gaw.channel_id);
+      if (channel) await channel.send({ embeds: [new EmbedBuilder().setColor(0xFFD700).setTitle("🎉 Reroll !").setDescription(`Nouveau gagnant : <@${winner}> pour **${gaw.prize}** !`)] });
+      res.json({ success: true });
+    } catch(e) { console.error('[REROLL]', e); res.status(500).json({ error: e.message }); }
+  });
   router.delete('/api/guild/:id/giveaways/:gid', requireAuth, requireGuildAccess, (req, res) => {
     try { db.prepare('DELETE FROM giveaways WHERE id=? AND guild_id=?').run(req.params.gid, req.guild.id); res.json({ success: true }); } catch(e) { res.json({ success: true }); }
   });
@@ -528,8 +573,8 @@ module.exports = (client, app) => {
   });
   router.post('/api/guild/:id/ticket-panels/:pid/messages/:type', requireAuth, requireGuildAccess, (req, res) => {
     try {
-      const { embed_title, embed_description, embed_color, embed_footer } = req.body;
-      db.prepare('INSERT INTO ticket_messages (panel_id, guild_id, type, embed_title, embed_description, embed_color, embed_footer) VALUES (?,?,?,?,?,?,?) ON CONFLICT(panel_id, type) DO UPDATE SET embed_title=excluded.embed_title, embed_description=excluded.embed_description, embed_color=excluded.embed_color, embed_footer=excluded.embed_footer').run(req.params.pid, req.guild.id, req.params.type, embed_title, embed_description, embed_color, embed_footer);
+      const { embed_title, embed_description, embed_color, embed_footer, embed_author } = req.body;
+      db.prepare('INSERT INTO ticket_messages (panel_id, guild_id, type, embed_title, embed_description, embed_color, embed_footer, embed_author) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(panel_id, type) DO UPDATE SET embed_title=excluded.embed_title, embed_description=excluded.embed_description, embed_color=excluded.embed_color, embed_footer=excluded.embed_footer, embed_author=excluded.embed_author').run(req.params.pid, req.guild.id, req.params.type, embed_title, embed_description, embed_color, embed_footer, embed_author);
       res.json({ success: true });
     } catch(e) { res.status(400).json({ error: e.message }); }
   });
