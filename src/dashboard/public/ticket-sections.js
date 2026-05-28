@@ -14,8 +14,8 @@ function renderTicketSection(name,p,roles,channels){
   var rolesOpts=roles.map(function(r){return '<option value="'+r.id+'">'+r.name+'</option>';}).join('');
   var catChannels=channels.filter(function(c){return c.type===4;});
   var textChannels=channels.filter(function(c){return c.type===0;});
-  var catOpts=catChannels.map(function(c){return '<option value="'+c.id+'"'+(p.category_id==c.id?' selected':'')+'>'+c.name+'</option>';}).join('');
-  var closedCatOpts=catChannels.map(function(c){return '<option value="'+c.id+'"'+(p.closed_category_id==c.id?' selected':'')+'>'+c.name+'</option>';}).join('');
+  var catOpts=catChannels.map(function(c){return '<option value="'+c.id+'"'+((p.category_open_id||p.category_id)==c.id?' selected':'')+'>'+c.name+'</option>';}).join('');
+  var closedCatOpts=catChannels.map(function(c){return '<option value="'+c.id+'"'+((p.category_closed_id||p.closed_category_id)==c.id?' selected':'')+'>'+c.name+'</option>';}).join('');
   var textOpts=textChannels.map(function(c){return '<option value="'+c.id+'"'+(p.transcript_channel_id==c.id?' selected':'')+'>'+c.name+'</option>';}).join('');
   var logOpts=textChannels.map(function(c){return '<option value="'+c.id+'"'+(p.log_channel_id==c.id?' selected':'')+'>'+c.name+'</option>';}).join('');
 
