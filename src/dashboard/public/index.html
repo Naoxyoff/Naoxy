@@ -3103,14 +3103,18 @@ async function confirmRenommerPanel() {
 async function sendPanel() {
   const id = document.getElementById("ticket-panel-select")?.value;
   if (!id) { toast("Aucun panel sélectionné", "error"); return; }
-  const r = await apiPost(`/ticket-panels/${id}/send`, {}).catch(() => ({ success: false }));
-  r.success ? toast("Panel envoyé dans le salon ✅", "success") : toast(r.error || "Erreur lors de l'envoi", "error");
+  const panel = await api(`/ticket-panels/${id}`).catch(() => null);
+  if (!panel?.channel_id) { toast("Aucun salon configuré pour ce panel", "error"); return; }
+  const r = await apiPost(`/ticket-panels/${id}/send`, { channelId: panel.channel_id }).catch(() => ({ success: false }));
+  r.success ? toast("Panel envoyé dans le salon ✅", "success") : toast(r.error || "Erreur lors de l\'envoi", "error");
 }
 
 async function updatePanel() {
   const id = document.getElementById("ticket-panel-select")?.value;
   if (!id) { toast("Aucun panel sélectionné", "error"); return; }
-  const r = await apiPost(`/ticket-panels/${id}/send`, { update: true }).catch(() => ({ success: false }));
+  const panel = await api(`/ticket-panels/${id}`).catch(() => null);
+  if (!panel?.channel_id) { toast("Aucun salon configuré pour ce panel", "error"); return; }
+  const r = await apiPost(`/ticket-panels/${id}/send`, { channelId: panel.channel_id, update: true }).catch(() => ({ success: false }));
   r.success ? toast("Panel mis à jour ✅", "success") : toast(r.error || "Erreur", "error");
 }
 
