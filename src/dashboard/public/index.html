@@ -3205,21 +3205,6 @@ async function confirmRenommerPanel() {
   } else toast(r.error || "Erreur", "error");
 }
 
-async function sendPanel() {
-  const id = document.getElementById("ticket-panel-select")?.value;
-  if (!id) { toast("Aucun panel sélectionné", "error"); return; }
-  const r = await apiPost("/ticket-panels/" + id + "/send", {}).catch(() => ({ success: false }));
-  r.success ? toast("Panel envoyé ✅", "success") : toast(r.error || "Erreur lors de l'envoi", "error");
-}
-
-async function updatePanel() {
-  const id = document.getElementById("ticket-panel-select")?.value;
-  if (!id) { toast("Aucun panel sélectionné", "error"); return; }
-  const r = await apiPost("/ticket-panels/" + id + "/send", { update: true }).catch(() => ({ success: false }));
-  r.success ? toast("Panel mis à jour ✅", "success") : toast(r.error || "Erreur", "error");
-}
-
-async function setCount() {
   const id = document.getElementById("ticket-panel-select")?.value;
   if (!id) { toast("Aucun panel sélectionné", "error"); return; }
   const count = prompt("Définir le compteur de tickets à :");

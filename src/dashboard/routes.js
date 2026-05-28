@@ -498,6 +498,31 @@ module.exports = (client, app) => {
   router.delete('/api/guild/:id/ticket-panels/:pid', requireAuth, requireGuildAccess, (req, res) => {
     try { db.prepare('DELETE FROM ticket_panels WHERE id=? AND guild_id=?').run(req.params.pid, req.guild.id); res.json({ success: true }); } catch(e) { res.status(400).json({ error: e.message }); }
   });
+  router.post('/api/guild/:id/ticket-panels/:pid/send', requireAuth, requireGuildAccess, async (req, res) => {
+    try {
+      const panel = db.prepare('SELECT * FROM ticket_panels WHERE id=? AND guild_id=?').get(req.params.pid, req.guild.id);
+      if (!panel) return res.status(404).json({ error: 'Panel introuvable' });
+      const channelId = req.body.channelId || panel.channel_id;
+      const ch = req.guild.channels.cache.get(channelId);
+      if (!ch) return res.status(400).json({ error: 'Salon introuvable' });
+      const { StringSelectMenuBuilder, ActionRowBuilder, EmbedBuilder } = require('discord.js');
+      const embed = new EmbedBuilder()
+        .setTitle(panel.embed_title || '🎫 Ouvrir un ticket')
+        .setDescription(panel.embed_description || 'Sélectionnez une catégorie.')
+        .setColor(panel.embed_color || '#7c3aed');
+      const menu = new StringSelectMenuBuilder()
+        .setCustomId('ticket_open')
+        .setPlaceholder('Choisis une catégorie')
+        .addOptions([
+          { label: '🎧 Support général', value: 'support' },
+          { label: '🛒 Commande / Achat', value: 'commande' },
+          { label: '📩 Autre', value: 'autre' },
+        ]);
+      await ch.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(menu)] });
+      res.json({ success: true });
+    } catch(e) { res.status(400).json({ error: e.message }); }
+  });
+
   router.post('/api/guild/:id/ticket-panels/:pid/deploy', requireAuth, requireGuildAccess, async (req, res) => {
     try {
       const panel = db.prepare('SELECT * FROM ticket_panels WHERE id=? AND guild_id=?').get(req.params.pid, req.guild.id);
