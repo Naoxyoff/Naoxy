@@ -21,7 +21,7 @@ async function openTicket(interaction) {
 
   const discordCategoryId = cat?.category_id || panel?.category_open_id || settings?.ticket_category;
   const supportRoleId = cat?.support_role_id || panel?.support_role_id || settings?.ticket_support_role;
-  const labelName = cat?.label || value;
+  const labelName = cat?.label || panel?.name || value;
 
   if (!discordCategoryId && !supportRoleId)
     return interaction.reply({ content: "❌ Les tickets ne sont pas configurés.", ephemeral: true });
