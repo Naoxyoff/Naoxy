@@ -272,6 +272,7 @@ const ticketCols = [
 ];
 for (const sql of ticketCols) { try { db.exec(sql); } catch(_) {} }
 try { db.exec('ALTER TABLE ticket_messages ADD COLUMN embed_author TEXT'); } catch(_) {}
+try { db.exec('ALTER TABLE ticket_messages ADD COLUMN embed_author TEXT'); } catch(_) {}
 
 db.exec(`CREATE TABLE IF NOT EXISTS ticket_messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
