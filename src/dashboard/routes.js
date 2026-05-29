@@ -385,7 +385,7 @@ module.exports = (client, app) => {
     try {
       const fields = [], values = [];
       const allowed = ['enabled','anti_ban','anti_kick','anti_channel_delete','anti_role_delete','anti_mention','anti_webhook','ban_threshold','kick_threshold','channel_delete_threshold','action','alert_channel','punish_role'];
-      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); values.push(req.body[k]); } });
+      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); let v = req.body[k]; if(typeof v === 'boolean') v = v ? 1 : 0; values.push(v); } });
       if(fields.length) { values.push(req.guild.id); db.prepare('UPDATE guild_settings SET '+fields.join(', ')+' WHERE guild_id = ?').run(...values); }
       res.json({ success: true });
     } catch(e) { res.json({ success: true }); }
@@ -396,7 +396,7 @@ module.exports = (client, app) => {
     try {
       const fields = [], values = [];
       const allowed = ['verification_enabled','verification_channel','verification_role','verification_method','verification_message','verification_question','verification_answer'];
-      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); values.push(req.body[k]); } });
+      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); let v = req.body[k]; if(typeof v === 'boolean') v = v ? 1 : 0; values.push(v); } });
       if(fields.length) { values.push(req.guild.id); db.prepare('UPDATE guild_settings SET '+fields.join(', ')+' WHERE guild_id = ?').run(...values); }
       res.json({ success: true });
     } catch(e) { res.json({ success: true }); }
@@ -407,7 +407,7 @@ module.exports = (client, app) => {
     try {
       const fields = [], values = [];
       const allowed = ['tempchan_enabled','tempchan_hub','tempchan_category','tempchan_name','tempchan_limit','tempchan_rename','tempchan_limit_perm','tempchan_lock'];
-      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); values.push(req.body[k]); } });
+      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); let v = req.body[k]; if(typeof v === 'boolean') v = v ? 1 : 0; values.push(v); } });
       if(fields.length) { values.push(req.guild.id); db.prepare('UPDATE guild_settings SET '+fields.join(', ')+' WHERE guild_id = ?').run(...values); }
       res.json({ success: true });
     } catch(e) { res.json({ success: true }); }
@@ -435,7 +435,7 @@ module.exports = (client, app) => {
     try {
       const fields = [], values = [];
       const allowed = ['ai_enabled','ai_channel','ai_model','ai_prompt','ai_language','ai_memory','ai_max_tokens'];
-      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); values.push(req.body[k]); } });
+      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); let v = req.body[k]; if(typeof v === 'boolean') v = v ? 1 : 0; values.push(v); } });
       if(fields.length) { values.push(req.guild.id); db.prepare('UPDATE guild_settings SET '+fields.join(', ')+' WHERE guild_id = ?').run(...values); }
       res.json({ success: true });
     } catch(e) { res.json({ success: true }); }
@@ -497,7 +497,7 @@ module.exports = (client, app) => {
       if(req.body.name_format !== undefined) req.body.ticket_open_name = req.body.name_format;
       if(req.body.closed_name_format !== undefined) req.body.ticket_close_name = req.body.closed_name_format;
       if(req.body.max_tickets !== undefined) req.body.max_open_per_user = req.body.max_tickets;
-      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); values.push(req.body[k]); } });
+      allowed.forEach(k => { if(req.body[k] !== undefined) { fields.push(k+' = ?'); let v = req.body[k]; if(typeof v === 'boolean') v = v ? 1 : 0; values.push(v); } });
       if(fields.length) { values.push(req.params.pid, req.guild.id); const result = db.prepare('UPDATE ticket_panels SET '+fields.join(', ')+' WHERE id=? AND guild_id=?').run(...values); console.log('[DB UPDATE] changes:', result.changes, 'fields:', fields, 'pid:', req.params.pid); }
       res.json({ success: true });
     } catch(e) { console.error('[PATCH ticket-panels ERROR]', e.message); res.status(400).json({ error: e.message }); }
