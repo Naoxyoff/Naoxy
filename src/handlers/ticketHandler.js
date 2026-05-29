@@ -50,7 +50,14 @@ async function createTicket(interaction, panel) {
   const gid = guild.id;
 
   const existing = db.prepare("SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open'").get(gid, interaction.user.id);
-  if (existing) return interaction.reply({ content: `❌ Tu as déjà un ticket ouvert : <#${existing.channel_id}>`, flags: 64 });
+  if (existing) {
+    const existingChannel = guild.channels.cache.get(existing.channel_id);
+    if (!existingChannel) {
+      db.prepare("UPDATE tickets SET status = 'closed' WHERE id = ?").run(existing.id);
+    } else {
+      return interaction.reply({ content: `❌ Tu as déjà un ticket ouvert : <#${existing.channel_id}>`, flags: 64 });
+    }
+  }
 
   await interaction.deferReply({ flags: 64 });
 
