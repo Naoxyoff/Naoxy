@@ -185,5 +185,5 @@ async function saveMessageEditor(type){
   var id=getPanelId();
   if(!id||!type) return;
   var data={embed_title:getVal('me-title'),embed_description:getVal('me-description'),embed_color:getVal('me-color-hex'),embed_footer:getVal('me-footer'),embed_author:getVal('me-author')};
-  try{await api('/ticket-panels/'+id+'/messages/'+type,'POST',data);toast('Sauvegarde !','success');}catch(e){toast('Erreur','error');}
+  try{await apiPost('/ticket-panels/'+id+'/messages/'+type,data);toast('Sauvegarde !','success');}catch(e){toast('Erreur','error');}
 }
