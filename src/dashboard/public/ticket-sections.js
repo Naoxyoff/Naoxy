@@ -201,8 +201,10 @@ function openMessageEditor(type){
 async function saveMessageEditor(type){
   var id=getPanelId();
   if(!id||!type) return;
+  var typeMap={ticket_message:'open',opened_message:'open',closed_message:'close',panel_message:'panel',close_question:'close_question'};
+  var dbType=typeMap[type]||type;
   var data={embed_title:getVal('me-title'),embed_description:getVal('me-description'),embed_color:getVal('me-color-hex'),embed_footer:getVal('me-footer'),embed_author:getVal('me-author')};
-  try{await apiPost('/ticket-panels/'+id+'/messages/'+type,data);toast('Sauvegarde !','success');}catch(e){toast('Erreur','error');}
+  try{await apiPost('/ticket-panels/'+id+'/messages/'+dbType,data);toast('Sauvegarde !','success');}catch(e){toast('Erreur: '+e.message,'error');}
 }
 
 async function loadTicketCategories() {
