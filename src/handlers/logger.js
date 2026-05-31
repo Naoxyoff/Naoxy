@@ -44,7 +44,7 @@ async function logMessageUpdate(oldMessage, newMessage) {
     .setThumbnail(oldMessage.author?.displayAvatarURL() ?? null)
     .setURL(newMessage.url)
     .addFields(
-      { name: "Auteur", value: `${oldMessage.author} (\`${oldMessage.author.id}\`)`, inline: true },
+      { name: "Auteur", value: oldMessage.author ? `${oldMessage.author} (\`${oldMessage.author.id}\`)` : "Inconnu", inline: true },
       { name: "Salon", value: `${oldMessage.channel}`, inline: true },
       { name: "Avant", value: oldMessage.content?.slice(0, 512) || "*vide*" },
       { name: "Après", value: newMessage.content?.slice(0, 512) || "*vide*" },
