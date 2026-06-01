@@ -22,7 +22,9 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-const slashCommandsData = [];
+const slashCommandsData = [  "1446586019628585152", // Discord Illégal
+  "1501996274596057168", // Discord Anim
+];
 const commandsPath = path.join(__dirname, "commands");
 for (const folder of fs.readdirSync(commandsPath)) {
   const folderPath = path.join(commandsPath, folder);
@@ -53,7 +55,7 @@ const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 if (!TOKEN || !CLIENT_ID) { console.error("❌ DISCORD_TOKEN et DISCORD_CLIENT_ID sont requis"); process.exit(1); }
 
-client.once("ready", async () => {
+client.once("clientReady", async () => {
   console.log(`🤖 Connecté en tant que ${client.user.tag}`);
   await client.user.setPresence({ activities: [{ name: "Orbis BOT ・BEST", type: 4 }], status: "online" });
 
@@ -76,6 +78,23 @@ app.set('client', client);
 app.use(dashboardRoutes(client, app));
 const PORT = process.env.PORT || process.env.DASHBOARD_PORT || 3001;
 app.listen(PORT, "0.0.0.0", () => console.log('🌐 Dashboard sur http://localhost:' + PORT));
+
+
+// ── Whitelist ──
+const WHITELIST = [
+  "1469110978028245168", // PlayWise
+  "1499908548585459792", // NLX Community
+  "1509358317862916218", // Weazel News | Unity Reborn
+];
+
+client.on("guildCreate", async (guild) => {
+  if (!WHITELIST.includes(guild.id)) {
+    console.log("❌ Serveur non autorisé : " + guild.name + " (" + guild.id + ") — départ automatique");
+    await guild.leave();
+  } else {
+    console.log("✅ Nouveau serveur autorisé : " + guild.name);
+  }
+});
 
 client.login(TOKEN);
 
