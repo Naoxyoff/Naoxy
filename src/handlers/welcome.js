@@ -10,7 +10,9 @@ function formatMsg(template, member) {
     .replace(/{user}/g, `<@${member.user.id}>`)
     .replace(/{username}/g, member.user.username)
     .replace(/{server}/g, member.guild.name)
-    .replace(/{membercount}/g, member.guild.memberCount);
+    .replace(/{membercount}/g, member.guild.memberCount)
+    .replace(/{count}/g, member.guild.memberCount)
+    .replace(/{guild}/g, member.guild.name);
 }
 
 async function sendWelcome(member) {
