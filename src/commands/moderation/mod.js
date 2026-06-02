@@ -152,7 +152,7 @@ const commands = [
     async execute(interaction) {
       const amount = interaction.options.getInteger("nombre", true);
       const target = interaction.options.getUser("membre");
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: 64 });
       let deleted = 0;
       let remaining = amount;
       while (remaining > 0) {
