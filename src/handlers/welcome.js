@@ -16,8 +16,10 @@ function formatMsg(template, member) {
 }
 
 async function sendWelcome(member) {
+  console.log(`[Welcome] guildMemberAdd déclenché pour ${member.user.tag} sur ${member.guild.name}`);
   const s = getSettings(member.guild.id);
-  if (!s?.welcome_channel) return;
+  console.log(`[Welcome] Config:`, JSON.stringify(s));
+  if (!s?.welcome_channel) { console.log(`[Welcome] Pas de welcome_channel configuré`); return; }
   const ch = member.guild.channels.cache.get(s.welcome_channel);
   if (!ch) return;
   const msg = formatMsg(s.welcome_message || "Bienvenue {user} sur **{server}** ! 🎉", member);
