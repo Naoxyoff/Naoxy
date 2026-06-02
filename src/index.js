@@ -94,5 +94,6 @@ client.on("guildCreate", async (guild) => {
   }
 });
 
+client.on("guildMemberAdd", (member) => console.log(`[DEBUG] guildMemberAdd recu: ${member.user.tag} sur ${member.guild.name}`));
 client.login(TOKEN);
 
