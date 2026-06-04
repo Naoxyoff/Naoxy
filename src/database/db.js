@@ -326,3 +326,12 @@ db.exec(`CREATE TABLE IF NOT EXISTS ticket_messages (
   UNIQUE(panel_id, type)
 );`);
 try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_enabled INTEGER DEFAULT 0'); } catch(_) {}
+
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_channel TEXT'); } catch(_) {}
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_model TEXT DEFAULT \'llama3-70b-8192\''); } catch(_) {}
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_prompt TEXT'); } catch(_) {}
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_language TEXT DEFAULT \'fr\''); } catch(_) {}
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_memory INTEGER DEFAULT 0'); } catch(_) {}
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_max_tokens INTEGER DEFAULT 500'); } catch(_) {}
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_persona TEXT'); } catch(_) {}
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_lang TEXT DEFAULT \'fr\''); } catch(_) {}
