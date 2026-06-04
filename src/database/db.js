@@ -325,3 +325,4 @@ db.exec(`CREATE TABLE IF NOT EXISTS ticket_messages (
   embed_color TEXT, embed_footer TEXT, embed_author TEXT,
   UNIQUE(panel_id, type)
 );`);
+try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_enabled INTEGER DEFAULT 0'); } catch(_) {}
