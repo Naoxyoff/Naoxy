@@ -210,5 +210,5 @@ const aiCols = [
   "ALTER TABLE guild_settings ADD COLUMN ai_lang TEXT DEFAULT 'fr'"
 ];
 for (const sql of aiCols) {
-  try { db.prepare(sql).run(); } catch {}
+  try { db.prepare(sql).run(); } catch(e) { if (!e.message.includes("duplicate column")) console.error("Migration error:", e.message); }
 }
