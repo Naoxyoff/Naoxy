@@ -196,142 +196,19 @@ db.prepare(`CREATE TABLE IF NOT EXISTS reactionrole_items (
   PRIMARY KEY (message_id, role_id)
 )`).run();
 
-db.prepare(`CREATE TABLE IF NOT EXISTS guild_settings (
-  guild_id TEXT NOT NULL,
-  key TEXT NOT NULL,
-  value TEXT,
-  PRIMARY KEY (guild_id, key)
-)`).run();
 
-db.prepare(`CREATE TABLE IF NOT EXISTS ticket_categories (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  panel_id INTEGER NOT NULL,
-  label TEXT NOT NULL,
-  emoji TEXT DEFAULT '🎫',
-  category_id TEXT,
-  support_role_id TEXT
-)`).run();
-
-db.prepare(`CREATE TABLE IF NOT EXISTS ticket_panels (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  guild_id TEXT NOT NULL,
-  name TEXT DEFAULT 'Support',
-  embed_title TEXT DEFAULT 'Ouvrir un ticket',
-  embed_description TEXT DEFAULT 'Clique pour ouvrir un ticket',
-  embed_color TEXT DEFAULT '#7c3aed',
-  button_label TEXT DEFAULT 'Ouvrir un ticket',
-  welcome_message TEXT DEFAULT 'Bonjour {user} !',
-  channel_id TEXT,
-  created_at INTEGER DEFAULT (unixepoch())
-)`).run();
-// ══ TICKET MIGRATION ══
-const ticketCols = [
-  "ALTER TABLE ticket_panels ADD COLUMN two_step_close INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN two_step_ticket INTEGER DEFAULT 1",
-  "ALTER TABLE ticket_panels ADD COLUMN auto_pin INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN ticket_padding INTEGER DEFAULT 4",
-  "ALTER TABLE ticket_panels ADD COLUMN category_open_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN closed_category_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN category_closed_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN ticket_open_name TEXT DEFAULT 'Ticket-{count}'",
-  "ALTER TABLE ticket_panels ADD COLUMN ticket_close_name TEXT DEFAULT 'Closed-{count}'",
-  "ALTER TABLE ticket_panels ADD COLUMN support_role_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN additional_roles TEXT DEFAULT '[]'",
-  "ALTER TABLE ticket_panels ADD COLUMN transcript_channel_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN log_channel_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN log_ticket_created INTEGER DEFAULT 1",
-  "ALTER TABLE ticket_panels ADD COLUMN log_ticket_closed INTEGER DEFAULT 1",
-  "ALTER TABLE ticket_panels ADD COLUMN log_ticket_opened INTEGER DEFAULT 1",
-  "ALTER TABLE ticket_panels ADD COLUMN log_ticket_renamed INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN log_ticket_deleted INTEGER DEFAULT 1",
-  "ALTER TABLE ticket_panels ADD COLUMN log_transcript_saved INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN claiming_enabled INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN claim_name TEXT DEFAULT 'Claimed-{count}'",
-  "ALTER TABLE ticket_panels ADD COLUMN auto_save_transcript INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN dm_on_close INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN dm_on_create INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN select_style INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN thread_style INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN thread_channel_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN form_enabled INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN form_title TEXT DEFAULT 'Please fill this out'",
-  "ALTER TABLE ticket_panels ADD COLUMN form_questions TEXT DEFAULT '[]'",
-  "ALTER TABLE ticket_panels ADD COLUMN max_open_per_user INTEGER DEFAULT 1",
-  "ALTER TABLE ticket_panels ADD COLUMN max_open_total INTEGER DEFAULT 500",
-  "ALTER TABLE ticket_panels ADD COLUMN schedule_enabled INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN ticket_count INTEGER DEFAULT 0",
-  "ALTER TABLE ticket_panels ADD COLUMN open_roles TEXT DEFAULT '[]'",
-  "ALTER TABLE ticket_panels ADD COLUMN close_roles TEXT DEFAULT '[]'",
-  "ALTER TABLE ticket_panels ADD COLUMN ticket_open_message TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN ticket_close_question TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN panel_message_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN channel_id TEXT",
-  "ALTER TABLE ticket_panels ADD COLUMN dropdown_items TEXT DEFAULT '[]'",
-  "ALTER TABLE ticket_panels ADD COLUMN escalate_panels TEXT DEFAULT '[]'",
-  "ALTER TABLE ticket_panels ADD COLUMN buttons_per_row INTEGER DEFAULT 5",
+// ── AI MIGRATION ──
+const aiCols = [
+  "ALTER TABLE guild_settings ADD COLUMN ai_enabled INTEGER DEFAULT 0",
+  "ALTER TABLE guild_settings ADD COLUMN ai_channel TEXT",
+  "ALTER TABLE guild_settings ADD COLUMN ai_model TEXT DEFAULT 'llama-3.3-70b'",
+  "ALTER TABLE guild_settings ADD COLUMN ai_prompt TEXT",
+  "ALTER TABLE guild_settings ADD COLUMN ai_language TEXT DEFAULT 'fr'",
+  "ALTER TABLE guild_settings ADD COLUMN ai_memory INTEGER DEFAULT 0",
+  "ALTER TABLE guild_settings ADD COLUMN ai_max_tokens INTEGER DEFAULT 500",
+  "ALTER TABLE guild_settings ADD COLUMN ai_persona TEXT",
+  "ALTER TABLE guild_settings ADD COLUMN ai_lang TEXT DEFAULT 'fr'"
 ];
-for (const sql of ticketCols) { try { db.exec(sql); } catch(_) {} }
-try { db.exec('ALTER TABLE ticket_messages ADD COLUMN embed_author TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_enabled INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_hub TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_category TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_name TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_limit INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_rename INTEGER DEFAULT 1'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_limit_perm INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_lock INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN auto_pin INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN dm_on_close INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN ticket_open_name TEXT DEFAULT \'ticket-{username}\''); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN ticket_close_name TEXT DEFAULT \'closed-{username}\''); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN two_step_close INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN buttons_per_row INTEGER DEFAULT 3'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN category_open_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN category_closed_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN log_channel_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN transcript_channel_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN claiming_enabled INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN form_enabled INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN form_title TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN max_open_per_user INTEGER DEFAULT 1'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_messages ADD COLUMN embed_author TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_enabled INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_hub TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_category TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_name TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_limit INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_rename INTEGER DEFAULT 1'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_limit_perm INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN tempchan_lock INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN auto_pin INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN dm_on_close INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN ticket_open_name TEXT DEFAULT \'ticket-{username}\''); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN ticket_close_name TEXT DEFAULT \'closed-{username}\''); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN two_step_close INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN buttons_per_row INTEGER DEFAULT 3'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN category_open_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN category_closed_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN log_channel_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN transcript_channel_id TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN claiming_enabled INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN form_enabled INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN form_title TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE ticket_panels ADD COLUMN max_open_per_user INTEGER DEFAULT 1'); } catch(_) {}
-
-db.exec(`CREATE TABLE IF NOT EXISTS ticket_messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  panel_id INTEGER, guild_id TEXT, type TEXT,
-  content TEXT, embed_title TEXT, embed_description TEXT,
-  embed_color TEXT, embed_footer TEXT, embed_author TEXT,
-  UNIQUE(panel_id, type)
-);`);
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_enabled INTEGER DEFAULT 0'); } catch(_) {}
-
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_channel TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_model TEXT DEFAULT \'llama3-70b-8192\''); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_prompt TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_language TEXT DEFAULT \'fr\''); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_memory INTEGER DEFAULT 0'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_max_tokens INTEGER DEFAULT 500'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_persona TEXT'); } catch(_) {}
-try { db.exec('ALTER TABLE guild_settings ADD COLUMN ai_lang TEXT DEFAULT \'fr\''); } catch(_) {}
+for (const sql of aiCols) {
+  try { db.prepare(sql).run(); } catch {}
+}
