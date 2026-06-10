@@ -140,7 +140,11 @@ module.exports = {
           await message.reply(chunks[0]);
           for (let i = 1; i < chunks.length; i++) await message.channel.send(chunks[i]);
         } else {
-          await message.reply(reply);
+          if (/owner|proprio|créé spécialement/i.test(reply) || !/naoxy/i.test(reply)) {
+            await message.reply("Je suis Orbis, un bot Discord unique créé par Naoxy. Comment puis-je t'aider aujourd'hui ?");
+          } else {
+            await message.reply(reply);
+          }
         }
       } catch (e) {
         console.error("[IA]", e.response?.data?.error?.message || e.message);
