@@ -633,7 +633,7 @@ module.exports = (client, app) => {
     try {
       const axios = require('axios');
       const settings = getGuildSettings(req.guild.id);
-      const prompt = settings.ai_prompt || 'Tu es un assistant Discord amical et utile. Tu reponds en francais.';
+      const prompt = settings.ai_prompt || 'Tu es Orbis, un bot Discord créé par Naoxy. Réponds de manière amicale et utile en français.';
       const r = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
         model: 'llama-3.1-8b-instant',
         max_tokens: parseInt(settings.ai_max_tokens) || 500,
