@@ -106,6 +106,13 @@ module.exports = {
     if (settings.ai_enabled && message.mentions.has(message.client.user)) {
       if (settings.ai_channel && settings.ai_channel !== message.channelId) return;
       const userMsg = message.content.replace(/<@!?\d+>/g, "").trim();
+      
+      // Réponse simple et efficace directe
+      const lowerMsg = userMsg.toLowerCase();
+      if (lowerMsg.includes("créé par qui") || lowerMsg.includes("cree par qui") || lowerMsg.includes("qui t'a créé") || lowerMsg.includes("qui t a cree") || lowerMsg.includes("ton createur") || lowerMsg.includes("ton créateur")) {
+        await message.reply("J'ai été créé par Naoxy !");
+        return;
+      }
       if (!userMsg) {
         await message.reply(`Bonjour ${message.author} ! Comment puis-je t'aider ? 😊`);
         return;
@@ -140,11 +147,9 @@ module.exports = {
           await message.reply(chunks[0]);
           for (let i = 1; i < chunks.length; i++) await message.channel.send(chunks[i]);
         } else {
-          if (/owner|proprio|créé spécialement/i.test(reply) || !/naoxy/i.test(reply)) {
-            await message.reply("Je suis Orbis, un bot Discord unique créé par Naoxy. Comment puis-je t'aider aujourd'hui ?");
-          } else {
+          
             await message.reply(reply);
-          }
+          
         }
       } catch (e) {
         console.error("[IA]", e.response?.data?.error?.message || e.message);
