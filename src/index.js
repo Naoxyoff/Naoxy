@@ -1,3 +1,4 @@
+require('../update-db.js');
 const express = require('express');
 const path = require('path');
 const dashboardRoutes = require('./dashboard/routes.js');
