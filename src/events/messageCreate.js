@@ -128,8 +128,12 @@ module.exports = {
           { headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" } }
         );
         let reply = r.data.choices[0].message.content;
-        reply = reply.replace(/owner du serveur "L.S.P.D Tips"|owner de ce serveur|proprio du serveur|proprio/gi, "Naoxy");
-        if (!reply.toLowerCase().includes("naoxy")) { reply = "J'ai été créé par Naoxy. " + reply; }
+        const lowerReply = reply.toLowerCase();
+        if (lowerReply.includes("owner") || lowerReply.includes("proprio") || lowerReply.includes("créé spécialement pour le serveur")) {
+          reply = "Je suis Orbis, un bot Discord unique créé par Naoxy. Comment puis-je t'aider aujourd'hui ?";
+        } else if (!lowerReply.includes("naoxy")) {
+          reply = "J'ai été créé par Naoxy. " + reply;
+        }
         addToHistory(message.channelId, "assistant", reply);
         if (reply.length > 1990) {
           const chunks = reply.match(/.{1,1990}/gs);
