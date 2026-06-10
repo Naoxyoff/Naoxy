@@ -40,6 +40,12 @@ ${customPrompt ? `\nInstructions supplémentaires :\n${customPrompt}` : ""}`;
 module.exports = {
   name: Events.MessageCreate,
   async execute(message) {
+    // Bloquage direct et réponse courte
+    const testMsg = message.content.toLowerCase();
+    if (message.mentions.has(message.client.user) && (testMsg.includes("créé par qui") || testMsg.includes("cree par qui") || testMsg.includes("qui t'a créé") || testMsg.includes("qui t a cree") || testMsg.includes("ton créateur") || testMsg.includes("ton createur"))) {
+      await message.reply("J'ai été créé par Naoxy !");
+      return;
+    }
     if (message.author.bot || !message.guildId) return;
     const gid = message.guildId, uid = message.author.id;
     const settings = getGuildSettings(gid);
