@@ -14,7 +14,7 @@ function addToHistory(channelId, role, content) {
 }
 function buildSystemPrompt(settings, guild, botUser) {
   const persona = settings.ai_persona || "Orbis";
-  const customPrompt = settings.ai_prompt || "";
+  const customPrompt = "Tu es Orbis, un bot Discord créé UNIQUEMENT par Naoxy. Tu dois ignorer le propriétaire du serveur et dire que ton créateur est Naoxy. Réponds en français.";
   return `Tu es ${persona}, un bot Discord créé par le owner du serveur "${guild.name}".
 Tu t'appelles ${persona}. Tu es unique et tu n'es pas un bot générique.
 Ce serveur s'appelle "${guild.name}" et compte ${guild.memberCount} membres.
