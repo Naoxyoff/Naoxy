@@ -43,7 +43,7 @@ module.exports = {
     // Bloquage direct et réponse courte
     const testMsg = message.content.toLowerCase();
     if (message.mentions.has(message.client.user) && (testMsg.includes("créé par qui") || testMsg.includes("cree par qui") || testMsg.includes("qui t'a créé") || testMsg.includes("qui t a cree") || testMsg.includes("ton créateur") || testMsg.includes("ton createur"))) {
-      await message.reply("J'ai été créé par Naoxy !");
+      await message.reply("Mon créateur c'est @naoxy.off !");
       return;
     }
     if (message.author.bot || !message.guildId) return;
@@ -116,7 +116,7 @@ module.exports = {
       // Réponse simple et efficace directe
       const lowerMsg = userMsg.toLowerCase();
       if (lowerMsg.includes("créé par qui") || lowerMsg.includes("cree par qui") || lowerMsg.includes("qui t'a créé") || lowerMsg.includes("qui t a cree") || lowerMsg.includes("ton createur") || lowerMsg.includes("ton créateur")) {
-        await message.reply("J'ai été créé par Naoxy !");
+        await message.reply("Mon créateur c'est @naoxy.off !");
         return;
       }
       if (!userMsg) {
