@@ -912,4 +912,4 @@ tr:hover td { background: rgba(112,80,255,0.04); }
 .ts-tag { background: var(--p1); }
 .ts-multiselect, .ts-tag-select { background: var(--bg3); border-color: var(--border); }
 .ts-tag-option:hover { background: var(--bg4); }
-.ts-page { max-width: 920px; }
+.ts-page { max-width: 920px; } 
