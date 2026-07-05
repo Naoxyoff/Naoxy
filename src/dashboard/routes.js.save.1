@@ -8,8 +8,7 @@ const SqliteStore = require("better-sqlite3-session-store")(session);
 module.exports = (client, app) => {
   const { db, getGuildSettings } = require("../database/db.js");
 
-  app.use(express.static(path.join(__dirname, "public")));
-  const sessionDb = require("better-sqlite3")("./sessions.db");
+  app.use(express.static(path.join(__dirname, "public"))  const sessionDb = require("better-sqlite3")("./sessions.db");
   app.use(session({
     secret: process.env.SESSION_SECRET || "secret",
     store: new SqliteStore({ client: sessionDb }),
@@ -505,6 +504,58 @@ module.exports = (client, app) => {
   router.delete('/api/guild/:id/ticket-panels/:pid', requireAuth, requireGuildAccess, (req, res) => {
     try { db.prepare('DELETE FROM ticket_panels WHERE id=? AND guild_id=?').run(req.params.pid, req.guild.id); res.json({ success: true }); } catch(e) { res.status(400).json({ error: e.message }); }
   });
+  // ── Ticket Categories ──
+  router.get('/api/guild/:id/ticket-panels/:pid/categories', requireAuth, requireGuildAccess, (req, res) => {
+    const cats = db.prepare('SELECT * FROM ticket_categories WHERE panel_id = ?').all(req.params.pid);
+    res.json(cats);
+  });
+
+  router.post('/api/guild/:id/ticket-panels/:pid/categories', requireAuth, requireGuildAccess, (req, res) => {
+    const { label, emoji, category_id, support_role_id } = req.body;
+    if (!label) return res.status(400).json({ error: 'Label requis' });
+    const r = db.prepare('INSERT INTO ticket_categories (panel_id, label, emoji, category_id, support_role_id) VALUES (?,?,?,?,?)').run(req.params.pid, label, emoji||'🎫', category_id||null, support_role_id||null);
+    res.json({ success: true, id: r.lastInsertRowid });
+  });
+
+  router.delete('/api/guild/:id/ticket-panels/:pid/categories/:cid', requireAuth, requireGuildAccess, (req, res) => {
+    db.prepare('DELETE FROM ticket_categories WHERE id = ? AND panel_id = ?').run(req.params.cid, req.params.pid);
+    res.json({ success: true });
+  });
+
+  router.post('/api/guild/:id/ticket-panels/:pid/send', requireAuth, requireGuildAccess, async (req, res) => {
+    try {
+      const panel = db.prepare('SELECT * FROM ticket_panels WHERE id=? AND guild_id=?').get(req.params.pid, req.guild.id);
+      if (!panel) return res.status(404).json({ error: 'Panel introuvable' });
+      const channelId = req.body.channelId || panel.channel_id;
+      const ch = req.guild.channels.cache.get(channelId);
+      if (!ch) return res.status(400).json({ error: 'Salon introuvable' });
+      const { ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder } = require('discord.js');
+      const embed = new EmbedBuilder()
+        .setTitle(panel.embed_title || '🎫 Support')
+        .setDescription(panel.embed_description || 'Pour créer un ticket, cliquez sur le bouton ci-dessous.')
+        .setColor(panel.embed_color || '#7c3aed');
+      const button = new ButtonBuilder()
+        .setCustomId('ticket_btn_' + panel.id)
+        .setLabel(panel.button_label || 'Créer un ticket')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('🎫');
+      await ch.send({ embeds: [embed], components: [new ActionRowBuilder().addComponents(button)] });
+      res.json({ success: true });
+    } catch(e) { res.status(400).json({ error: e.message }); }
+  });
+
+  router.post('/api/guild/:id/ticket-panels/:pid/deploy', requireAuth, requireGuildAccess, async (req, res) => {
+    try {
+      const panel = db.prepare('SELECT * FROM ticket_panels WHERE id=? AND guild_id=?').get(req.params.pid, req.guild.id);
+      const ch = req.guild.channels.cache.get(req.body.channelId);
+      const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+      const embed = new EmbedBuilder().setTitle(panel.embed_title).setDescription(panel.embed_description).setColor(panel.embed_color||'#7c3aed');
+      const btn = new ButtonBuilder().setCustomId('ticket_open_'+panel.id).setLabel(panel.button_label).setStyle(ButtonStyle.Primary);
+      await ch.send({ embeds:[embed], components:[new ActionRowBuilder().addComponents(btn)] });
+      res.json({ success: true });
+    } catch(e) { res.status(400).json({ error: e.message }); }
+  });
+
   // ── Reaction roles POST/DELETE ──
   router.post('/api/guild/:id/reactionroles', requireAuth, requireGuildAccess, (req, res) => {
     try {

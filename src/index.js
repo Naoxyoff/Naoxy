@@ -66,18 +66,22 @@ client.once("clientReady", async () => {
   } catch (e) { console.error(e); }
 });
 
-
-// ── Dashboard ──
+// ── Dashboard Configuration Propre ──
 const app = express();
-app.use(express.json());
-app.use(require("express-session")({ secret: process.env.SESSION_SECRET || "secret", resave: false, saveUninitialized: false, cookie: { secure: false, sameSite: "lax", maxAge: 1000 * 60 * 60 * 8 } }));
-app.get("/", (req, res) => res.redirect("/login"));
-app.use(express.static(path.join(__dirname, 'dashboard/public')));
-app.set('client', client);
-app.use(dashboardRoutes(client, app));
-const PORT = process.env.PORT || process.env.DASHBOARD_PORT || 3001;
-app.listen(PORT, "0.0.0.0", () => console.log('🌐 Dashboard sur http://localhost:' + PORT));
 
+// OBLIGATOIRE SUR RAILWAY
+app.set('trust proxy', 1);
+app.use(express.json());
+app.set('client', client);
+
+// 1. On lie d'abord les fichiers statiques (CSS, JS du site)
+app.use(express.static(path.join(__dirname, "dashboard", "public")));
+
+// 2. On charge tes routes d'authentification et d'API
+app.use('/', dashboardRoutes(client, app));
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, "0.0.0.0", () => console.log('🌐 Dashboard sur le port ' + PORT));
 
 // ── Whitelist ──
 const WHITELIST = [
@@ -97,4 +101,3 @@ client.on("guildCreate", async (guild) => {
 
 client.on("guildMemberAdd", (member) => console.log(`[DEBUG] guildMemberAdd recu: ${member.user.tag} sur ${member.guild.name}`));
 client.login(TOKEN);
-
