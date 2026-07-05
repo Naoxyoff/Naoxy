@@ -1,28 +1,81 @@
 const express = require('express');
 const router = express.Router();
 
-module.exports = (client, app) => {
-  app.get("/login", (req, res) => {
+router.get('/login', (req, res) => {
     res.send(`
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orbis Dashboard - Connexion</title>
     <style>
-        body { margin: 0 !important; background-color: #050505 !important; color: #f4f4f5 !important; display: flex !important; justify-content: center !important; align-items: center !important; height: 100vh !important; }
-        .login-container { background-color: #0f0f11 !important; border: 1px solid #1f1f23 !important; padding: 2.5rem !important; border-radius: 12px !important; text-align: center !important; }
-        .btn-discord { display: inline-block !important; padding: 0.8rem 2rem !important; background-color: #5865F2 !important; color: #fff !important; text-decoration: none !important; border-radius: 6px !important; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #050505; color: #f4f4f5; display: flex; 
+            justify-content: center; align-items: center; height: 100vh; 
+            overflow: hidden; position: relative;
+        }
+        body::before { 
+            content: ""; position: absolute; top: -150px; left: -150px; 
+            width: 450px; height: 450px; border: 1px solid rgba(124, 58, 237, 0.15); 
+            border-radius: 50%; pointer-events: none; 
+        }
+        body::after { 
+            content: ""; position: absolute; bottom: -200px; right: -200px; 
+            width: 550px; height: 550px; border: 1px solid rgba(124, 58, 237, 0.12); 
+            border-radius: 50%; pointer-events: none; 
+        }
+        .glow-top { 
+            position: absolute; top: 250px; left: 120px; width: 14px; height: 14px; 
+            background-color: #7c3aed; border-radius: 50%; box-shadow: 0 0 20px 6px #7c3aed; pointer-events: none;
+        }
+        .glow-bottom { 
+            position: absolute; bottom: 300px; right: 250px; width: 28px; height: 28px; 
+            background-color: #7c3aed; border-radius: 50%; box-shadow: 0 0 30px 10px rgba(124, 58, 237, 0.6); opacity: 0.7; pointer-events: none;
+        }
+        .login-container { 
+            background-color: #0f0f11; border: 1px solid #1f1f23; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 380px; z-index: 10; text-align: center; 
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700; color: #f4f4f5; }
+        p.subtitle { color: #71717a; font-size: 0.85rem; margin-bottom: 2rem; }
+        .btn-discord { 
+            display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem; background-color: #5865F2; border: none; border-radius: 6px; color: #fff; font-size: 0.95rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color 0.2s; 
+        }
+        .btn-discord:hover { background-color: #4752C4; }
+    </style>
+</head>
+        .glow-top { 
+            position: absolute; top: 250px; left: 120px; width: 14px; height: 14px; 
+            background-color: #7c3aed; border-radius: 50%; box-shadow: 0 0 20px 6px #7c3aed; pointer-events: none;
+        }
+        .glow-bottom { 
+            position: absolute; bottom: 300px; right: 250px; width: 28px; height: 28px; 
+            background-color: #7c3aed; border-radius: 50%; box-shadow: 0 0 30px 10px rgba(124, 58, 237, 0.6); opacity: 0.7; pointer-events: none;
+        }
+        .login-container { 
+            background-color: #0f0f11; border: 1px solid #1f1f23; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 380px; z-index: 10; text-align: center; 
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700; color: #f4f4f5; }
+        p.subtitle { color: #71717a; font-size: 0.85rem; margin-bottom: 2rem; }
+        .btn-discord { 
+            display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem; background-color: #5865F2; border: none; border-radius: 6px; color: #fff; font-size: 0.95rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color 0.2s; 
+        }
+        .btn-discord:hover { background-color: #4752C4; }
     </style>
 </head>
 <body>
+    <div class="glow-top"></div>
+    <div class="glow-bottom"></div>
     <div class="login-container">
         <h1>Orbis Dashboard</h1>
+        <p class="subtitle">Connectez-vous pour gérer votre instance</p>
         <a href="/auth/discord" class="btn-discord">Se connecter avec Discord</a>
     </div>
 </body>
 </html>
     `);
-  });
-  return router;
-};
+});
+
+module.exports = router;
