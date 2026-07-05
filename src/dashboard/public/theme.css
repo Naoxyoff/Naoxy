@@ -1016,28 +1016,44 @@ tr:hover td { background: rgba(139,92,246,0.06); }
 .ts-multiselect, .ts-tag-select { background: var(--glass-strong); border-color: var(--glass-border); }
 .ts-tag-option:hover { background: var(--glass-strong); }
 .ts-page { max-width: 920px; }
-/* ==========================================
-   AJOUTS DESIGN : BANNIÈRE ET LOGO ORBIS 
-   ========================================== */
+/* =======================================================
+   PATCH DESIGN ORBIS : PAGE 1 (LOGIN) & PAGE 3 (SERVEURS)
+   ======================================================= */
 
-/* Applique la bannière en arrière-plan global */
-body {
+/* 1. On coupe les anciens fonds sur la page 1 et la page 3 */
+body:has(.login-card)::before, body:has(.login-card)::after,
+body.servers-page::before, body.servers-page::after {
+    display: none !important;
+}
+
+/* 2. Application de la bannière Orbis en fond uniquement sur ces deux pages */
+body:has(.login-card), 
+body.servers-page {
     background: linear-gradient(rgba(13, 11, 22, 0.8), rgba(13, 11, 22, 0.9)), 
                 url('https://res.cloudinary.com/dmv7b93xu/image/upload/v1/32c8c336-1721-4bbc-9b57-14d1d4ca45e4.png') no-repeat center center fixed !important;
     background-size: cover !important;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
 }
 
-/* Modifie la boîte de connexion existante en Glassmorphism */
+/* 3. Style Glassmorphism pour la boîte de Login (Page 1) */
 .login-card {
     background: rgba(20, 16, 35, 0.7) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(125, 68, 255, 0.3) !important;
     border-radius: 16px !important;
+    padding: 40px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Ajoute le conteneur pour afficher ta PP Orbis en rond */
+/* 4. Affichage du logo rond Orbis sur la page de Login */
 .login-avatar {
     width: 90px;
     height: 90px;
@@ -1046,17 +1062,22 @@ body {
     background-size: cover;
     margin: 0 auto 20px auto;
     border: 2px solid #7d44ff;
-    box-shadow: 0 0 20px rgba(125, 68, 255, 0.6);
+    box-shadow: 0 0 20px rgba(125, 68, 255, 0.5);
 }
 
-/* Améliore le bouton Discord s'il utilise cette classe */
+/* 5. Bouton Discord de la page 1 */
 .btn-discord {
     background-color: #5865F2 !important;
     color: white !important;
+    border: none !important;
+    padding: 14px 24px !important;
     font-weight: bold !important;
+    border-radius: 8px !important;
+    cursor: pointer;
     transition: all 0.2s ease;
+    width: 100%;
+    margin-top: 15px;
 }
-
 .btn-discord:hover {
     background-color: #4752C4 !important;
     transform: translateY(-2px);
