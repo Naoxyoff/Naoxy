@@ -68,6 +68,7 @@ client.once("clientReady", async () => {
 
 // ── Dashboard Configuration Propre ──
 const app = express();
+app.use(express.static("public"));
 
 // OBLIGATOIRE SUR RAILWAY
 app.set('trust proxy', 1);

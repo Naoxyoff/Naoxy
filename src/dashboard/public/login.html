@@ -5,24 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orbis Dashboard - Connexion</title>
     <style>
-        body { margin: 0 !important; padding: 0 !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; background-color: #050505 !important; color: #f4f4f5 !important; display: flex !important; justify-content: center !important; align-items: center !important; height: 100vh !important; overflow: hidden !important; position: relative !important; }
-        body::before { content: "" !important; position: absolute !important; top: -150px !important; left: -150px !important; width: 450px !important; height: 450px !important; border: 1px solid rgba(124, 58, 237, 0.15) !important; border-radius: 50% !important; pointer-events: none !important; }
-        body::after { content: "" !important; position: absolute !important; bottom: -200px !important; right: -200px !important; width: 550px !important; height: 550px !important; border: 1px solid rgba(124, 58, 237, 0.12) !important; border-radius: 50% !important; pointer-events: none !important; }
-        .dot-top { position: absolute !important; top: 250px !important; left: 120px !important; width: 14px !important; height: 14px !important; background-color: #7c3aed !important; border-radius: 50% !important; filter: drop-shadow(0 0 8px #7c3aed) !important; }
-        .dot-bottom { position: absolute !important; bottom: 300px !important; right: 250px !important; width: 28px !important; height: 28px !important; background-color: #7c3aed !important; border-radius: 50% !important; filter: drop-shadow(0 0 12px #7c3aed) !important; opacity: 0.7 !important; }
-        .login-container { background-color: #0f0f11 !important; border: 1px solid #1f1f23 !important; padding: 2.5rem !important; border-radius: 12px !important; width: 100% !important; max-width: 380px !important; z-index: 10 !important; text-align: center !important; }
-        h1 { font-size: 1.5rem !important; margin: 0 0 0.5rem 0 !important; font-weight: 700 !important; color: #f4f4f5 !important; }
-        p.subtitle { color: #71717a !important; font-size: 0.85rem !important; margin: 0 0 2rem 0 !important; }
-        .btn-discord { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; padding: 0.8rem !important; background-color: #5865F2 !important; border: none !important; border-radius: 6px !important; color: #fff !important; font-size: 0.95rem !important; font-weight: 600 !important; text-decoration: none !important; cursor: pointer !important; transition: background-color 0.2s !important; }
-        .btn-discord:hover { background-color: #4752C4 !important; }
+        * {
+            box-sizing: border-box;
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #050505; 
+            /* On utilise le nom exact de ton fichier image ici */
+            background-image: url('32c8c336-1721-4bbc-9b57-14d1d4ca45e4.png'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #f4f4f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+
+        .login-container { 
+            background-color: rgba(15, 15, 17, 0.75); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(31, 31, 35, 0.8); 
+            padding: 2.5rem; 
+            border-radius: 16px; 
+            width: 100%; 
+            max-width: 400px; 
+            z-index: 10; 
+            text-align: center; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 { 
+            font-size: 1.6rem; 
+            margin: 0 0 0.5rem 0; 
+            font-weight: 700; 
+            color: #f4f4f5; 
+        }
+
+        p.subtitle { 
+            color: #a1a1aa; 
+            font-size: 0.9rem; 
+            margin: 0 0 2rem 0; 
+        }
+
+        .btn-discord { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 100%; 
+            padding: 0.9rem; 
+            background-color: #5865F2; 
+            border: none; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            text-decoration: none; 
+            cursor: pointer; 
+            transition: background-color 0.2s, transform 0.1s; 
+        }
+
+        .btn-discord:hover { 
+            background-color: #4752C4; 
+        }
+
+        .btn-discord:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
-    <div class="dot-top"></div><div class="dot-bottom"></div>
+
     <div class="login-container">
         <h1>Orbis Dashboard</h1>
-        <p class="subtitle">Connectez-vous pour gérer votre instance</p>
+        <p class="subtitle">Connecte-toi avec Discord</p>
         <a href="/auth/discord" class="btn-discord">Se connecter avec Discord</a>
     </div>
+
 </body>
 </html>
