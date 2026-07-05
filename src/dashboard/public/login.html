@@ -5,69 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orbis Dashboard - Connexion</title>
     <style>
-        body {
-            margin: 0; padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #050505; color: #f4f4f5;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden; position: relative;
-        }
-        body::before {
-            content: ""; position: absolute; top: -150px; left: -150px;
-            width: 450px; height: 450px; border: 1px solid rgba(124, 58, 237, 0.15);
-            border-radius: 50%; pointer-events: none;
-        }
-        body::after {
-            content: ""; position: absolute; bottom: -200px; right: -200px;
-            width: 550px; height: 550px; border: 1px solid rgba(124, 58, 237, 0.12);
-            border-radius: 50%; pointer-events: none;
-        }
-        .dot-top {
-            position: absolute; top: 250px; left: 120px; width: 14px; height: 14px;
-            background-color: #7c3aed; border-radius: 50%; filter: drop-shadow(0 0 8px #7c3aed);
-        }
-        .dot-bottom {
-            position: absolute; bottom: 300px; right: 250px; width: 28px; height: 28px;
-            background-color: #7c3aed; border-radius: 50%; filter: drop-shadow(0 0 12px #7c3aed); opacity: 0.7;
-        }
-        .login-container {
-            background-color: #0f0f11; border: 1px solid #1f1f23;
-            padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 380px; z-index: 10; text-align: center;
-        }
-        h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; font-weight: 700; letter-spacing: -0.025em; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #050505; color: #f4f4f5; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; position: relative; }
+        body::before { content: ""; position: absolute; top: -150px; left: -150px; width: 450px; height: 450px; border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 50%; pointer-events: none; }
+        body::after { content: ""; position: absolute; bottom: -200px; right: -200px; width: 550px; height: 550px; border: 1px solid rgba(124, 58, 237, 0.12); border-radius: 50%; pointer-events: none; }
+        .dot-top { position: absolute; top: 250px; left: 120px; width: 14px; height: 14px; background-color: #7c3aed; border-radius: 50%; filter: drop-shadow(0 0 8px #7c3aed); }
+        .dot-bottom { position: absolute; bottom: 300px; right: 250px; width: 28px; height: 28px; background-color: #7c3aed; border-radius: 50%; filter: drop-shadow(0 0 12px #7c3aed); opacity: 0.7; }
+        .login-container { background-color: #0f0f11; border: 1px solid #1f1f23; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 380px; z-index: 10; text-align: center; }
+        h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; font-weight: 700; }
         p.subtitle { color: #71717a; font-size: 0.85rem; margin: 0 0 2rem 0; }
-        .btn-discord {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 100%; padding: 0.8rem; background-color: #5865F2; border: none;
-            border-radius: 6px; color: #fff; font-size: 0.95rem; font-weight: 600;
-            text-decoration: none; cursor: pointer; transition: background-color 0.2s, transform 0.1s; box-sizing: border-box;
-        }
+        .btn-discord { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem; background-color: #5865F2; border: none; border-radius: 6px; color: #fff; font-size: 0.95rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color 0.2s; }
         .btn-discord:hover { background-color: #4752C4; }
-        .btn-discord:active { transform: scale(0.98); }
-        .error-message {
-            color: #ef4444; font-size: 0.8rem; margin-top: 1.25rem; padding: 0.5rem;
-            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 4px; display: none;
-        }
     </style>
 </head>
 <body>
     <div class="dot-top"></div><div class="dot-bottom"></div>
     <div class="login-container">
         <h1>Orbis Dashboard</h1>
-        <p class="subtitle">Connectez-vous avec Discord pour gérer votre instance</p>
+        <p class="subtitle">Connectez-vous pour gérer votre instance</p>
         <a href="/auth/discord" class="btn-discord">Se connecter avec Discord</a>
-        <div id="error" class="error-message"></div>
     </div>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        const errorDiv = document.getElementById('error');
-        if (error) {
-            errorDiv.style.display = 'block';
-            if (error === 'auth_failed') errorDiv.textContent = 'L\'authentification avec Discord a échoué.';
-            else if (error === 'no_code') errorDiv.textContent = 'Code d\'autorisation Discord manquant.';
-            else errorDiv.textContent = 'Une erreur est survenue lors de la connexion.';
-        }
-    </script>
 </body>
 </html>
