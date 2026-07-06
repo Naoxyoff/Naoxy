@@ -68,17 +68,16 @@ client.once("clientReady", async () => {
 
 // ── Dashboard Configuration Propre ──
 const app = express();
-app.use(express.static("public"));
 
 // OBLIGATOIRE SUR RAILWAY
 app.set('trust proxy', 1);
 app.use(express.json());
 app.set('client', client);
 
-// 1. On lie d'abord les fichiers statiques (CSS, JS du site)
+// On lie proprement le dossier public contenant le html et les images
 app.use(express.static(path.join(__dirname, "dashboard", "public")));
 
-// 2. On charge tes routes d'authentification et d'API
+// On charge tes routes d'authentification et d'API
 app.use('/', dashboardRoutes(client, app));
 
 const PORT = process.env.PORT || 3001;
@@ -86,9 +85,9 @@ app.listen(PORT, "0.0.0.0", () => console.log('🌐 Dashboard sur le port ' + PO
 
 // ── Whitelist ──
 const WHITELIST = [
-  "1469110978028245168", // PlayWise
-  "1499908548585459792", // NLX Community
-  "1509358317862916218", // Weazel News | Unity Reborn
+  "1469110978028245168",
+  "1499908548585459792",
+  "1509358317862916218",
 ];
 
 client.on("guildCreate", async (guild) => {
