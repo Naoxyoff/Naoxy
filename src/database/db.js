@@ -103,6 +103,21 @@ db.exec(`
     guild_id TEXT, name TEXT, description TEXT,
     price INTEGER, role_id TEXT, emoji TEXT DEFAULT '🛍️'
   );
+  CREATE TABLE IF NOT EXISTS ticket_panels (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    emoji TEXT DEFAULT '🎫',
+    description TEXT DEFAULT 'Ouvrir un ticket',
+    category_open_id TEXT,
+    support_role_id TEXT,
+    ticket_open_name TEXT DEFAULT 'ticket-{count}-{username}',
+    ticket_padding INTEGER DEFAULT 4,
+    welcome_message TEXT,
+    embed_title TEXT,
+    embed_color TEXT DEFAULT '#7c3aed',
+    log_channel_id TEXT
+  );
   CREATE TABLE IF NOT EXISTS automod_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT, user_id TEXT, type TEXT, content TEXT, action TEXT,
