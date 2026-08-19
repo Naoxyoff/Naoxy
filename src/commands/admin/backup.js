@@ -203,7 +203,7 @@ async function restoreBackup(guild, data, purge) {
   } catch (e) { console.error("[Backup] Erreur settings:", e.message); }
 
   // Créer les rôles puis repositionner
-  const sortedRoles = [...data.roles].sort((a, b) => a.position - b.position);
+  const sortedRoles = [...data.roles].sort((a, b) => b.position - a.position);
   const createdRolesList = [];
   for (const r of sortedRoles) {
     try {
