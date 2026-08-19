@@ -1,7 +1,6 @@
 require('../update-db.js');
 const express = require('express');
 const path = require('path');
-const dashboardRoutes = require('./dashboard/routes.js');
 const { Client, GatewayIntentBits, Partials, Collection, REST, Routes } = require("discord.js");
 const fs = require("fs");
 require("dotenv").config();
@@ -56,7 +55,16 @@ if (!TOKEN || !CLIENT_ID) { console.error("❌ DISCORD_TOKEN et DISCORD_CLIENT_I
 
 client.once("clientReady", async () => {
   console.log(`🤖 Connecté en tant que ${client.user.tag}`);
-  await client.user.setPresence({ activities: [{ name: "Orbis BOT ・BEST", type: 4 }], status: "online" });
+  const statuses = [
+    { name: "En développement", type: 3 },
+    { name: "V.1.0", type: 3 },
+  ];
+  let statusIndex = 0;
+  client.user.setPresence({ activities: [statuses[statusIndex]], status: "online" });
+  setInterval(() => {
+    statusIndex = (statusIndex + 1) % statuses.length;
+    client.user.setPresence({ activities: [statuses[statusIndex]], status: "online" });
+  }, 10000);
 
   const rest = new REST().setToken(TOKEN);
   try {
@@ -75,10 +83,8 @@ app.use(express.json());
 app.set('client', client);
 
 // On lie proprement le dossier public contenant le html et les images
-app.use(express.static(path.join(__dirname, "dashboard", "public")));
 
 // On charge tes routes d'authentification et d'API
-app.use('/', dashboardRoutes(client, app));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, "0.0.0.0", () => console.log('🌐 Dashboard sur le port ' + PORT));
