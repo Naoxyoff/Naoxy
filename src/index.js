@@ -87,7 +87,8 @@ app.set('client', client);
 // On charge tes routes d'authentification et d'API
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, "0.0.0.0", () => console.log('🌐 Dashboard sur le port ' + PORT));
+app.get('/', (req, res) => res.send('OK'));
+app.listen(PORT, "0.0.0.0", () => console.log('🌐 Serveur sur le port ' + PORT));
 
 // ── Whitelist ──
 const WHITELIST = [
