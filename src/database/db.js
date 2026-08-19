@@ -46,18 +46,6 @@ db.exec(`
     log_moderation_channel TEXT,
     log_serveur_channel TEXT
   );
-  CREATE TABLE IF NOT EXISTS member_levels (
-    guild_id TEXT NOT NULL, user_id TEXT NOT NULL,
-    xp INTEGER DEFAULT 0, level INTEGER DEFAULT 0,
-    messages INTEGER DEFAULT 0, last_xp INTEGER DEFAULT 0,
-    PRIMARY KEY (guild_id, user_id)
-  );
-  CREATE TABLE IF NOT EXISTS member_economy (
-    guild_id TEXT NOT NULL, user_id TEXT NOT NULL,
-    balance INTEGER DEFAULT 0, bank INTEGER DEFAULT 0,
-    last_daily INTEGER DEFAULT 0, last_work INTEGER DEFAULT 0, last_crime INTEGER DEFAULT 0,
-    PRIMARY KEY (guild_id, user_id)
-  );
   CREATE TABLE IF NOT EXISTS warnings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT, user_id TEXT, moderator_id TEXT, reason TEXT,
@@ -131,24 +119,6 @@ function getGuildSettings(guildId) {
   return s;
 }
 
-function getMemberLevel(guildId, userId) {
-  let r = db.prepare("SELECT * FROM member_levels WHERE guild_id = ? AND user_id = ?").get(guildId, userId);
-  if (!r) {
-    db.prepare("INSERT OR IGNORE INTO member_levels (guild_id, user_id) VALUES (?, ?)").run(guildId, userId);
-    r = db.prepare("SELECT * FROM member_levels WHERE guild_id = ? AND user_id = ?").get(guildId, userId);
-  }
-  return r;
-}
-
-function getMemberEconomy(guildId, userId) {
-  let r = db.prepare("SELECT * FROM member_economy WHERE guild_id = ? AND user_id = ?").get(guildId, userId);
-  if (!r) {
-    db.prepare("INSERT OR IGNORE INTO member_economy (guild_id, user_id) VALUES (?, ?)").run(guildId, userId);
-    r = db.prepare("SELECT * FROM member_economy WHERE guild_id = ? AND user_id = ?").get(guildId, userId);
-  }
-  return r;
-}
-
 function xpForLevel(level) { return Math.floor(100 * Math.pow(1.5, level)); }
 
 function levelFromXp(xp) {
@@ -157,7 +127,7 @@ function levelFromXp(xp) {
   return level;
 }
 
-module.exports = { db, getGuildSettings, getMemberLevel, getMemberEconomy, xpForLevel, levelFromXp };
+module.exports = { db, getGuildSettings };
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS backups (
@@ -207,7 +177,8 @@ const aiCols = [
   "ALTER TABLE guild_settings ADD COLUMN ai_memory INTEGER DEFAULT 0",
   "ALTER TABLE guild_settings ADD COLUMN ai_max_tokens INTEGER DEFAULT 500",
   "ALTER TABLE guild_settings ADD COLUMN ai_persona TEXT",
-  "ALTER TABLE guild_settings ADD COLUMN ai_lang TEXT DEFAULT 'fr'"
+  "ALTER TABLE guild_settings ADD COLUMN ai_lang TEXT DEFAULT 'fr'",
+  "ALTER TABLE guild_settings ADD COLUMN ticket_name TEXT DEFAULT 'ticket-{user}'"
 ];
 for (const sql of aiCols) {
   try { db.prepare(sql).run(); } catch(e) { if (!e.message.includes("duplicate column")) console.error("Migration error:", e.message); }

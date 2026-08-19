@@ -1,5 +1,5 @@
 const { Events, EmbedBuilder } = require("discord.js");
-const { db, getMemberLevel, levelFromXp, xpForLevel, getGuildSettings } = require("../database/db.js");
+const { db, getGuildSettings } = require("../database/db.js");
 const { COLORS } = require("../utils/helpers.js");
 
 const aiMemoryMap = new Map();
@@ -22,8 +22,6 @@ Ce serveur s'appelle "${guild.name}" et compte ${guild.memberCount} membres.
 Commandes disponibles :
 🛡️ Modération : /ban, /kick, /mute, /warn, /clear, /logs
 🎫 Tickets : /ticket create, /ticket close, /ticket add
-💰 Économie : /balance, /daily, /pay, /shop, /leaderboard
-📈 Niveaux : /rank, /leaderboard, /setxp
 🎉 Giveaways : /giveaway start, /giveaway end, /giveaway reroll
 💾 Backup : /backup create, /backup load, /backup list, /backup delete, /backup info
 🎭 Rôles : /roles autorole add, /roles reactionrole create, /roles give, /roles take, /roles all
