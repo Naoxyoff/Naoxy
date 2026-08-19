@@ -149,7 +149,7 @@ async function captureBackup(guild) {
     }));
 
   const channels = guild.channels.cache
-    .filter(c => c.type !== ChannelType.GuildCategory)
+    .filter(c => c.type !== ChannelType.GuildCategory && c.permissionOverwrites)
     .sort((a, b) => a.position - b.position)
     .map(c => ({
       id: c.id, name: c.name, type: c.type, position: c.position, parentId: c.parentId,
