@@ -103,7 +103,7 @@ module.exports = {
         const description = (interaction.options.getString("description") || "Clique sur un bouton pour obtenir ou retirer un rôle.").replace(/\\n/g, "\n");
         const mode = interaction.options.getString("mode") || "button";
 
-        const embed = new EmbedBuilder().setColor(COLORS.gold).setTitle(titre).setDescription(description);
+        const embed = new EmbedBuilder().setColor(0x4e2bd9).setTitle(titre).setDescription(description);
         const msg = await salon.send({ embeds: [embed] });
 
         db.prepare("INSERT INTO reactionroles (guild_id, message_id, channel_id, mode) VALUES (?, ?, ?, ?)").run(guild.id, msg.id, salon.id, mode);
