@@ -1,4 +1,5 @@
 const { logInvite } = require("../handlers/inviteLogger");
+const { checkRaid } = require("../handlers/protection.js");
 const { sendWelcome } = require("../handlers/welcome");
 const autoRoleHandler = require("../handlers/autoRoleHandler");
 

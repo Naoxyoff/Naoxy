@@ -31,11 +31,16 @@ module.exports = {
           { name: "🔴 Anti-spam", value: `Seuil : **${row.spam_threshold ?? 5}** messages en **${row.spam_interval ?? 3}s**`, inline: false },
           { name: "🔔 Anti-mention spam", value: `Max : **${row.mention_threshold ?? 5}** mentions par message`, inline: false },
           { name: "🚨 Anti-raid", value: `Seuil : **${row.raid_threshold ?? 10}** joins en **${row.raid_interval ?? 10}s**`, inline: false },
-          { name: "💣 Anti-nuke", value: `Seuil : **${row.nuke_threshold ?? 3}** suppressions en 30s`, inline: false },
+          { name: "💣 Anti-nuke (simple)", value: `Seuil : **${row.nuke_threshold ?? 3}** suppressions en 30s`, inline: false },
           { name: "⏱️ Durée du mute", value: `**${row.mute_duration ?? 10}** minutes`, inline: false },
           { name: "📋 Salon de logs", value: row.log_channel_id ? `<#${row.log_channel_id}>` : "Auto-détecté", inline: false },
+          { name: "🛡️ Anti-nuke avancé", value: row.antinuke_enabled ? "✅ Activé" : "❌ Désactivé", inline: false },
+          { name: "⚔️ Action anti-nuke", value: `\`${row.an_action ?? 'ban'}\``, inline: true },
+          { name: "🚪 Salon d'alerte", value: row.an_alert_channel ? `<#${row.an_alert_channel}>` : "Non défini", inline: true },
+          { name: "📊 Seuils", value: `Salons : **${row.an_chan_thresh ?? 2}** • Bans : **${row.an_ban_thresh ?? 3}** • Kicks : **${row.an_kick_thresh ?? 3}**`, inline: false },
+          { name: "🔧 Protections actives", value: `Salons : ${row.an_delchan ? '✅' : '❌'} • Rôles : ${row.an_delrole ? '✅' : '❌'} • Bans : ${row.an_massban ? '✅' : '❌'} • Kicks : ${row.an_masskick ? '✅' : '❌'} • Webhooks : ${row.an_webhook ? '✅' : '❌'}`, inline: false },
         )
-        .setFooter({ text: "Utilisez /protect set pour modifier" });
+        .setFooter({ text: "Utilisez /protect set ou /protect antinuke pour modifier" });
       return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 

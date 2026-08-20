@@ -1,5 +1,6 @@
 const { Events, EmbedBuilder } = require("discord.js");
 const { db, getGuildSettings } = require("../database/db.js");
+const { checkSpam, checkMentions } = require("../handlers/protection.js");
 const { COLORS } = require("../utils/helpers.js");
 
 const aiMemoryMap = new Map();

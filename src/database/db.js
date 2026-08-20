@@ -118,6 +118,11 @@ db.exec(`
     embed_color TEXT DEFAULT '#7c3aed',
     log_channel_id TEXT
   );
+  CREATE TABLE IF NOT EXISTS antinuke_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT, user_id TEXT, type TEXT, detail TEXT, action TEXT,
+    created_at INTEGER DEFAULT (unixepoch())
+  );
   CREATE TABLE IF NOT EXISTS automod_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT, user_id TEXT, type TEXT, content TEXT, action TEXT,
@@ -203,7 +208,19 @@ const aiCols = [
   "ALTER TABLE ticket_panels ADD COLUMN welcome_message TEXT",
   "ALTER TABLE ticket_panels ADD COLUMN embed_title TEXT",
   "ALTER TABLE ticket_panels ADD COLUMN embed_color TEXT DEFAULT '#7c3aed'",
-  "ALTER TABLE ticket_panels ADD COLUMN log_channel_id TEXT"
+  "ALTER TABLE ticket_panels ADD COLUMN log_channel_id TEXT",
+  "ALTER TABLE guild_settings ADD COLUMN antinuke_enabled INTEGER DEFAULT 1",
+  "ALTER TABLE guild_settings ADD COLUMN an_alert_channel TEXT",
+  "ALTER TABLE guild_settings ADD COLUMN an_delchan INTEGER DEFAULT 1",
+  "ALTER TABLE guild_settings ADD COLUMN an_delrole INTEGER DEFAULT 1",
+  "ALTER TABLE guild_settings ADD COLUMN an_massban INTEGER DEFAULT 1",
+  "ALTER TABLE guild_settings ADD COLUMN an_masskick INTEGER DEFAULT 1",
+  "ALTER TABLE guild_settings ADD COLUMN an_webhook INTEGER DEFAULT 1",
+  "ALTER TABLE guild_settings ADD COLUMN an_chan_thresh INTEGER DEFAULT 2",
+  "ALTER TABLE guild_settings ADD COLUMN an_ban_thresh INTEGER DEFAULT 3",
+  "ALTER TABLE guild_settings ADD COLUMN an_kick_thresh INTEGER DEFAULT 3",
+  "ALTER TABLE guild_settings ADD COLUMN an_action TEXT DEFAULT 'ban'",
+  "ALTER TABLE guild_settings ADD COLUMN an_punish_role TEXT"
 ];
 for (const sql of aiCols) {
   try { db.prepare(sql).run(); } catch(e) { if (!e.message.includes("duplicate column")) console.error("Migration error:", e.message); }
