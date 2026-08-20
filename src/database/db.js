@@ -19,6 +19,7 @@ export async function initDatabase() {
       leave_channel TEXT,
       leave_message TEXT,
       log_channel TEXT,
+      log_channel_id TEXT,
       auto_role TEXT,
       levels_enabled INTEGER DEFAULT 1,
       levels_channel TEXT,
