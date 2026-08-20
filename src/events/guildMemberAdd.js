@@ -18,10 +18,9 @@ module.exports = {
       const ch = member.guild.channels.cache.get(settings.welcome_channel);
       if (!ch) return;
 
+      // On passe le chemin de ta bannière personnalisée au Canvas
       const bannerPath = path.join(__dirname, '../assets/banner.png');
-      const banner = new AttachmentBuilder(bannerPath, { name: 'banner.png' });
-
-      const buffer = await createWelcomeImage(member, null, 'welcome');
+      const buffer = await createWelcomeImage(member, bannerPath, 'welcome');
       const welcomeCanvas = new AttachmentBuilder(buffer, { name: 'welcome.png' });
 
       const rawMsg = settings.welcome_message ?? "Bienvenue {user} sur **{guild}** ! Tu es le **{count}**ème membre ! 🎉";
@@ -34,11 +33,10 @@ module.exports = {
         .setColor(COLORS?.success || 0x10b981)
         .setTitle("Ho ! Un nouveau membre !")
         .setDescription(msg)
-        .setThumbnail("attachment://welcome.png")
-        .setImage("attachment://banner.png")
+        .setImage("attachment://welcome.png")
         .setTimestamp();
 
-      await ch.send({ embeds: [embed], files: [welcomeCanvas, banner] });
+      await ch.send({ embeds: [embed], files: [welcomeCanvas] });
     } catch (e) {
       console.error("Erreur guildMemberAdd:", e);
     }

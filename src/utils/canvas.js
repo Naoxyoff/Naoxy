@@ -1,6 +1,6 @@
 const Canvas = require('canvas');
 
-async function createWelcomeImage(member, bannerUrl, type = 'welcome') {
+async function createWelcomeImage(member, customBg, type = 'welcome') {
   const canvas = Canvas.createCanvas(1024, 450);
   const ctx = canvas.getContext('2d');
 
