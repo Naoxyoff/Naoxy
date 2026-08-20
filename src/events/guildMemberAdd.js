@@ -6,6 +6,7 @@ const { createWelcomeImage } = require('../utils/canvas.js');
 module.exports = {
   name: Events.GuildMemberAdd,
   async execute(member) {
+    const banner = new AttachmentBuilder('./src/assets/banner.png', { name: 'banner.png' });
     try {
       const res = await db.execute({
         sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
@@ -26,14 +27,14 @@ module.exports = {
         .replace(/{guild}/g, member.guild.name)
         .replace(/{count}/g, `${member.guild.memberCount}`);
 
-      const embed = new EmbedBuilder()
+      const embed = new EmbedBuilder().setImage('attachment://banner.png')
         .setColor(COLORS?.success || 0x10b981)
         .setTitle("Ho ! Un nouveau membre !")
         .setDescription(msg)
         .setImage("attachment://welcome.png")
         .setTimestamp();
 
-      await ch.send({ embeds: [embed], files: [attachment] });
+      await ch.send({ files: [banner], embeds: [embed], files: [attachment] });
     } catch (e) {
       console.error("Erreur guildMemberAdd:", e);
     }
