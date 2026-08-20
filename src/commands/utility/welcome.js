@@ -25,12 +25,10 @@ module.exports = {
       await interaction.deferReply({ ephemeral: true });
       const channel = interaction.options.getChannel("salon", true);
       const msg = interaction.options.getString("message") ?? "Bienvenue {user} sur **{guild}** ! Tu es le **{count}**ème membre ! 🎉";
-      
+
       try {
-        await db.exec({
-          sql: "INSERT INTO guild_settings (guild_id, welcome_channel, welcome_message) VALUES (?, ?, ?) ON CONFLICT(guild_id) DO UPDATE SET welcome_channel = ?, welcome_message = ?",
-          args: [gid, channel.id, msg, channel.id, msg]
-        });
+        db.prepare("INSERT INTO guild_settings (guild_id, welcome_channel, welcome_message) VALUES (?, ?, ?) ON CONFLICT(guild_id) DO UPDATE SET welcome_channel = ?, welcome_message = ?")
+          .run(gid, channel.id, msg, channel.id, msg);
         await interaction.editReply({ embeds: [successEmbed("Message d'arrivée configuré !", `Salon : ${channel}\nMessage : ${msg}`)] });
       } catch (e) {
         console.error(e);
@@ -40,13 +38,11 @@ module.exports = {
     } else if (sub === "depart") {
       await interaction.deferReply({ ephemeral: true });
       const channel = interaction.options.getChannel("salon", true);
-      const msg = interaction.options.getString("message") ?? "Au revoir **{user}** ! On espère te revoir sur **{guild}** 👋";
-      
+      const msg = interaction.options.getString("message") ?? "Au revoir **{user}** ! On espère te revoir sur **{guild}**👋";
+
       try {
-        await db.exec({
-          sql: "INSERT INTO guild_settings (guild_id, leave_channel, leave_message) VALUES (?, ?, ?) ON CONFLICT(guild_id) DO UPDATE SET leave_channel = ?, leave_message = ?",
-          args: [gid, channel.id, msg, channel.id, msg]
-        });
+        db.prepare("INSERT INTO guild_settings (guild_id, leave_channel, leave_message) VALUES (?, ?, ?) ON CONFLICT(guild_id) DO UPDATE SET leave_channel = ?, leave_message = ?")
+          .run(gid, channel.id, msg, channel.id, msg);
         await interaction.editReply({ embeds: [successEmbed("Message de départ configuré !", `Salon : ${channel}\nMessage : ${msg}`)] });
       } catch (e) {
         console.error(e);
@@ -56,11 +52,7 @@ module.exports = {
     } else if (sub === "test") {
       await interaction.deferReply({ ephemeral: true });
       try {
-        const res = await db.exec({
-          sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
-          args: [gid]
-        });
-        const settings = res.rows[0];
+        const settings = db.prepare("SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?").get(gid);
         if (!settings || !settings.welcome_channel) {
           return interaction.editReply({ embeds: [errorEmbed("Aucun salon d'arrivée configuré.")] });
         }
@@ -68,7 +60,7 @@ module.exports = {
         if (!ch) {
           return interaction.editReply({ embeds: [errorEmbed("Salon introuvable.")] });
         }
-        
+
         const buffer = await createWelcomeImage(interaction.member, null, 'welcome');
         const attachment = new AttachmentBuilder(buffer, { name: 'welcome.png' });
 
@@ -94,10 +86,7 @@ module.exports = {
 
     } else if (sub === "disable") {
       await interaction.deferReply({ ephemeral: true });
-      await db.exec({
-        sql: "UPDATE guild_settings SET welcome_channel = NULL, leave_channel = NULL WHERE guild_id = ?",
-        args: [gid]
-      });
+      db.prepare("UPDATE guild_settings SET welcome_channel = NULL, leave_channel = NULL WHERE guild_id = ?").run(gid);
       await interaction.editReply({ embeds: [successEmbed("Messages de bienvenue désactivés.")] });
     }
   }
