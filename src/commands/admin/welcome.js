@@ -55,7 +55,7 @@ module.exports = {
         .replace(/{guild}/g, interaction.guild?.name ?? "")
         .replace(/{count}/g, `${interaction.guild?.memberCount}`);
         
-      const title = settings.welcome_title || "Ho ! Un nouveau membre ! 🎉";
+      const title = settings.welcome_title || "Ho ! Un nouveau membre !";
 
       const embed = new EmbedBuilder()
         .setColor(0x10b981)
