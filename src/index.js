@@ -61,7 +61,8 @@ client.once("clientReady", async () => {
   console.log(`🤖 Connecté en tant que ${client.user.tag}`);
   const statuses = [
     { name: "En développement", type: 3 },
-    { name: "V.1.0", type: 3 },
+    { name: "V.1.3.7", type: 3 },
+    { name: "Crée par Naoxy", type: 3 },
   ];
   let statusIndex = 0;
   client.user.setPresence({ activities: [statuses[statusIndex]], status: "online" });
