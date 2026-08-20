@@ -86,7 +86,7 @@ module.exports = {
       const role = interaction.options.getRole("role_staff");
       const emoji = interaction.options.getString("emoji") || "🎫";
       const description = interaction.options.getString("description") || "Ouvrir un ticket";
-      const nomSalon = interaction.options.getString("nom_salon") || "ticket-{count}-{username}";
+      const nomSalon = interaction.options.getString("nom_salon") || "ticket-{count}";
       const messageBienvenue = interaction.options.getString("message_bienvenue") || null;
       const salonLogs = interaction.options.getChannel("salon_logs");
 
