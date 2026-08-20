@@ -1,7 +1,6 @@
 const Canvas = require('canvas');
 const path = require('path');
 
-// Préchargement de la bannière en mémoire pour zéro délai E/S
 let cachedBanner = null;
 (async () => {
   try {
@@ -13,7 +12,6 @@ let cachedBanner = null;
 })();
 
 async function createWelcomeImage(member, customBg, type = 'welcome') {
-  // Dimensions réduites pour un rendu plus rapide
   const canvas = Canvas.createCanvas(700, 300);
   const ctx = canvas.getContext('2d');
 
@@ -26,7 +24,8 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
   }
 
   const avatarSize = 140;
-  const avatarX = 50;
+  // Avatar poussé vers la droite (passe de 50 à 100)
+  const avatarX = 100;
   const avatarY = (canvas.height - avatarSize) / 2;
 
   let avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png";
