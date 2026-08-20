@@ -8,4 +8,25 @@ const db = createClient({
   authToken: dbAuthToken,
 });
 
+// Fonction utilitaire pour récupérer ou créer les paramètres d'une guilde
+export async function getGuildSettings(guildId) {
+  const res = await db.execute({
+    sql: "SELECT * FROM guild_settings WHERE guild_id = ?",
+    args: [guildId]
+  });
+  
+  if (res.rows.length === 0) {
+    await db.execute({
+      sql: "INSERT OR IGNORE INTO guild_settings (guild_id) VALUES (?)",
+      args: [guildId]
+    });
+    const retryRes = await db.execute({
+      sql: "SELECT * FROM guild_settings WHERE guild_id = ?",
+      args: [guildId]
+    });
+    return retryRes.rows[0];
+  }
+  return res.rows[0];
+}
+
 export default db;
