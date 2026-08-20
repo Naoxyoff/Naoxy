@@ -17,7 +17,7 @@ module.exports = {
     setTimeout(() => recentlyProcessed.delete(key), 10000);
 
     try {
-      const res = await db.execute({
+      const res = await db.exec({
         sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
         args: [member.guild.id]
       });

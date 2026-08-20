@@ -26,7 +26,7 @@ module.exports = {
     const gid = interaction.guildId;
 
     if (sub === "status") {
-      const rowRes = await db.execute({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const rowRes = await db.exec({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
       const row = rowRes.rows[0] || {};
       const embed = new EmbedBuilder()
         .setColor(COLORS.info)
@@ -72,17 +72,17 @@ module.exports = {
       if (Object.keys(updates).length === 0)
         return interaction.editReply({ embeds: [errorEmbed("Aucun paramètre fourni.")] });
 
-      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const existingRes = await db.exec({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
       const existing = existingRes.rows[0];
 
       if (existing) {
         const setClauses = Object.keys(updates).map(k => `${k} = ?`).join(", ");
-        await db.execute({ sql: `UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`, args: [...Object.values(updates), gid] });
+        await db.exec({ sql: `UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`, args: [...Object.values(updates), gid] });
       } else {
         updates.guild_id = gid;
         const keys = Object.keys(updates).join(", ");
         const placeholders = Object.keys(updates).map(() => "?").join(", ");
-        await db.execute({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
+        await db.exec({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
       }
 
       return interaction.editReply({ 

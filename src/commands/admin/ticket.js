@@ -71,7 +71,7 @@ module.exports = {
   async autocomplete(interaction) {
     const focused = interaction.options.getFocused();
     const gid = interaction.guildId;
-    const res = await db.execute({ sql: "SELECT name FROM ticket_panels WHERE guild_id = ?", args: [gid] });
+    const res = await db.exec({ sql: "SELECT name FROM ticket_panels WHERE guild_id = ?", args: [gid] });
     const panels = res.rows;
     const filtered = panels.filter(p => p.name.toLowerCase().includes(focused.toLowerCase())).slice(0, 25);
     await interaction.respond(filtered.map(p => ({ name: p.name, value: p.name })));
@@ -91,12 +91,12 @@ module.exports = {
       const messageBienvenue = interaction.options.getString("message_bienvenue") || null;
       const salonLogs = interaction.options.getChannel("salon_logs");
 
-      const existing = await db.execute({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
+      const existing = await db.exec({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
       if (existing.rows.length > 0) {
         return interaction.reply({ embeds: [errorEmbed("Un type de ticket avec ce nom existe déjà.")], ephemeral: true });
       }
 
-      await db.execute({
+      await db.exec({
         sql: `INSERT INTO ticket_panels (guild_id, name, emoji, description, category_open_id, support_role_id, ticket_open_name, welcome_message, log_channel_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [gid, nom, emoji, description, categorie.id, role.id, nomSalon, messageBienvenue, salonLogs ? salonLogs.id : null]
       });
@@ -110,15 +110,15 @@ module.exports = {
 
     } else if (sub === "removetype") {
       const nom = interaction.options.getString("nom");
-      const existing = await db.execute({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
+      const existing = await db.exec({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
       if (existing.rows.length === 0) {
         return interaction.reply({ embeds: [errorEmbed("Aucun type de ticket avec ce nom.")], ephemeral: true });
       }
-      await db.execute({ sql: "DELETE FROM ticket_panels WHERE id = ?", args: [existing.rows[0].id] });
+      await db.exec({ sql: "DELETE FROM ticket_panels WHERE id = ?", args: [existing.rows[0].id] });
       await interaction.reply({ embeds: [successEmbed("🗑️ Type de ticket supprimé", `**${nom}** a été retiré.`)], ephemeral: true });
 
     } else if (sub === "listtypes") {
-      const res = await db.execute({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
+      const res = await db.exec({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
       if (!res.rows.length) {
         return interaction.reply({ embeds: [errorEmbed("Aucun type de ticket configuré.", "Utilise `/ticket addtype` pour en créer un.")], ephemeral: true });
       }
@@ -137,7 +137,7 @@ module.exports = {
       const titre = interaction.options.getString("titre") || "Orbis - Bot";
       const description = interaction.options.getString("description") || "Pour créer un ticket, cliquez sur le bouton ci-dessous.";
 
-      const res = await db.execute({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
+      const res = await db.exec({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
       if (!res.rows.length) {
         return interaction.reply({ embeds: [errorEmbed("Aucun type de ticket configuré.", "Utilise `/ticket addtype` avant de créer le panel.")], ephemeral: true });
       }

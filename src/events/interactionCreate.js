@@ -35,7 +35,7 @@ module.exports = {
       }
 
       if (interaction.customId === "ticket_close_btn") {
-        const ticketRes = await db.execute({
+        const ticketRes = await db.exec({
           sql: "SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'",
           args: [interaction.channelId]
         });
@@ -80,7 +80,7 @@ module.exports = {
 
       // ── Giveaway ──
       if (interaction.customId === "giveaway_join") {
-        const gawRes = await db.execute({
+        const gawRes = await db.exec({
           sql: "SELECT * FROM giveaways WHERE message_id = ? AND ended = 0",
           args: [interaction.message.id]
         });
@@ -93,7 +93,7 @@ module.exports = {
         }
         entries.push(interaction.user.id);
         
-        await db.execute({
+        await db.exec({
           sql: "UPDATE giveaways SET entries = ? WHERE id = ?",
           args: [JSON.stringify(entries), gaw.id]
         });

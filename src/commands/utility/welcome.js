@@ -27,7 +27,7 @@ module.exports = {
       const msg = interaction.options.getString("message") ?? "Bienvenue {user} sur **{guild}** ! Tu es le **{count}**ème membre ! 🎉";
       
       try {
-        await db.execute({
+        await db.exec({
           sql: "INSERT INTO guild_settings (guild_id, welcome_channel, welcome_message) VALUES (?, ?, ?) ON CONFLICT(guild_id) DO UPDATE SET welcome_channel = ?, welcome_message = ?",
           args: [gid, channel.id, msg, channel.id, msg]
         });
@@ -43,7 +43,7 @@ module.exports = {
       const msg = interaction.options.getString("message") ?? "Au revoir **{user}** ! On espère te revoir sur **{guild}** 👋";
       
       try {
-        await db.execute({
+        await db.exec({
           sql: "INSERT INTO guild_settings (guild_id, leave_channel, leave_message) VALUES (?, ?, ?) ON CONFLICT(guild_id) DO UPDATE SET leave_channel = ?, leave_message = ?",
           args: [gid, channel.id, msg, channel.id, msg]
         });
@@ -56,7 +56,7 @@ module.exports = {
     } else if (sub === "test") {
       await interaction.deferReply({ ephemeral: true });
       try {
-        const res = await db.execute({
+        const res = await db.exec({
           sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
           args: [gid]
         });
@@ -94,7 +94,7 @@ module.exports = {
 
     } else if (sub === "disable") {
       await interaction.deferReply({ ephemeral: true });
-      await db.execute({
+      await db.exec({
         sql: "UPDATE guild_settings SET welcome_channel = NULL, leave_channel = NULL WHERE guild_id = ?",
         args: [gid]
       });

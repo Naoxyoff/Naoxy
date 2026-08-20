@@ -57,7 +57,7 @@ module.exports = {
         const filePath = path.join(BACKUP_DIR, `${backupId}.json`);
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
         
-        await db.execute({
+        await db.exec({
           sql: `INSERT INTO backups (backup_id, guild_id, owner_id, name, file_path, created_at, guild_name, role_count, channel_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           args: [backupId, guild.id, interaction.user.id, nom, filePath, Math.floor(Date.now() / 1000), guild.name, data.roles.length, data.channels.length]
         });
@@ -75,7 +75,7 @@ module.exports = {
       const id = interaction.options.getString("id", true);
       const purge = interaction.options.getBoolean("purge") ?? true;
       
-      const rowRes = await db.execute({ sql: "SELECT * FROM backups WHERE backup_id = ?", args: [id] });
+      const rowRes = await db.exec({ sql: "SELECT * FROM backups WHERE backup_id = ?", args: [id] });
       const row = rowRes.rows[0];
       if (!row) return interaction.editReply({ embeds: [errorEmbed("Backup introuvable.")] });
       if (!fs.existsSync(row.file_path)) return interaction.editReply({ embeds: [errorEmbed("Fichier de backup manquant.")] });
@@ -90,7 +90,7 @@ module.exports = {
       }
 
     } else if (sub === "list") {
-      const rowsRes = await db.execute({ sql: "SELECT * FROM backups WHERE owner_id = ? ORDER BY created_at DESC LIMIT 10", args: [interaction.user.id] });
+      const rowsRes = await db.exec({ sql: "SELECT * FROM backups WHERE owner_id = ? ORDER BY created_at DESC LIMIT 10", args: [interaction.user.id] });
       const rows = rowsRes.rows;
       if (rows.length === 0) return interaction.reply({ embeds: [infoEmbed("Aucun backup trouvé.")], ephemeral: true });
       await interaction.reply({ embeds: [new EmbedBuilder().setColor(COLORS.gold).setTitle("📦 Vos backups")
@@ -99,16 +99,16 @@ module.exports = {
 
     } else if (sub === "delete") {
       const id = interaction.options.getString("id", true);
-      const rowRes = await db.execute({ sql: "SELECT * FROM backups WHERE backup_id = ? AND owner_id = ?", args: [id, interaction.user.id] });
+      const rowRes = await db.exec({ sql: "SELECT * FROM backups WHERE backup_id = ? AND owner_id = ?", args: [id, interaction.user.id] });
       const row = rowRes.rows[0];
       if (!row) return interaction.reply({ embeds: [errorEmbed("Backup introuvable ou vous n'êtes pas le propriétaire.")], ephemeral: true });
       if (fs.existsSync(row.file_path)) fs.unlinkSync(row.file_path);
-      await db.execute({ sql: "DELETE FROM backups WHERE backup_id = ?", args: [id] });
+      await db.exec({ sql: "DELETE FROM backups WHERE backup_id = ?", args: [id] });
       await interaction.reply({ embeds: [successEmbed("🗑️ Supprimé !", `**${row.name}** supprimé.`)], ephemeral: true });
 
     } else if (sub === "info") {
       const id = interaction.options.getString("id", true);
-      const rowRes = await db.execute({ sql: "SELECT * FROM backups WHERE backup_id = ?", args: [id] });
+      const rowRes = await db.exec({ sql: "SELECT * FROM backups WHERE backup_id = ?", args: [id] });
       const row = rowRes.rows[0];
       if (!row) return interaction.reply({ embeds: [errorEmbed("Backup introuvable.")], ephemeral: true });
       let data = null;

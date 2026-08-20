@@ -3,7 +3,7 @@ const { default: db } = require("../database/db.js");
 
 async function handleTicketButton(interaction) {
   const gid = interaction.guildId;
-  const panelsRes = await db.execute({
+  const panelsRes = await db.exec({
     sql: 'SELECT * FROM ticket_panels WHERE guild_id = ?',
     args: [gid]
   });
@@ -44,7 +44,7 @@ async function handleTicketButton(interaction) {
 async function handleTicketSelect(interaction) {
   const gid = interaction.guildId;
   const panelId = interaction.values[0];
-  const panelRes = await db.execute({
+  const panelRes = await db.exec({
     sql: 'SELECT * FROM ticket_panels WHERE id = ? AND guild_id = ?',
     args: [panelId, gid]
   });
@@ -57,7 +57,7 @@ async function createTicket(interaction, panel) {
   const guild = interaction.guild;
   const gid = guild.id;
 
-  const existingRes = await db.execute({
+  const existingRes = await db.exec({
     sql: "SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open'",
     args: [gid, interaction.user.id]
   });
@@ -66,7 +66,7 @@ async function createTicket(interaction, panel) {
   if (existing) {
     const existingChannel = guild.channels.cache.get(existing.channel_id);
     if (!existingChannel) {
-      await db.execute({
+      await db.exec({
         sql: "UPDATE tickets SET status = 'closed' WHERE id = ?",
         args: [existing.id]
       });
@@ -77,7 +77,7 @@ async function createTicket(interaction, panel) {
 
   await interaction.deferReply({ flags: 64 });
 
-  const countRes = await db.execute({
+  const countRes = await db.exec({
     sql: "SELECT COUNT(*) as c FROM tickets WHERE guild_id = ?",
     args: [gid]
   });
@@ -106,7 +106,7 @@ async function createTicket(interaction, panel) {
     reason: `Ticket ouvert par ${interaction.user.tag}`,
   });
 
-  await db.execute({
+  await db.exec({
     sql: "INSERT INTO tickets (guild_id, channel_id, user_id, subject, status) VALUES (?, ?, ?, ?, 'open')",
     args: [gid, channel.id, interaction.user.id, panel.name || 'Support']
   });
@@ -141,20 +141,20 @@ async function createTicket(interaction, panel) {
 }
 
 async function closeTicket(interaction) {
-  const ticketRes = await db.execute({
+  const ticketRes = await db.exec({
     sql: "SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'",
     args: [interaction.channelId]
   });
   const ticket = ticketRes.rows[0];
   if (!ticket) return interaction.reply({ content: "❌ Ce salon n'est pas un ticket ouvert.", flags: 64 });
 
-  await db.execute({
+  await db.exec({
     sql: "UPDATE tickets SET status = 'closed' WHERE channel_id = ?",
     args: [interaction.channelId]
   });
 
   // Log si configuré
-  const panelRes = await db.execute({
+  const panelRes = await db.exec({
     sql: "SELECT * FROM ticket_panels WHERE guild_id = ?",
     args: [interaction.guildId]
   });
