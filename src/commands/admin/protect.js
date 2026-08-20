@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const { db } = require("../../database/db.js");
+const { default: db } = require("../../database/db.js");
 const { successEmbed, errorEmbed, COLORS } = require("../../utils/helpers.js");
 
 module.exports = {
@@ -23,7 +23,8 @@ module.exports = {
     const gid = interaction.guildId;
 
     if (sub === "status") {
-      const row = db.prepare("SELECT * FROM guild_settings WHERE guild_id = ?").get(gid) || {};
+      const rowRes = await db.execute({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const row = rowRes.rows[0] || {};
       const embed = new EmbedBuilder()
         .setColor(COLORS.info)
         .setTitle("🛡️ Configuration de la protection")
@@ -67,15 +68,17 @@ module.exports = {
       if (Object.keys(updates).length === 0)
         return interaction.reply({ embeds: [errorEmbed("Aucun paramètre fourni.")], ephemeral: true });
 
-      const existing = db.prepare("SELECT guild_id FROM guild_settings WHERE guild_id = ?").get(gid);
+      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const existing = existingRes.rows[0];
+
       if (existing) {
         const setClauses = Object.keys(updates).map(k => `${k} = ?`).join(", ");
-        db.prepare(`UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`).run(...Object.values(updates), gid);
+        await db.execute({ sql: `UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`, args: [...Object.values(updates), gid] });
       } else {
         updates.guild_id = gid;
         const keys = Object.keys(updates).join(", ");
         const placeholders = Object.keys(updates).map(() => "?").join(", ");
-        db.prepare(`INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`).run(...Object.values(updates));
+        await db.execute({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
       }
 
       await interaction.reply({ embeds: [successEmbed("✅ Protection mise à jour !", Object.entries(updates).filter(([k]) => k !== "guild_id").map(([k, v]) => `**${k}** → ${v}`).join("\n"))], ephemeral: true });

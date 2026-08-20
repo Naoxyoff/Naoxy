@@ -2,7 +2,7 @@ const {
   SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits,
   ChannelType
 } = require("discord.js");
-const { db } = require("../../database/db.js");
+const { default: db } = require("../../database/db.js");
 const { successEmbed, errorEmbed, infoEmbed, COLORS } = require("../../utils/helpers.js");
 const fs = require("fs");
 const path = require("path");
@@ -11,7 +11,6 @@ const https = require("https");
 const BACKUP_DIR = path.join(__dirname, "../../../data/backups");
 if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
 
-// Télécharge une image en base64
 function downloadImageBase64(url) {
   return new Promise((resolve, reject) => {
     if (!url) return resolve(null);
@@ -47,19 +46,22 @@ module.exports = {
   async execute(interaction) {
     if (!interaction.guild) return interaction.reply({ content: "❌ Cette commande doit être utilisée dans un serveur.", flags: 64 });
     const sub = interaction.options.getSubcommand();
-    const gid = interaction.guildId;
+    const guild = interaction.guild;
 
     if (sub === "create") {
       await interaction.deferReply({ ephemeral: true });
       const nom = interaction.options.getString("nom") || `backup-${Date.now()}`;
-      const guild = interaction.guild;
       try {
         const data = await captureBackup(guild);
         const backupId = `${guild.id}-${Date.now()}`;
         const filePath = path.join(BACKUP_DIR, `${backupId}.json`);
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-        db.prepare(`INSERT INTO backups (backup_id, guild_id, owner_id, name, file_path, created_at, guild_name, role_count, channel_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-          .run(backupId, guild.id, interaction.user.id, nom, filePath, Math.floor(Date.now() / 1000), guild.name, data.roles.length, data.channels.length);
+        
+        await db.execute({
+          sql: `INSERT INTO backups (backup_id, guild_id, owner_id, name, file_path, created_at, guild_name, role_count, channel_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [backupId, guild.id, interaction.user.id, nom, filePath, Math.floor(Date.now() / 1000), guild.name, data.roles.length, data.channels.length]
+        });
+
         await interaction.editReply({ embeds: [new EmbedBuilder().setColor(COLORS.success).setTitle("✅ Backup créé !")
           .setDescription(`**Nom :** ${nom}\n**ID :** \`${backupId}\`\n**Rôles :** ${data.roles.length}\n**Salons :** ${data.channels.length}\n**Logo :** ${data.settings.iconBase64 ? "✅ Sauvegardé" : "❌ Aucun"}`)
           .setFooter({ text: "Utilisez /backup load <id> pour restaurer" }).setTimestamp()] });
@@ -72,8 +74,9 @@ module.exports = {
       await interaction.deferReply({ ephemeral: true });
       const id = interaction.options.getString("id", true);
       const purge = interaction.options.getBoolean("purge") ?? true;
-      const guild = interaction.guild;
-      const row = db.prepare("SELECT * FROM backups WHERE backup_id = ?").get(id);
+      
+      const rowRes = await db.execute({ sql: "SELECT * FROM backups WHERE backup_id = ?", args: [id] });
+      const row = rowRes.rows[0];
       if (!row) return interaction.editReply({ embeds: [errorEmbed("Backup introuvable.")] });
       if (!fs.existsSync(row.file_path)) return interaction.editReply({ embeds: [errorEmbed("Fichier de backup manquant.")] });
       const data = JSON.parse(fs.readFileSync(row.file_path, "utf8"));
@@ -87,7 +90,8 @@ module.exports = {
       }
 
     } else if (sub === "list") {
-      const rows = db.prepare("SELECT * FROM backups WHERE owner_id = ? ORDER BY created_at DESC LIMIT 10").all(interaction.user.id);
+      const rowsRes = await db.execute({ sql: "SELECT * FROM backups WHERE owner_id = ? ORDER BY created_at DESC LIMIT 10", args: [interaction.user.id] });
+      const rows = rowsRes.rows;
       if (rows.length === 0) return interaction.reply({ embeds: [infoEmbed("Aucun backup trouvé.")], ephemeral: true });
       await interaction.reply({ embeds: [new EmbedBuilder().setColor(COLORS.gold).setTitle("📦 Vos backups")
         .setDescription(rows.map(r => `**${r.name}**\n> ID: \`${r.backup_id}\` | ${r.guild_name}\n> 🗂️ ${r.channel_count} salons • 👑 ${r.role_count} rôles • <t:${r.created_at}:R>`).join("\n\n"))
@@ -95,15 +99,17 @@ module.exports = {
 
     } else if (sub === "delete") {
       const id = interaction.options.getString("id", true);
-      const row = db.prepare("SELECT * FROM backups WHERE backup_id = ? AND owner_id = ?").get(id, interaction.user.id);
+      const rowRes = await db.execute({ sql: "SELECT * FROM backups WHERE backup_id = ? AND owner_id = ?", args: [id, interaction.user.id] });
+      const row = rowRes.rows[0];
       if (!row) return interaction.reply({ embeds: [errorEmbed("Backup introuvable ou vous n'êtes pas le propriétaire.")], ephemeral: true });
       if (fs.existsSync(row.file_path)) fs.unlinkSync(row.file_path);
-      db.prepare("DELETE FROM backups WHERE backup_id = ?").run(id);
+      await db.execute({ sql: "DELETE FROM backups WHERE backup_id = ?", args: [id] });
       await interaction.reply({ embeds: [successEmbed("🗑️ Supprimé !", `**${row.name}** supprimé.`)], ephemeral: true });
 
     } else if (sub === "info") {
       const id = interaction.options.getString("id", true);
-      const row = db.prepare("SELECT * FROM backups WHERE backup_id = ?").get(id);
+      const rowRes = await db.execute({ sql: "SELECT * FROM backups WHERE backup_id = ?", args: [id] });
+      const row = rowRes.rows[0];
       if (!row) return interaction.reply({ embeds: [errorEmbed("Backup introuvable.")], ephemeral: true });
       let data = null;
       if (fs.existsSync(row.file_path)) data = JSON.parse(fs.readFileSync(row.file_path, "utf8"));
@@ -125,7 +131,6 @@ async function captureBackup(guild) {
   await guild.roles.fetch();
   await guild.channels.fetch();
 
-  // Télécharger le logo en base64
   const iconURL = guild.iconURL({ size: 1024, extension: "png" });
   const iconBase64 = await downloadImageBase64(iconURL);
 
@@ -188,7 +193,6 @@ async function restoreBackup(guild, data, purge) {
     }
   }
 
-  // Restaurer paramètres + logo
   try {
     const editOptions = {
       name: data.settings.name,
@@ -202,7 +206,6 @@ async function restoreBackup(guild, data, purge) {
     await guild.edit(editOptions);
   } catch (e) { console.error("[Backup] Erreur settings:", e.message); }
 
-  // Créer les rôles puis repositionner
   const sortedRoles = [...data.roles].sort((a, b) => b.position - a.position);
   const createdRolesList = [];
   for (const r of sortedRoles) {
@@ -222,7 +225,6 @@ async function restoreBackup(guild, data, purge) {
     await new Promise(res => setTimeout(res, 1000));
   } catch (e) { console.error('[Backup] setPositions error:', e.message); }
 
-  // Catégories
   for (const cat of data.categories) {
     try {
       const created = await guild.channels.create({
@@ -234,7 +236,6 @@ async function restoreBackup(guild, data, purge) {
     } catch (e) { console.error("[Backup] Channel error:", e.message); }
   }
 
-  // Salons
   for (const ch of data.channels) {
     try {
       const options = {

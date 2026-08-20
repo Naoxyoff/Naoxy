@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionFlagsBits } = require("discord.js");
-const { db } = require("../../database/db.js");
+const { default: db } = require("../../database/db.js");
 const { successEmbed, errorEmbed, infoEmbed, COLORS, parseDuration, formatDuration, randomInt } = require("../../utils/helpers.js");
 
 module.exports = {
@@ -45,21 +45,28 @@ module.exports = {
         console.error('[GIVEAWAY ERROR]', err);
         return interaction.reply({ embeds: [errorEmbed('Erreur : ' + err.message)], ephemeral: true });
       }
-      const result = db.prepare("INSERT INTO giveaways (guild_id, channel_id, message_id, host_id, prize, winners_count, ends_at) VALUES (?, ?, ?, ?, ?, ?, ?)").run(gid, channel.id, msg.id, interaction.user.id, prize, winners, endsAt);
-      await interaction.reply({ embeds: [successEmbed("Giveaway lancé !", `ID: **${result.lastInsertRowid}** — Se termine <t:${endsAt}:R>`)], ephemeral: true });
+      
+      const res = await db.execute({
+        sql: "INSERT INTO giveaways (guild_id, channel_id, message_id, host_id, prize, winners_count, ends_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        args: [gid, channel.id, msg.id, interaction.user.id, prize, winners, endsAt]
+      });
+      
+      await interaction.reply({ embeds: [successEmbed("Giveaway lancé !", `ID: **${res.lastInsertRowid}** — Se termine <t:${endsAt}:R>`)], ephemeral: true });
 
     } else if (sub === "end") {
       const id = interaction.options.getInteger("id", true);
-      const gaw = db.prepare("SELECT * FROM giveaways WHERE id = ? AND guild_id = ? AND ended = 0").get(id, gid);
+      const gawRes = await db.execute({ sql: "SELECT * FROM giveaways WHERE id = ? AND guild_id = ? AND ended = 0", args: [id, gid] });
+      const gaw = gawRes.rows[0];
       if (!gaw) return interaction.reply({ embeds: [errorEmbed("Giveaway introuvable ou déjà terminé.")], ephemeral: true });
       await endGiveaway(gaw, interaction.client);
       await interaction.reply({ embeds: [successEmbed("Giveaway terminé !")], ephemeral: true });
 
     } else if (sub === "reroll") {
       const id = interaction.options.getInteger("id", true);
-      const gaw = db.prepare("SELECT * FROM giveaways WHERE id = ? AND guild_id = ?").get(id, gid);
+      const gawRes = await db.execute({ sql: "SELECT * FROM giveaways WHERE id = ? AND guild_id = ?", args: [id, gid] });
+      const gaw = gawRes.rows[0];
       if (!gaw) return interaction.reply({ embeds: [errorEmbed("Giveaway introuvable.")], ephemeral: true });
-      const entries = JSON.parse(gaw.entries);
+      const entries = JSON.parse(gaw.entries || "[]");
       if (entries.length === 0) return interaction.reply({ embeds: [infoEmbed("Aucun participant.")] });
       const winner = entries[randomInt(0, entries.length - 1)];
       const channel = interaction.guild.channels.cache.get(gaw.channel_id);
@@ -67,7 +74,8 @@ module.exports = {
       await interaction.reply({ embeds: [successEmbed("Reroll effectué !")], ephemeral: true });
 
     } else if (sub === "list") {
-      const rows = db.prepare("SELECT * FROM giveaways WHERE guild_id = ? AND ended = 0 ORDER BY ends_at ASC").all(gid);
+      const rowsRes = await db.execute({ sql: "SELECT * FROM giveaways WHERE guild_id = ? AND ended = 0 ORDER BY ends_at ASC", args: [gid] });
+      const rows = rowsRes.rows;
       if (rows.length === 0) return interaction.reply({ embeds: [infoEmbed("Aucun giveaway actif.")] });
       await interaction.reply({ embeds: [new EmbedBuilder().setColor(COLORS.gold).setTitle("🎉 Giveaways actifs").setDescription(rows.map(g => `**#${g.id}** — **${g.prize}** (<t:${g.ends_at}:R>) — ${g.winners_count} gagnant(s)`).join("\n"))] });
     }
@@ -75,8 +83,8 @@ module.exports = {
 };
 
 async function endGiveaway(gaw, client) {
-  db.prepare("UPDATE giveaways SET ended = 1 WHERE id = ?").run(gaw.id);
-  const entries = JSON.parse(gaw.entries);
+  await db.execute({ sql: "UPDATE giveaways SET ended = 1 WHERE id = ?", args: [gaw.id] });
+  const entries = JSON.parse(gaw.entries || "[]");
   const guild = client.guilds.cache.get(gaw.guild_id);
   const channel = guild?.channels.cache.get(gaw.channel_id);
   if (!channel) return;
