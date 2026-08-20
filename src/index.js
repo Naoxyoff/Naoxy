@@ -112,7 +112,7 @@ async function startBot() {
     
     await initDatabase();
 
-    console.log('🔑 Connexion à Discord...');
+    console.log('✅ Connexion à Discord...');
     await client.login(process.env.DISCORD_TOKEN);
     console.log('✅ Connecté à Discord avec succès !');
   } catch (err) {
