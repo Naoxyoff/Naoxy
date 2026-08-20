@@ -109,7 +109,7 @@ client.on("guildCreate", async (guild) => {
 // Fonction principale pour démarrer le bot et initialiser Turso
 async function startBot() {
   try {
-    console.log('🔄 Initialisation de la base de données Turso...');
+    
     await initDatabase();
 
     console.log('🔑 Connexion à Discord...');
