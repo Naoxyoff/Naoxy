@@ -72,7 +72,7 @@ client.once("clientReady", async () => {
 
   const rest = new REST().setToken(TOKEN);
   try {
-    console.log("📡 Enregistrement des slash commands en global...");
+    
     await rest.put(Routes.applicationCommands(CLIENT_ID), { body: slashCommandsData });
     console.log(`✅ ${slashCommandsData.length} slash commands enregistrées globalement.`);
   } catch (e) { console.error(e); }
