@@ -122,3 +122,14 @@ async function startBot() {
 }
 
 startBot();
+
+
+console.log('--- DIAGNOSTIC --- ');
+console.log('TOKEN EXISTE ?', !!process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN).catch(e => console.error('ERREUR EXACTE:', e));
+
+
+console.log('--- DIAGNOSTIC RENDER --- ');
+console.log('TOKEN DETECTE ?', !!process.env.DISCORD_TOKEN);
+if(process.env.DISCORD_TOKEN) console.log('LONGUEUR TOKEN :', process.env.DISCORD_TOKEN.length);
+client.login(process.env.DISCORD_TOKEN).catch(e => console.error('❌ ERREUR LOGIN RENDER :', e.message));
