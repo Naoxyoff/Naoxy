@@ -2,6 +2,7 @@ process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', 
 process.on('uncaughtException', (err) => console.error('[Exception non gérée]', err));
 
 require('../update-db.js');
+const { initDatabase } = require('./database/init.js'); // Import de l'initialisation Turso
 const express = require('express');
 const path = require('path');
 const { Client, GatewayIntentBits, Partials, Collection, REST, Routes } = require("discord.js");
@@ -80,14 +81,9 @@ client.once("clientReady", async () => {
 // ── Dashboard Configuration Propre ──
 const app = express();
 
-// OBLIGATOIRE SUR RAILWAY
 app.set('trust proxy', 1);
 app.use(express.json());
 app.set('client', client);
-
-// On lie proprement le dossier public contenant le html et les images
-
-// On charge tes routes d'authentification et d'API
 
 const PORT = process.env.PORT || 3001;
 app.get('/', (req, res) => res.send('OK'));
@@ -110,4 +106,18 @@ client.on("guildCreate", async (guild) => {
 });
 
 client.on("guildMemberAdd", (member) => console.log(`[DEBUG] guildMemberAdd recu: ${member.user.tag} sur ${member.guild.name}`));
-client.login(TOKEN);
+
+// Fonction principale pour démarrer le bot et initialiser Turso
+async function startBot() {
+  try {
+    console.log("🔄 Initialisation de la base de données Turso...");
+    await initDatabase();
+    
+    console.log("🔑 Connexion à Discord...");
+    await client.login(TOKEN);
+  } catch (error) {
+    console.error("❌ Erreur critique au démarrage :", error);
+  }
+}
+
+startBot();
