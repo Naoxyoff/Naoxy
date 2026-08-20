@@ -1,13 +1,24 @@
 {
-  "name": "orbis-bot",
+  "name": "naoxy-bot",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Bot Discord par Naoxy",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js"
   },
   "dependencies": {
-    "canvas": "^2.11.2",
-    "discord.js": "^14.14.1"
+    "@libsql/client": "^0.17.4",
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "@paypal/paypal-server-sdk": "^2.3.0",
+    "axios": "^1.16.1",
+    "better-sqlite3": "^12.10.0",
+    "better-sqlite3-session-store": "^0.1.0",
+    "canvas": "^3.2.3",
+    "cookie-session": "^2.1.1",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.0.0",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "node-fetch": "^3.3.2"
   }
 }

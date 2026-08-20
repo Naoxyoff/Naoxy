@@ -1,4 +1,4 @@
-import db from '../database/db.js';
+const db = require('../database/db.js');
 
 function getLogChannels(guildId) {
   if (!db || typeof db.prepare !== 'function') {
@@ -11,12 +11,14 @@ function getLogChannels(guildId) {
   }
 }
 
-export function logChannelCreate(channel) {
+function logChannelCreate(channel) {
   const channels = getLogChannels(channel.guild.id);
   if (!channels.length) return;
 }
 
-export function logChannelDelete(channel) {
+function logChannelDelete(channel) {
   const channels = getLogChannels(channel.guild.id);
   if (!channels.length) return;
 }
+
+module.exports = { logChannelCreate, logChannelDelete };
