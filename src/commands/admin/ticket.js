@@ -134,36 +134,32 @@ module.exports = {
 
     } else if (sub === "panel") {
       const salon = interaction.options.getChannel("salon");
-      const titre = interaction.options.getString("titre") || "🎫 Ouvrir un ticket";
-      const description = interaction.options.getString("description") || "Sélectionnez une catégorie ci-dessous pour ouvrir un ticket.";
+      const titre = interaction.options.getString("titre") || "Orbis - Bot";
+      const description = interaction.options.getString("description") || "Pour créer un ticket, cliquez sur le bouton ci-dessous.";
 
       const panels = db.prepare("SELECT * FROM ticket_panels WHERE guild_id = ?").all(gid);
       if (!panels.length) {
         return interaction.reply({ embeds: [errorEmbed("Aucun type de ticket configuré.", "Utilise `/ticket addtype` avant de créer le panel.")], ephemeral: true });
       }
 
-      const menu = new StringSelectMenuBuilder()
-        .setCustomId("ticket_open_panel")
-        .setPlaceholder("Choisis une catégorie")
-        .addOptions(panels.slice(0, 25).map(p => ({
-          label: p.name,
-          description: p.description?.slice(0, 100) || undefined,
-          value: String(p.id),
-          emoji: p.emoji || "🎫"
-        })));
+      const openBtn = new ButtonBuilder()
+        .setCustomId("ticket_btn_open")
+        .setLabel("Créer un ticket")
+        .setEmoji("🎫")
+        .setStyle(ButtonStyle.Primary);
 
-      const row = new ActionRowBuilder().addComponents(menu);
+      const row = new ActionRowBuilder().addComponents(openBtn);
 
       const embed = new EmbedBuilder()
         .setColor('#7c3aed')
         .setTitle(titre)
         .setDescription(description)
-        .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL() });
+        .setFooter({ text: "Propulsé par l'équipe Seeding Studios 🔥" });
 
       await salon.send({ embeds: [embed], components: [row] });
 
       await interaction.reply({
-        embeds: [successEmbed("✅ Panel envoyé", `Le menu de tickets a été envoyé dans ${salon}.`)],
+        embeds: [successEmbed("✅ Panel envoyé", `Le bouton de ticket a été envoyé dans ${salon}.`)],
         ephemeral: true
       });
 
