@@ -58,7 +58,6 @@ const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 if (!TOKEN || !CLIENT_ID) { console.error("❌ DISCORD_TOKEN et DISCORD_CLIENT_ID sont requis"); process.exit(1); }
 
 client.once("clientReady", async () => {
-  console.log(`🤖 Connecté en tant que ${client.user.tag}`);
   const statuses = [
     { name: "En développement", type: 3 },
     { name: "V.1.3.7", type: 3 },
@@ -124,12 +123,7 @@ async function startBot() {
 startBot();
 
 
-console.log('--- DIAGNOSTIC --- ');
-console.log('TOKEN EXISTE ?', !!process.env.DISCORD_TOKEN);
 client.login(process.env.DISCORD_TOKEN).catch(e => console.error('ERREUR EXACTE:', e));
 
 
-console.log('--- DIAGNOSTIC RENDER --- ');
-console.log('TOKEN DETECTE ?', !!process.env.DISCORD_TOKEN);
-if(process.env.DISCORD_TOKEN) console.log('LONGUEUR TOKEN :', process.env.DISCORD_TOKEN.length);
 client.login(process.env.DISCORD_TOKEN).catch(e => console.error('❌ ERREUR LOGIN RENDER :', e.message));
