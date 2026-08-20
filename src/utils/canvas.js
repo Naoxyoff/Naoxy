@@ -5,8 +5,13 @@ async function createWelcomeImage(member, bannerUrl, type = 'welcome') {
   const ctx = canvas.getContext('2d');
 
   // Fond sombre uni
-  ctx.fillStyle = '#2b2d31';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  try {
+    const background = await loadImage('https://cdn.discordapp.com/attachments/1539848387401097270/1540077214781939832/8d8a885b-8024-4d08-8cfb-87a410618046_2.png?ex=6a88a42d&is=6a8752ad&hm=2e8761238d394f05c478a150fa0d8f0d744398fc6e6a3343d9333e6110ebb1e3&');
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+  } catch (e) {
+    ctx.fillStyle = '#2b2d31';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 
   const avatarSize = 220;
   const avatarX = 100;
