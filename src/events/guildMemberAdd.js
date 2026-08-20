@@ -8,7 +8,7 @@ module.exports = {
     const gid = member.guild.id;
 
     const res = await db.execute({
-      sql: "SELECT welcome_channel, welcome_message, welcome_title, welcome_image FROM guild_settings WHERE guild_id = ?",
+      sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
       args: [gid]
     });
     
@@ -25,18 +25,12 @@ module.exports = {
       .replace(/{guild}/g, member.guild.name)
       .replace(/{count}/g, `${member.guild.memberCount}`);
 
-    const title = settings.welcome_title || "Ho ! Un nouveau membre !";
-
     const embed = new EmbedBuilder()
       .setColor(COLORS.success || "#22c55e")
-      .setTitle(title)
+      .setTitle("Ho ! Un nouveau membre !")
       .setDescription(msg)
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
       .setTimestamp();
-
-    if (settings.welcome_image) {
-      embed.setImage(settings.welcome_image);
-    }
 
     await channel.send({ embeds: [embed] }).catch(() => {});
   }
