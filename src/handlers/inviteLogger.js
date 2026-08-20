@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const { db } = require("../database/db.js");
+const db = require("../database/db.js");
 
 const inviteCache = new Map();
 

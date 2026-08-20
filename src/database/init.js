@@ -92,5 +92,9 @@ export async function initDatabase() {
   await db.exec(`CREATE TABLE IF NOT EXISTS reactionroles (message_id TEXT PRIMARY KEY, guild_id TEXT NOT NULL, channel_id TEXT NOT NULL, mode TEXT DEFAULT 'button')`);
   await db.exec(`CREATE TABLE IF NOT EXISTS reactionrole_items (message_id TEXT NOT NULL, role_id TEXT NOT NULL, label TEXT, emoji TEXT, PRIMARY KEY (message_id, role_id))`);
 
+  await db.exec(`CREATE TABLE IF NOT EXISTS invite_stats (guild_id TEXT NOT NULL, inviter_id TEXT NOT NULL, count INTEGER DEFAULT 0, PRIMARY KEY (guild_id, inviter_id))`);
+
+  try { await db.exec(`ALTER TABLE guild_settings ADD COLUMN invite_log_channel TEXT`); } catch (e) {}
+
   console.log("✅ Connecté à Turso avec succès !");
 }
