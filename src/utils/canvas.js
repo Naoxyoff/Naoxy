@@ -51,8 +51,8 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
     ctx.stroke();
   } catch (err) {}
 
-  // Texte rapproché de la PP (260 au lieu de 320)
-  const textX = 260;
+  // Position réglée sur 290
+  const textX = 290;
   const startY = (canvas.height / 2) - 25;
 
   const mainText = type === 'goodbye' ? 'À bientôt' : 'Bienvenue';
