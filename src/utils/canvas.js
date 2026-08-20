@@ -16,8 +16,8 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
   }
 
   const avatarSize = 220;
-  // Avatar reculé vers la gauche (130 au lieu de 200)
-  const avatarX = 130;
+  // Avatar décalé vers la gauche
+  const avatarX = 80;
   const avatarY = (canvas.height - avatarSize) / 2;
 
   let avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png";
@@ -44,8 +44,8 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
     ctx.stroke();
   } catch (err) {}
 
-  // Position du texte adaptée à la nouvelle position de l'avatar
-  const textX = avatarX + avatarSize + 50;
+  // Texte maintenu bien à droite indépendamment de l'avatar
+  const textX = 400;
   const startY = (canvas.height / 2) - 40;
 
   const mainText = type === 'goodbye' ? 'À bientôt' : 'Bienvenue';
