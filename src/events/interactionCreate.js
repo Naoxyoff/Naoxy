@@ -1,6 +1,6 @@
-const { Events, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
+const { Events, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
 const { handleTicketButton, handleTicketSelect, closeTicket } = require("../handlers/ticketHandler.js");
-const { db, getGuildSettings } = require("../database/db.js");
+const { default: db, getGuildSettings } = require("../database/db.js");
 const { COLORS, successEmbed, errorEmbed } = require("../utils/helpers.js");
 
 module.exports = {
@@ -16,7 +16,9 @@ module.exports = {
     }
 
     const gid = interaction.guildId;
-    const settings = getGuildSettings(gid);
+    if (gid) {
+      await getGuildSettings(gid);
+    }
 
     // ── Select Menu (Tickets) ──
     if (interaction.isStringSelectMenu()) {
@@ -33,7 +35,12 @@ module.exports = {
       }
 
       if (interaction.customId === "ticket_close_btn") {
-        const ticket = db.prepare("SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'").get(interaction.channelId);
+        const ticketRes = await db.execute({
+          sql: "SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'",
+          args: [interaction.channelId]
+        });
+        const ticket = ticketRes.rows[0];
+        
         if (!ticket) return interaction.reply({ embeds: [errorEmbed("Ce salon n'est pas un ticket ouvert.")], flags: 64 });
 
         const closeBtn = new ButtonBuilder().setCustomId("ticket_confirm_close").setLabel("✅ Confirmer").setStyle(ButtonStyle.Danger);
@@ -54,8 +61,6 @@ module.exports = {
         await interaction.reply({ embeds: [successEmbed("Fermeture annulée")], flags: 64 });
       }
 
-
-
       // ── Reaction Roles ──
       if (interaction.customId.startsWith('rr_btn_')) {
         const roleId = interaction.customId.replace('rr_btn_', '');
@@ -73,33 +78,26 @@ module.exports = {
         }
       }
 
-      if (interaction.customId.startsWith('rr_select_')) {
-        const roleId = interaction.values[0];
-        const member = interaction.member;
-        try {
-          if (member.roles.cache.has(roleId)) {
-            await member.roles.remove(roleId);
-            return interaction.reply({ embeds: [errorEmbed('Rôle retiré !', `Le rôle <@&${roleId}> vous a été retiré.`)], flags: 64 });
-          } else {
-            await member.roles.add(roleId);
-            return interaction.reply({ embeds: [successEmbed('Rôle ajouté !', `Le rôle <@&${roleId}> vous a été donné.`)], flags: 64 });
-          }
-        } catch (e) {
-          return interaction.reply({ embeds: [errorEmbed('Erreur', 'Impossible de modifier votre rôle.')], flags: 64 });
-        }
-      }
-
       // ── Giveaway ──
       if (interaction.customId === "giveaway_join") {
-        const gaw = db.prepare("SELECT * FROM giveaways WHERE message_id = ? AND ended = 0").get(interaction.message.id);
+        const gawRes = await db.execute({
+          sql: "SELECT * FROM giveaways WHERE message_id = ? AND ended = 0",
+          args: [interaction.message.id]
+        });
+        const gaw = gawRes.rows[0];
         if (!gaw) return interaction.reply({ embeds: [errorEmbed("Ce giveaway est terminé.")], flags: 64 });
 
-        const entries = JSON.parse(gaw.entries);
+        const entries = JSON.parse(gaw.entries || "[]");
         if (entries.includes(interaction.user.id)) {
           return interaction.reply({ embeds: [errorEmbed("Vous participez déjà !")], flags: 64 });
         }
         entries.push(interaction.user.id);
-        db.prepare("UPDATE giveaways SET entries = ? WHERE id = ?").run(JSON.stringify(entries), gaw.id);
+        
+        await db.execute({
+          sql: "UPDATE giveaways SET entries = ? WHERE id = ?",
+          args: [JSON.stringify(entries), gaw.id]
+        });
+        
         await interaction.reply({ embeds: [successEmbed("🎉 Participation enregistrée !", `Vous participez au giveaway **${gaw.prize}** !`)], flags: 64 });
       }
     }
