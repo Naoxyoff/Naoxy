@@ -41,7 +41,7 @@ module.exports = {
         embed.addFields({ name: `Rôles [${member.roles.cache.size - 1}]`, value: roles.length > 1024 ? roles.slice(0, 1020) + '...' : roles, inline: false });
       }
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     }
   }
 };
