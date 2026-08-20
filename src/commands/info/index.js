@@ -17,7 +17,7 @@ module.exports = {
 
     if (sub === "utilisateur") {
       const user = interaction.options.getUser("utilisateur");
-      const member = interaction.guild.members.cache.get(user.id);
+      const member = interaction.guild ? interaction.guild.members.cache.get(user.id) : null;
 
       const roles = member
         ? member.roles.cache.filter(r => r.id !== interaction.guild.id).sort((a, b) => b.position - a.position).map(r => `${r}`).join(', ') || 'Aucun'
