@@ -30,6 +30,7 @@ module.exports = {
       .setTitle("Ho ! Un nouveau membre !")
       .setDescription(msg)
       .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+      .setImage("https://cdn.discordapp.com/attachments/1539848384188256346/1540052962033016965/content.png")
       .setTimestamp();
 
     await channel.send({ embeds: [embed] }).catch(() => {});
