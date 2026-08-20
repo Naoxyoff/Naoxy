@@ -92,5 +92,5 @@ export async function initDatabase() {
   await db.execute(`CREATE TABLE IF NOT EXISTS reactionroles (message_id TEXT PRIMARY KEY, guild_id TEXT NOT NULL, channel_id TEXT NOT NULL, mode TEXT DEFAULT 'button')`);
   await db.execute(`CREATE TABLE IF NOT EXISTS reactionrole_items (message_id TEXT NOT NULL, role_id TEXT NOT NULL, label TEXT, emoji TEXT, PRIMARY KEY (message_id, role_id))`);
 
-  console.log(" Base de données Turso initialisée avec succès !");
+  console.log(" ✅ Connecté à Turso avec succès !");
 }
