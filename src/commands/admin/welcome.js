@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const { default: db } = require("../../database/db.js");
+const { db } = require("../../database/db.js");
 const { successEmbed, errorEmbed, COLORS } = require("../../utils/helpers.js");
 
 module.exports = {
@@ -24,11 +24,11 @@ module.exports = {
       const channel = interaction.options.getChannel("salon", true);
       const msg = interaction.options.getString("message") ?? "Bienvenue {user} sur **{guild}** ! Tu es le **{count}**ème membre ! 🎉";
       
-      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
-      if (existingRes.rows.length > 0) {
-        await db.execute({ sql: "UPDATE guild_settings SET welcome_channel = ?, welcome_message = ? WHERE guild_id = ?", args: [channel.id, msg, gid] });
+      const existingRes = db.prepare("SELECT guild_id FROM guild_settings WHERE guild_id = ?").get(gid);
+      if (existingRes) {
+        db.prepare("UPDATE guild_settings SET welcome_channel = ?, welcome_message = ? WHERE guild_id = ?").run(channel.id, msg, gid);
       } else {
-        await db.execute({ sql: "INSERT INTO guild_settings (guild_id, welcome_channel, welcome_message) VALUES (?, ?, ?)", args: [gid, channel.id, msg] });
+        db.prepare("INSERT INTO guild_settings (guild_id, welcome_channel, welcome_message) VALUES (?, ?, ?)").run(gid, channel.id, msg);
       }
       await interaction.reply({ embeds: [successEmbed("Message d'arrivée configuré !", `Salon : ${channel}\nMessage : ${msg}`)] });
 
@@ -36,29 +36,41 @@ module.exports = {
       const channel = interaction.options.getChannel("salon", true);
       const msg = interaction.options.getString("message") ?? "Au revoir **{user}** ! On espère te revoir sur **{guild}** 👋";
       
-      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
-      if (existingRes.rows.length > 0) {
-        await db.execute({ sql: "UPDATE guild_settings SET leave_channel = ?, leave_message = ? WHERE guild_id = ?", args: [channel.id, msg, gid] });
+      const existingRes = db.prepare("SELECT guild_id FROM guild_settings WHERE guild_id = ?").get(gid);
+      if (existingRes) {
+        db.prepare("UPDATE guild_settings SET leave_channel = ?, leave_message = ? WHERE guild_id = ?").run(channel.id, msg, gid);
       } else {
-        await db.execute({ sql: "INSERT INTO guild_settings (guild_id, leave_channel, leave_message) VALUES (?, ?, ?)", args: [gid, channel.id, msg] });
+        db.prepare("INSERT INTO guild_settings (guild_id, leave_channel, leave_message) VALUES (?, ?, ?)").run(gid, channel.id, msg);
       }
       await interaction.reply({ embeds: [successEmbed("Message de départ configuré !", `Salon : ${channel}\nMessage : ${msg}`)] });
 
     } else if (sub === "test") {
-      const settingsRes = await db.execute({ sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?", args: [gid] });
-      const settings = settingsRes.rows[0] || {};
+      const settings = db.prepare("SELECT welcome_channel, welcome_message, welcome_title, welcome_image FROM guild_settings WHERE guild_id = ?").get(gid) || {};
       if (!settings.welcome_channel) return interaction.reply({ embeds: [errorEmbed("Aucun salon d'arrivée configuré.")], ephemeral: true });
       const ch = interaction.guild?.channels.cache.get(settings.welcome_channel);
       if (!ch) return interaction.reply({ embeds: [errorEmbed("Salon introuvable.")], ephemeral: true });
-      const msg = (settings.welcome_message ?? "Bienvenue {user} sur **{guild}** !")
-        .replace("{user}", interaction.user.toString())
-        .replace("{guild}", interaction.guild?.name ?? "")
-        .replace("{count}", `${interaction.guild?.memberCount}`);
-      await ch.send({ embeds: [new EmbedBuilder().setColor(COLORS.success).setDescription(msg).setThumbnail(interaction.user.displayAvatarURL()).setTimestamp()] });
+      
+      const msg = (settings.welcome_message ?? "Bienvenue {user} sur **{guild}** ! Tu es le **{count}**ème membre ! 🎉")
+        .replace(/{user}/g, interaction.user.toString())
+        .replace(/{guild}/g, interaction.guild?.name ?? "")
+        .replace(/{count}/g, `${interaction.guild?.memberCount}`);
+        
+      const title = settings.welcome_title || "Ho ! Un nouveau membre ! 🎉";
+
+      const embed = new EmbedBuilder()
+        .setColor(0x10b981)
+        .setTitle(title)
+        .setDescription(msg)
+        .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
+        .setTimestamp();
+
+      if (settings.welcome_image) embed.setImage(settings.welcome_image);
+
+      await ch.send({ embeds: [embed] });
       await interaction.reply({ embeds: [successEmbed("Message de test envoyé !")], ephemeral: true });
 
     } else if (sub === "disable") {
-      await db.execute({ sql: "UPDATE guild_settings SET welcome_channel = NULL, leave_channel = NULL WHERE guild_id = ?", args: [gid] });
+      db.prepare("UPDATE guild_settings SET welcome_channel = NULL, leave_channel = NULL WHERE guild_id = ?").run(gid);
       await interaction.reply({ embeds: [successEmbed("Messages de bienvenue désactivés.")] });
     }
   }
