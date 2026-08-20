@@ -8,7 +8,7 @@ module.exports = {
     const gid = member.guild.id;
 
     const res = await db.execute({
-      sql: "SELECT leave_channel, leave_message FROM guild_settings WHERE guild_id = ?",
+      sql: "SELECT leave_channel, leave_message, leave_title, leave_image FROM guild_settings WHERE guild_id = ?",
       args: [gid]
     });
     
@@ -20,17 +20,23 @@ module.exports = {
 
     const rawMsg = settings.leave_message ?? "Au revoir **{user}** ! On espère te revoir sur **{guild}** 👋";
     const msg = rawMsg
-      .replace("{user}", member.user.tag)
-      .replace("{guild}", member.guild.name);
+      .replace(/{user}/g, member.toString())
+      .replace(/{username}/g, member.user.username)
+      .replace(/{guild}/g, member.guild.name);
 
-    await channel.send({
-      embeds: [
-        new EmbedBuilder()
-          .setColor(COLORS.error || "#ef4444")
-          .setDescription(msg)
-          .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-          .setTimestamp()
-      ]
-    });
+    const title = settings.leave_title || "Un membre vient de partir...";
+
+    const embed = new EmbedBuilder()
+      .setColor(COLORS.error || "#ef4444") // Rouge pour le départ
+      .setTitle(title)
+      .setDescription(msg)
+      .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+      .setTimestamp();
+
+    if (settings.leave_image) {
+      embed.setImage(settings.leave_image);
+    }
+
+    await channel.send({ embeds: [embed] }).catch(() => {});
   }
 };

@@ -8,7 +8,7 @@ module.exports = {
     const gid = member.guild.id;
 
     const res = await db.execute({
-      sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
+      sql: "SELECT welcome_channel, welcome_message, welcome_title, welcome_image FROM guild_settings WHERE guild_id = ?",
       args: [gid]
     });
     
@@ -20,18 +20,24 @@ module.exports = {
 
     const rawMsg = settings.welcome_message ?? "Bienvenue {user} sur **{guild}** ! Tu es le **{count}**ème membre ! 🎉";
     const msg = rawMsg
-      .replace("{user}", member.toString())
-      .replace("{guild}", member.guild.name)
-      .replace("{count}", `${member.guild.memberCount}`);
+      .replace(/{user}/g, member.toString())
+      .replace(/{username}/g, member.user.username)
+      .replace(/{guild}/g, member.guild.name)
+      .replace(/{count}/g, `${member.guild.memberCount}`);
 
-    await channel.send({
-      embeds: [
-        new EmbedBuilder()
-          .setColor(COLORS.success || "#22c55e")
-          .setDescription(msg)
-          .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-          .setTimestamp()
-      ]
-    });
+    const title = settings.welcome_title || "Ho ! Un nouveau membre !";
+
+    const embed = new EmbedBuilder()
+      .setColor(COLORS.success || "#22c55e")
+      .setTitle(title)
+      .setDescription(msg)
+      .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+      .setTimestamp();
+
+    if (settings.welcome_image) {
+      embed.setImage(settings.welcome_image);
+    }
+
+    await channel.send({ embeds: [embed] }).catch(() => {});
   }
 };
