@@ -13,7 +13,7 @@ async function handleTicketButton(interaction) {
       .addOptions(panels.slice(0, 25).map(p => ({
         label: p.name || p.embed_title || 'Support',
         value: String(p.id),
-        emoji: '🎫'
+        emoji: p.emoji || '🎫'
       })));
 
     const cancelBtn = new ButtonBuilder()
