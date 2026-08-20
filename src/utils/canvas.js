@@ -5,7 +5,6 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
   const canvas = Canvas.createCanvas(1024, 450);
   const ctx = canvas.getContext('2d');
 
-  // Chargement de la bannière en fond
   try {
     const bannerPath = customBg || path.join(__dirname, '../assets/banner.png');
     const background = await Canvas.loadImage(bannerPath);
@@ -44,7 +43,8 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
     ctx.stroke();
   } catch (err) {}
 
-  const textX = avatarX + avatarSize + 50;
+  // Décalage du texte vers la droite (passage du décalage de +50 à +120)
+  const textX = avatarX + avatarSize + 120;
   const startY = (canvas.height / 2) - 40;
 
   const mainText = type === 'goodbye' ? 'À bientôt' : 'Bienvenue';
@@ -52,17 +52,14 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
 
   ctx.textAlign = 'left';
 
-  // Texte principal "Bienvenue" (Passé de 56px à 72px)
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 72px Arial, sans-serif';
   ctx.fillText(mainText, textX, startY);
   
-  // Sous-texte "sur le serveur Discord" (Passé de 24px à 32px)
   ctx.font = 'bold 32px Arial, sans-serif';
   ctx.fillStyle = '#dcdcdc';
   ctx.fillText(subText, textX, startY + 55);
   
-  // Nom du serveur (Passé de 36px à 48px)
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 48px Arial, sans-serif';
   ctx.fillText(member.guild.name, textX, startY + 115);
