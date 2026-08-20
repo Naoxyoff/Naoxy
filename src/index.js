@@ -114,10 +114,10 @@ async function startBot() {
     await initDatabase();
     
     console.log("🔑 Connexion à Discord...");
-    await client.login(TOKEN).then(() => console.log('✅ Connecté à Discord avec succès !')).catch(err => console.error('❌ ÉCHEC DE CONNEXION DISCORD:', err));
-  } catch (error) {
-    console.error("❌ Erreur critique au démarrage :", error);
-  }
-}
-
-startBot();
+    await 
+console.log('🔑 Tentative de connexion avec le token...');
+client.login(process.env.DISCORD_TOKEN).then(() => {
+  console.log('✅ Connecté à Discord avec succès !');
+}).catch(err => {
+  console.error('❌ ERREUR CRITIQUE LOGIN:', err.message);
+});
