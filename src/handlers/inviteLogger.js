@@ -20,7 +20,7 @@ async function initInviteCache(client) {
       console.error(`[InviteLogger] Erreur ${guild.name}:`, err.message);
     }
   }
-  console.log(`[InviteLogger] Cache initialisé.`);
+  
 }
 
 async function getUsedInvite(member) {
