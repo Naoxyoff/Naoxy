@@ -15,14 +15,10 @@ module.exports = {
     setTimeout(() => recentlyProcessedRemove.delete(key), 10000);
 
     try {
-      const res = await db.exec({
-        sql: "SELECT welcome_channel, leave_message FROM guild_settings WHERE guild_id = ?",
-        args: [member.guild.id]
-      });
-      const settings = res.rows[0];
-      if (!settings || !settings.welcome_channel) return;
+      const settings = db.prepare("SELECT leave_channel, leave_message FROM guild_settings WHERE guild_id = ?").get(member.guild.id);
+      if (!settings || !settings.leave_channel) return;
 
-      const ch = member.guild.channels.cache.get(settings.welcome_channel);
+      const ch = member.guild.channels.cache.get(settings.leave_channel);
       if (!ch) return;
 
       const bannerPath = path.join(__dirname, '../assets/banner.png');

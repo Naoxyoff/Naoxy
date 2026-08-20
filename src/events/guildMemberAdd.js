@@ -4,24 +4,18 @@ const { COLORS } = require('../utils/helpers.js');
 const { createWelcomeImage } = require('../utils/canvas.js');
 const path = require('path');
 
-// Anti-doublon temporaire en mémoire
 const recentlyProcessed = new Set();
 
 module.exports = {
   name: Events.GuildMemberAdd,
   async execute(member) {
-    // Si le membre a déjà été traité durant les 10 dernières secondes, on stoppe
     const key = `${member.guild.id}-${member.id}`;
     if (recentlyProcessed.has(key)) return;
     recentlyProcessed.add(key);
     setTimeout(() => recentlyProcessed.delete(key), 10000);
 
     try {
-      const res = await db.exec({
-        sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
-        args: [member.guild.id]
-      });
-      const settings = res.rows[0];
+      const settings = db.prepare("SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?").get(member.guild.id);
       if (!settings || !settings.welcome_channel) return;
 
       const ch = member.guild.channels.cache.get(settings.welcome_channel);
