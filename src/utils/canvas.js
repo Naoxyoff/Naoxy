@@ -1,29 +1,38 @@
 const Canvas = require('canvas');
 const path = require('path');
 
+// Préchargement de la bannière en mémoire pour zéro délai E/S
+let cachedBanner = null;
+(async () => {
+  try {
+    const bannerPath = path.join(__dirname, '../assets/banner.png');
+    cachedBanner = await Canvas.loadImage(bannerPath);
+  } catch (e) {
+    console.error("Impossible de précharger la bannière:", e);
+  }
+})();
+
 async function createWelcomeImage(member, customBg, type = 'welcome') {
-  const canvas = Canvas.createCanvas(1024, 450);
+  // Dimensions réduites pour un rendu plus rapide
+  const canvas = Canvas.createCanvas(700, 300);
   const ctx = canvas.getContext('2d');
 
   try {
-    const bannerPath = customBg || path.join(__dirname, '../assets/banner.png');
-    const background = await Canvas.loadImage(bannerPath);
+    const background = cachedBanner || await Canvas.loadImage(customBg || path.join(__dirname, '../assets/banner.png'));
     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   } catch (e) {
-    console.error("Erreur chargement bannière Canvas:", e);
     ctx.fillStyle = '#2b2d31';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  const avatarSize = 220;
-  // Avatar décalé vers la gauche
-  const avatarX = 80;
+  const avatarSize = 140;
+  const avatarX = 50;
   const avatarY = (canvas.height - avatarSize) / 2;
 
   let avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png";
   try {
     if (member && member.user) {
-      avatarURL = member.user.displayAvatarURL({ extension: 'png', size: 256 }) || avatarURL;
+      avatarURL = member.user.displayAvatarURL({ extension: 'png', size: 128 }) || avatarURL;
     }
   } catch (e) {}
 
@@ -38,15 +47,14 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
     ctx.restore();
     
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.arc(avatarX + (avatarSize / 2), avatarY + (avatarSize / 2), avatarSize / 2, 0, Math.PI * 2, true);
     ctx.stroke();
   } catch (err) {}
 
-  // Texte maintenu bien à droite indépendamment de l'avatar
-  const textX = 400;
-  const startY = (canvas.height / 2) - 40;
+  const textX = 320;
+  const startY = (canvas.height / 2) - 25;
 
   const mainText = type === 'goodbye' ? 'À bientôt' : 'Bienvenue';
   const subText = 'sur le serveur Discord';
@@ -54,18 +62,18 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
   ctx.textAlign = 'left';
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 72px Arial, sans-serif';
+  ctx.font = 'bold 48px Arial, sans-serif';
   ctx.fillText(mainText, textX, startY);
   
-  ctx.font = 'bold 32px Arial, sans-serif';
+  ctx.font = 'bold 22px Arial, sans-serif';
   ctx.fillStyle = '#dcdcdc';
-  ctx.fillText(subText, textX, startY + 55);
+  ctx.fillText(subText, textX, startY + 38);
   
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 48px Arial, sans-serif';
-  ctx.fillText(member.guild.name, textX, startY + 115);
+  ctx.font = 'bold 32px Arial, sans-serif';
+  ctx.fillText(member.guild.name, textX, startY + 78);
 
-  return canvas.toBuffer();
+  return canvas.toBuffer('image/png', { compressionLevel: 3 });
 }
 
 module.exports = { createWelcomeImage };
