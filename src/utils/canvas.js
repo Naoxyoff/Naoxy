@@ -1,14 +1,17 @@
 const Canvas = require('canvas');
+const path = require('path');
 
 async function createWelcomeImage(member, customBg, type = 'welcome') {
   const canvas = Canvas.createCanvas(1024, 450);
   const ctx = canvas.getContext('2d');
 
-  // Fond sombre uni
+  // Chargement de la bannière en fond
   try {
-    const background = await loadImage('./src/assets/banner.png');
+    const bannerPath = customBg || path.join(__dirname, '../assets/banner.png');
+    const background = await Canvas.loadImage(bannerPath);
     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   } catch (e) {
+    console.error("Erreur chargement bannière Canvas:", e);
     ctx.fillStyle = '#2b2d31';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
@@ -45,7 +48,7 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
   const startY = (canvas.height / 2) - 25;
 
   const mainText = type === 'goodbye' ? 'À bientôt' : 'Bienvenue';
-  const subText = type === 'goodbye' ? 'sur le serveur Discord' : 'sur le serveur Discord';
+  const subText = 'sur le serveur Discord';
 
   ctx.textAlign = 'left';
 
