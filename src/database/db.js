@@ -1,4 +1,4 @@
-import { createClient } from "@libsql/client";
+const { createClient } = require("@libsql/client");
 
 const dbUrl = process.env.TURSO_DATABASE_URL || "file:local.db";
 const dbAuthToken = process.env.TURSO_AUTH_TOKEN || "";
@@ -139,4 +139,4 @@ export async function getGuildSettings(guildId) {
   return res.rows[0];
 }
 
-export default db;
+module.exports = db;
