@@ -63,11 +63,9 @@ async function createTicket(interaction, panel) {
 
   const count = (db.prepare("SELECT COUNT(*) as c FROM tickets WHERE guild_id = ?").get(gid)?.c ?? 0) + 1;
   
-  const nameFormat = panel.ticket_open_name || 'ticket-{count}-{username}';
+  const nameFormat = panel.ticket_open_name || 'ticket-{count}';
   const channelName = nameFormat
     .replace('{count}', String(count).padStart(panel.ticket_padding || 4, '0'))
-    .replace('{username}', interaction.user.username.toLowerCase().replace(/[^a-z0-9]/g, ''))
-    .replace('{user}', interaction.user.username.toLowerCase().replace(/[^a-z0-9]/g, ''))
     .toLowerCase()
     .slice(0, 100);
 
