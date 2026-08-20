@@ -24,7 +24,6 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
   }
 
   const avatarSize = 140;
-  // Avatar poussé vers la droite (passe de 50 à 100)
   const avatarX = 100;
   const avatarY = (canvas.height - avatarSize) / 2;
 
@@ -52,7 +51,8 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
     ctx.stroke();
   } catch (err) {}
 
-  const textX = 320;
+  // Texte rapproché de la PP (260 au lieu de 320)
+  const textX = 260;
   const startY = (canvas.height / 2) - 25;
 
   const mainText = type === 'goodbye' ? 'À bientôt' : 'Bienvenue';
