@@ -6,7 +6,7 @@ async function createWelcomeImage(member, bannerUrl, type = 'welcome') {
 
   // Fond sombre uni
   try {
-    const background = await loadImage('src/assets/banner.png');
+    const background = await loadImage('./src/assets/banner.png');
     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
   } catch (e) {
     ctx.fillStyle = '#2b2d31';
