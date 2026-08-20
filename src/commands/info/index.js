@@ -4,6 +4,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("info")
     .setDescription("Affiche des informations")
+    .setIntegrationTypes(0, 1)
+    .setContexts(0, 1, 2)
     .addSubcommand(s =>
       s.setName("utilisateur")
         .setDescription("Afficher les informations d'un utilisateur")
