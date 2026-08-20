@@ -193,7 +193,17 @@ const aiCols = [
   "ALTER TABLE guild_settings ADD COLUMN ai_max_tokens INTEGER DEFAULT 500",
   "ALTER TABLE guild_settings ADD COLUMN ai_persona TEXT",
   "ALTER TABLE guild_settings ADD COLUMN ai_lang TEXT DEFAULT 'fr'",
-  "ALTER TABLE guild_settings ADD COLUMN ticket_name TEXT DEFAULT 'ticket-{user}'"
+  "ALTER TABLE guild_settings ADD COLUMN ticket_name TEXT DEFAULT 'ticket-{user}'",
+  "ALTER TABLE ticket_panels ADD COLUMN emoji TEXT DEFAULT '🎫'",
+  "ALTER TABLE ticket_panels ADD COLUMN description TEXT DEFAULT 'Ouvrir un ticket'",
+  "ALTER TABLE ticket_panels ADD COLUMN category_open_id TEXT",
+  "ALTER TABLE ticket_panels ADD COLUMN support_role_id TEXT",
+  "ALTER TABLE ticket_panels ADD COLUMN ticket_open_name TEXT DEFAULT 'ticket-{count}-{username}'",
+  "ALTER TABLE ticket_panels ADD COLUMN ticket_padding INTEGER DEFAULT 4",
+  "ALTER TABLE ticket_panels ADD COLUMN welcome_message TEXT",
+  "ALTER TABLE ticket_panels ADD COLUMN embed_title TEXT",
+  "ALTER TABLE ticket_panels ADD COLUMN embed_color TEXT DEFAULT '#7c3aed'",
+  "ALTER TABLE ticket_panels ADD COLUMN log_channel_id TEXT"
 ];
 for (const sql of aiCols) {
   try { db.prepare(sql).run(); } catch(e) { if (!e.message.includes("duplicate column")) console.error("Migration error:", e.message); }
