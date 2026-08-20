@@ -17,7 +17,7 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
   }
 
   const avatarSize = 220;
-  const avatarX = 100;
+  const avatarX = 80;
   const avatarY = (canvas.height - avatarSize) / 2;
 
   let avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png";
@@ -44,25 +44,28 @@ async function createWelcomeImage(member, customBg, type = 'welcome') {
     ctx.stroke();
   } catch (err) {}
 
-  const textX = avatarX + avatarSize + 170;
-  const startY = (canvas.height / 2) - 25;
+  const textX = avatarX + avatarSize + 50;
+  const startY = (canvas.height / 2) - 40;
 
   const mainText = type === 'goodbye' ? 'À bientôt' : 'Bienvenue';
   const subText = 'sur le serveur Discord';
 
   ctx.textAlign = 'left';
 
+  // Texte principal "Bienvenue" (Passé de 56px à 72px)
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 56px Arial, sans-serif';
+  ctx.font = 'bold 72px Arial, sans-serif';
   ctx.fillText(mainText, textX, startY);
   
-  ctx.font = '24px Arial, sans-serif';
+  // Sous-texte "sur le serveur Discord" (Passé de 24px à 32px)
+  ctx.font = 'bold 32px Arial, sans-serif';
   ctx.fillStyle = '#dcdcdc';
-  ctx.fillText(subText, textX, startY + 45);
+  ctx.fillText(subText, textX, startY + 55);
   
+  // Nom du serveur (Passé de 36px à 48px)
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 36px Arial, sans-serif';
-  ctx.fillText(member.guild.name, textX, startY + 95);
+  ctx.font = 'bold 48px Arial, sans-serif';
+  ctx.fillText(member.guild.name, textX, startY + 115);
 
   return canvas.toBuffer();
 }
