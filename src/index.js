@@ -1,3 +1,6 @@
+process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', err));
+process.on('uncaughtException', (err) => console.error('[Exception non gérée]', err));
+
 require('../update-db.js');
 const express = require('express');
 const path = require('path');

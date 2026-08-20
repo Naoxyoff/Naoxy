@@ -90,27 +90,21 @@ async function createTicket(interaction, panel) {
 
   db.prepare("INSERT INTO tickets (guild_id, channel_id, user_id, subject, status) VALUES (?, ?, ?, ?, 'open')").run(gid, channel.id, interaction.user.id, panel.name || 'Support');
 
-  // Lire le message depuis ticket_messages, sinon fallback sur welcome_message du panel
-  const ticketMsg = db.prepare("SELECT * FROM ticket_messages WHERE panel_id = ? AND guild_id = ? AND type = 'open'").get(panel.id, gid);
-  
-  const rawDescription = ticketMsg?.embed_description || panel.welcome_message || 'Bonjour {user} ! 👋\n\nMerci d\'avoir ouvert un ticket. Le staff va vous répondre dès que possible.\n\nDécrivez votre demande ci-dessous.';
+  const rawDescription = panel.welcome_message || 'Bonjour {user} ! 👋\n\nMerci d\'avoir ouvert un ticket. Le staff va vous répondre dès que possible.\n\nDécrivez votre demande ci-dessous.';
   const description = rawDescription
     .replace(/\{user\}/g, `<@${interaction.user.id}>`)
     .replace(/\{username\}/g, interaction.user.username)
     .replace(/\{server\}/g, guild.name)
     .replace(/\{count\}/g, String(count));
 
-  const embedTitle = ticketMsg?.embed_title || panel.embed_title || panel.name || '🎫 Ticket';
-  const embedColor = ticketMsg?.embed_color || panel.embed_color || '#7c3aed';
+  const embedTitle = panel.embed_title || panel.name || '🎫 Ticket';
+  const embedColor = panel.embed_color || '#7c3aed';
 
   const embed = new EmbedBuilder()
     .setColor(embedColor)
     .setTitle(embedTitle)
     .setDescription(description)
     .setTimestamp();
-
-  if (ticketMsg?.embed_footer) embed.setFooter({ text: ticketMsg.embed_footer.replace(/\{user\}/g, interaction.user.username) });
-  if (ticketMsg?.embed_author) embed.setAuthor({ name: ticketMsg.embed_author.replace(/\{user\}/g, interaction.user.username) });
 
   const closeBtn = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId("ticket_close_btn").setLabel("🔒 Fermer le ticket").setStyle(ButtonStyle.Danger)
