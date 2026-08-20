@@ -19,6 +19,9 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
+    // Diffère la réponse immédiatement pour éviter le timeout des 3 secondes de Discord
+    await interaction.deferReply({ ephemeral: true });
+
     const sub = interaction.options.getSubcommand();
     const gid = interaction.guildId;
 
@@ -42,7 +45,8 @@ module.exports = {
           { name: "🔧 Protections actives", value: `Salons : ${row.an_delchan ? '✅' : '❌'} • Rôles : ${row.an_delrole ? '✅' : '❌'} • Bans : ${row.an_massban ? '✅' : '❌'} • Kicks : ${row.an_masskick ? '✅' : '❌'} • Webhooks : ${row.an_webhook ? '✅' : '❌'}`, inline: false },
         )
         .setFooter({ text: "Utilisez /protect set ou /protect antinuke pour modifier" });
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      
+      return interaction.editReply({ embeds: [embed] });
     }
 
     if (sub === "set") {
@@ -66,7 +70,7 @@ module.exports = {
       if (log_salon) updates.log_channel_id = log_salon.id;
 
       if (Object.keys(updates).length === 0)
-        return interaction.reply({ embeds: [errorEmbed("Aucun paramètre fourni.")], ephemeral: true });
+        return interaction.editReply({ embeds: [errorEmbed("Aucun paramètre fourni.")] });
 
       const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
       const existing = existingRes.rows[0];
@@ -81,7 +85,9 @@ module.exports = {
         await db.execute({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
       }
 
-      await interaction.reply({ embeds: [successEmbed("✅ Protection mise à jour !", Object.entries(updates).filter(([k]) => k !== "guild_id").map(([k, v]) => `**${k}** → ${v}`).join("\n"))], ephemeral: true });
+      return interaction.editReply({ 
+        embeds: [successEmbed("✅ Protection mise à jour !", Object.entries(updates).filter(([k]) => k !== "guild_id").map(([k, v]) => `**${k}** → ${v}`).join("\n"))] 
+      });
     }
   }
 };
