@@ -1,14 +1,20 @@
 const { EmbedBuilder } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
+const { db } = require("../database/db.js");
 
 const inviteCache = new Map();
-const configPath = path.join(__dirname, "../../data/inviteLogConfig.json");
 
 function getLogChannelId(guildId) {
-  if (!fs.existsSync(configPath)) return null;
-  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-  return config[guildId] || null;
+  const row = db.prepare("SELECT invite_log_channel FROM guild_settings WHERE guild_id = ?").get(guildId);
+  return row?.invite_log_channel || null;
+}
+
+function incrementInviterCount(guildId, inviterId) {
+  db.prepare(`
+    INSERT INTO invite_stats (guild_id, inviter_id, count) VALUES (?, ?, 1)
+    ON CONFLICT(guild_id, inviter_id) DO UPDATE SET count = count + 1
+  `).run(guildId, inviterId);
+  const row = db.prepare("SELECT count FROM invite_stats WHERE guild_id = ? AND inviter_id = ?").get(guildId, inviterId);
+  return row?.count || 1;
 }
 
 async function initInviteCache(client) {
@@ -20,7 +26,7 @@ async function initInviteCache(client) {
       console.error(`[InviteLogger] Erreur ${guild.name}:`, err.message);
     }
   }
-  
+  console.log(`[InviteLogger] Cache initialisé.`);
 }
 
 async function getUsedInvite(member) {
@@ -43,12 +49,17 @@ async function getUsedInvite(member) {
 async function logInvite(member) {
   const guild = member.guild;
   const channelId = getLogChannelId(guild.id);
-  if (!channelId) return;
-
-  const logChannel = guild.channels.cache.get(channelId);
-  if (!logChannel) return;
 
   const usedInvite = await getUsedInvite(member);
+  let totalInvites = null;
+
+  if (usedInvite?.inviter) {
+    totalInvites = incrementInviterCount(guild.id, usedInvite.inviter.id);
+  }
+
+  if (!channelId) return;
+  const logChannel = guild.channels.cache.get(channelId);
+  if (!logChannel) return;
 
   const embed = new EmbedBuilder()
     .setTitle("📥 Nouveau membre rejoint")
@@ -58,7 +69,7 @@ async function logInvite(member) {
       { name: "👤 Membre", value: `${member} (${member.user.tag})\nID: \`${member.id}\``, inline: false },
       { name: "📨 Invite utilisée", value: usedInvite ? `\`${usedInvite.code}\`` : "Inconnue", inline: true },
       { name: "👑 Invité par", value: usedInvite?.inviter ? `${usedInvite.inviter} (${usedInvite.inviter.tag})` : "Inconnu", inline: true },
-      { name: "🔢 Utilisations", value: usedInvite ? `${usedInvite.uses}` : "N/A", inline: true },
+      { name: "🔢 Utilisations totales", value: totalInvites !== null ? `${totalInvites}` : "N/A", inline: true },
       { name: "📅 Date", value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false },
       { name: "👥 Membres total", value: `${guild.memberCount}`, inline: true }
     )

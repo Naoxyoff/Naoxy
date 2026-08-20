@@ -1,18 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
-
-const configPath = path.join(__dirname, "../../data/inviteLogConfig.json");
-
-function loadConfig() {
-  if (!fs.existsSync(configPath)) return {};
-  return JSON.parse(fs.readFileSync(configPath, "utf-8"));
-}
-
-function saveConfig(config) {
-  fs.mkdirSync(path.dirname(configPath), { recursive: true });
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-}
+const { db } = require("../../database/db.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,9 +14,14 @@ module.exports = {
 
   async execute(interaction) {
     const channel = interaction.options.getChannel("salon");
-    const config = loadConfig();
-    config[interaction.guildId] = channel.id;
-    saveConfig(config);
+    const gid = interaction.guildId;
+
+    const existing = db.prepare("SELECT guild_id FROM guild_settings WHERE guild_id = ?").get(gid);
+    if (existing) {
+      db.prepare("UPDATE guild_settings SET invite_log_channel = ? WHERE guild_id = ?").run(channel.id, gid);
+    } else {
+      db.prepare("INSERT INTO guild_settings (guild_id, invite_log_channel) VALUES (?, ?)").run(gid, channel.id);
+    }
 
     const embed = new EmbedBuilder()
       .setTitle("✅ Invite Logger configuré")
