@@ -4,9 +4,18 @@ const { COLORS } = require('../utils/helpers.js');
 const { createWelcomeImage } = require('../utils/canvas.js');
 const path = require('path');
 
+// Anti-doublon temporaire en mémoire
+const recentlyProcessed = new Set();
+
 module.exports = {
   name: Events.GuildMemberAdd,
   async execute(member) {
+    // Si le membre a déjà été traité durant les 10 dernières secondes, on stoppe
+    const key = `${member.guild.id}-${member.id}`;
+    if (recentlyProcessed.has(key)) return;
+    recentlyProcessed.add(key);
+    setTimeout(() => recentlyProcessed.delete(key), 10000);
+
     try {
       const res = await db.execute({
         sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
@@ -18,7 +27,6 @@ module.exports = {
       const ch = member.guild.channels.cache.get(settings.welcome_channel);
       if (!ch) return;
 
-      // On passe le chemin de ta bannière personnalisée au Canvas
       const bannerPath = path.join(__dirname, '../assets/banner.png');
       const buffer = await createWelcomeImage(member, bannerPath, 'welcome');
       const welcomeCanvas = new AttachmentBuilder(buffer, { name: 'welcome.png' });
