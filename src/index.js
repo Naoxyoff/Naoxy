@@ -110,14 +110,15 @@ client.on("guildMemberAdd", (member) => console.log(`[DEBUG] guildMemberAdd recu
 // Fonction principale pour démarrer le bot et initialiser Turso
 async function startBot() {
   try {
-    console.log("🔄 Initialisation de la base de données Turso...");
+    console.log('🔄 Initialisation de la base de données Turso...');
     await initDatabase();
-    
-    console.log("🔑 Connexion à Discord...");
-    await 
-console.log('🔑 Tentative de connexion avec le token...');
-client.login(process.env.DISCORD_TOKEN).then(() => {
-  console.log('✅ Connecté à Discord avec succès !');
-}).catch(err => {
-  console.error('❌ ERREUR CRITIQUE LOGIN:', err.message);
-});
+
+    console.log('🔑 Connexion à Discord...');
+    await client.login(process.env.DISCORD_TOKEN);
+    console.log('✅ Connecté à Discord avec succès !');
+  } catch (err) {
+    console.error('❌ ERREUR CRITIQUE DÉMARRAGE:', err.message);
+  }
+}
+
+startBot();
