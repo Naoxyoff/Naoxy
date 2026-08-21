@@ -2,21 +2,19 @@ const {
   SlashCommandBuilder,
   EmbedBuilder,
   ActionRowBuilder,
-  StringSelectMenuBuilder,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
   PermissionFlagsBits,
 } = require("discord.js");
 
-const { default: db } = require("../../database/db.js");
+const db = require("../../database/db.js").default || require("../../database/db.js");
 const { successEmbed, errorEmbed } = require("../../utils/helpers.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("ticket")
     .setDescription("Système de tickets")
-
     .addSubcommand(s =>
       s.setName("addtype")
         .setDescription("Ajouter un type de ticket au menu")
@@ -29,18 +27,15 @@ module.exports = {
         .addStringOption(o => o.setName("message_bienvenue").setDescription("Message envoyé à l'ouverture du ticket").setRequired(false))
         .addChannelOption(o => o.setName("salon_logs").setDescription("Salon où logger la fermeture des tickets").setRequired(false))
     )
-
     .addSubcommand(s =>
       s.setName("removetype")
         .setDescription("Retirer un type de ticket")
         .addStringOption(o => o.setName("nom").setDescription("Nom exact du type à retirer").setRequired(true).setAutocomplete(true))
     )
-
     .addSubcommand(s =>
       s.setName("listtypes")
         .setDescription("Lister les types de tickets configurés")
     )
-
     .addSubcommand(s =>
       s.setName("panel")
         .setDescription("Envoyer le menu d'ouverture de ticket dans un salon")
@@ -48,32 +43,27 @@ module.exports = {
         .addStringOption(o => o.setName("titre").setDescription("Titre de l'embed").setRequired(false))
         .addStringOption(o => o.setName("description").setDescription("Description de l'embed").setRequired(false))
     )
-
     .addSubcommand(s =>
       s.setName("close")
         .setDescription("Fermer le ticket")
     )
-
     .addSubcommand(s =>
       s.setName("add")
         .setDescription("Ajouter un membre au ticket")
         .addUserOption(o => o.setName("membre").setDescription("Membre").setRequired(true))
     )
-
     .addSubcommand(s =>
       s.setName("remove")
         .setDescription("Retirer un membre du ticket")
         .addUserOption(o => o.setName("membre").setDescription("Membre").setRequired(true))
     )
-
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
 
   async autocomplete(interaction) {
     const focused = interaction.options.getFocused();
     const gid = interaction.guildId;
-    const res = await db.exec({ sql: "SELECT name FROM ticket_panels WHERE guild_id = ?", args: [gid] });
-    const panels = res.rows;
-    const filtered = panels.filter(p => p.name.toLowerCase().includes(focused.toLowerCase())).slice(0, 25);
+    const res = await db.execute({ sql: "SELECT name FROM ticket_panels WHERE guild_id = ?", args: [gid] });
+    const filtered = res.rows.filter(p => p.name.toLowerCase().includes(focused.toLowerCase())).slice(0, 25);
     await interaction.respond(filtered.map(p => ({ name: p.name, value: p.name })));
   },
 
@@ -91,12 +81,12 @@ module.exports = {
       const messageBienvenue = interaction.options.getString("message_bienvenue") || null;
       const salonLogs = interaction.options.getChannel("salon_logs");
 
-      const existing = await db.exec({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
+      const existing = await db.execute({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
       if (existing.rows.length > 0) {
         return interaction.reply({ embeds: [errorEmbed("Un type de ticket avec ce nom existe déjà.")], ephemeral: true });
       }
 
-      await db.exec({
+      await db.execute({
         sql: `INSERT INTO ticket_panels (guild_id, name, emoji, description, category_open_id, support_role_id, ticket_open_name, welcome_message, log_channel_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [gid, nom, emoji, description, categorie.id, role.id, nomSalon, messageBienvenue, salonLogs ? salonLogs.id : null]
       });
@@ -110,15 +100,15 @@ module.exports = {
 
     } else if (sub === "removetype") {
       const nom = interaction.options.getString("nom");
-      const existing = await db.exec({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
+      const existing = await db.execute({ sql: "SELECT id FROM ticket_panels WHERE guild_id = ? AND name = ?", args: [gid, nom] });
       if (existing.rows.length === 0) {
         return interaction.reply({ embeds: [errorEmbed("Aucun type de ticket avec ce nom.")], ephemeral: true });
       }
-      await db.exec({ sql: "DELETE FROM ticket_panels WHERE id = ?", args: [existing.rows[0].id] });
+      await db.execute({ sql: "DELETE FROM ticket_panels WHERE id = ?", args: [existing.rows[0].id] });
       await interaction.reply({ embeds: [successEmbed("🗑️ Type de ticket supprimé", `**${nom}** a été retiré.`)], ephemeral: true });
 
     } else if (sub === "listtypes") {
-      const res = await db.exec({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
+      const res = await db.execute({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
       if (!res.rows.length) {
         return interaction.reply({ embeds: [errorEmbed("Aucun type de ticket configuré.", "Utilise `/ticket addtype` pour en créer un.")], ephemeral: true });
       }
@@ -137,7 +127,7 @@ module.exports = {
       const titre = interaction.options.getString("titre") || "Orbis - Bot";
       const description = interaction.options.getString("description") || "Pour créer un ticket, cliquez sur le bouton ci-dessous.";
 
-      const res = await db.exec({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
+      const res = await db.execute({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [gid] });
       if (!res.rows.length) {
         return interaction.reply({ embeds: [errorEmbed("Aucun type de ticket configuré.", "Utilise `/ticket addtype` avant de créer le panel.")], ephemeral: true });
       }

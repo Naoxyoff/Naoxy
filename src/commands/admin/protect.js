@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const { default: db } = require("../../database/db.js");
+const db = require("../../database/db.js").default || require("../../database/db.js");
 const { successEmbed, errorEmbed, COLORS } = require("../../utils/helpers.js");
 
 module.exports = {
@@ -19,14 +19,13 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
-    // Diffère la réponse immédiatement pour éviter le timeout des 3 secondes de Discord
     await interaction.deferReply({ ephemeral: true });
 
     const sub = interaction.options.getSubcommand();
     const gid = interaction.guildId;
 
     if (sub === "status") {
-      const rowRes = await db.exec({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const rowRes = await db.execute({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
       const row = rowRes.rows[0] || {};
       const embed = new EmbedBuilder()
         .setColor(COLORS.info)
@@ -45,7 +44,7 @@ module.exports = {
           { name: "🔧 Protections actives", value: `Salons : ${row.an_delchan ? '✅' : '❌'} • Rôles : ${row.an_delrole ? '✅' : '❌'} • Bans : ${row.an_massban ? '✅' : '❌'} • Kicks : ${row.an_masskick ? '✅' : '❌'} • Webhooks : ${row.an_webhook ? '✅' : '❌'}`, inline: false },
         )
         .setFooter({ text: "Utilisez /protect set ou /protect antinuke pour modifier" });
-      
+
       return interaction.editReply({ embeds: [embed] });
     }
 
@@ -72,21 +71,21 @@ module.exports = {
       if (Object.keys(updates).length === 0)
         return interaction.editReply({ embeds: [errorEmbed("Aucun paramètre fourni.")] });
 
-      const existingRes = await db.exec({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
       const existing = existingRes.rows[0];
 
       if (existing) {
         const setClauses = Object.keys(updates).map(k => `${k} = ?`).join(", ");
-        await db.exec({ sql: `UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`, args: [...Object.values(updates), gid] });
+        await db.execute({ sql: `UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`, args: [...Object.values(updates), gid] });
       } else {
         updates.guild_id = gid;
         const keys = Object.keys(updates).join(", ");
         const placeholders = Object.keys(updates).map(() => "?").join(", ");
-        await db.exec({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
+        await db.execute({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
       }
 
-      return interaction.editReply({ 
-        embeds: [successEmbed("✅ Protection mise à jour !", Object.entries(updates).filter(([k]) => k !== "guild_id").map(([k, v]) => `**${k}** → ${v}`).join("\n"))] 
+      return interaction.editReply({
+        embeds: [successEmbed("✅ Protection mise à jour !", Object.entries(updates).filter(([k]) => k !== "guild_id").map(([k, v]) => `**${k}** → ${v}`).join("\n"))]
       });
     }
   }

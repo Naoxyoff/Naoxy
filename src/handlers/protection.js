@@ -1,26 +1,24 @@
 const { EmbedBuilder, PermissionFlagsBits, ChannelType } = require("discord.js");
-const { db } = require("../database/db.js");
+const db = require("../database/db.js").default || require("../database/db.js");
 
-// ─── STOCKAGE EN MÉMOIRE ──────────────────────────────────────────────────────
-const spamMap = new Map();      // userId -> [timestamps]
-const mentionMap = new Map();   // userId -> [timestamps]
-const joinMap = new Map();      // guildId -> [timestamps]
-const nukeMap = new Map();      // userId -> { channels: n, roles: n, lastReset: ts }
+const spamMap = new Map();
+const mentionMap = new Map();
+const joinMap = new Map();
+const nukeMap = new Map();
 
 const DEFAULTS = {
-  spam_threshold: 5,       // messages en X secondes
-  spam_interval: 3,        // secondes
-  mention_threshold: 5,    // mentions par message
-  raid_threshold: 10,      // joins en X secondes
-  raid_interval: 10,       // secondes
-  nuke_threshold: 3,       // suppressions de salons/rôles
-  mute_duration: 10,       // minutes
+  spam_threshold: 5,
+  spam_interval: 3,
+  mention_threshold: 5,
+  raid_threshold: 10,
+  raid_interval: 10,
+  nuke_threshold: 3,
+  mute_duration: 10,
 };
 
-// ─── UTILITAIRES ─────────────────────────────────────────────────────────────
-function getSettings(guildId) {
-  const row = db.prepare("SELECT * FROM guild_settings WHERE guild_id = ?").get(guildId);
-  return { ...DEFAULTS, ...row };
+async function getSettings(guildId) {
+  const res = await db.execute({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [guildId] });
+  return { ...DEFAULTS, ...(res.rows[0] || {}) };
 }
 
 async function muteUser(guild, userId, reason, duration, logChannel) {
@@ -61,8 +59,8 @@ async function muteUser(guild, userId, reason, duration, logChannel) {
   }
 }
 
-function getLogChannel(guild) {
-  const settings = getSettings(guild.id);
+async function getLogChannel(guild) {
+  const settings = await getSettings(guild.id);
   if (settings.log_channel_id) return guild.channels.cache.get(settings.log_channel_id);
   return guild.channels.cache.find(c =>
     c.type === ChannelType.GuildText &&
@@ -70,13 +68,12 @@ function getLogChannel(guild) {
   );
 }
 
-// ─── ANTI-SPAM ───────────────────────────────────────────────────────────────
 async function checkSpam(message) {
   if (!message.guild || message.author.bot) return;
   const member = message.member;
   if (!member || member.permissions.has(PermissionFlagsBits.ManageMessages)) return;
 
-  const settings = getSettings(message.guild.id);
+  const settings = await getSettings(message.guild.id);
   const key = `${message.guild.id}-${message.author.id}`;
   const now = Date.now();
 
@@ -87,7 +84,7 @@ async function checkSpam(message) {
 
   if (timestamps.length >= settings.spam_threshold) {
     spamMap.delete(key);
-    const logCh = getLogChannel(message.guild);
+    const logCh = await getLogChannel(message.guild);
     await muteUser(message.guild, message.author.id, `Anti-spam : ${timestamps.length} messages en ${settings.spam_interval}s`, settings.mute_duration, logCh);
     await message.channel.send({ embeds: [new EmbedBuilder()
       .setColor(0xFF4444)
@@ -96,18 +93,17 @@ async function checkSpam(message) {
   }
 }
 
-// ─── ANTI-MENTION SPAM ───────────────────────────────────────────────────────
 async function checkMentions(message) {
   if (!message.guild || message.author.bot) return;
   const member = message.member;
   if (!member || member.permissions.has(PermissionFlagsBits.ManageMessages)) return;
 
-  const settings = getSettings(message.guild.id);
+  const settings = await getSettings(message.guild.id);
   const mentionCount = message.mentions.users.size + message.mentions.roles.size + (message.mentions.everyone ? 5 : 0);
 
   if (mentionCount >= settings.mention_threshold) {
     await message.delete().catch(() => {});
-    const logCh = getLogChannel(message.guild);
+    const logCh = await getLogChannel(message.guild);
     await muteUser(message.guild, message.author.id, `Anti-mention spam : ${mentionCount} mentions`, settings.mute_duration, logCh);
     await message.channel.send({ embeds: [new EmbedBuilder()
       .setColor(0xFF4444)
@@ -116,10 +112,9 @@ async function checkMentions(message) {
   }
 }
 
-// ─── ANTI-RAID ───────────────────────────────────────────────────────────────
 async function checkRaid(member) {
   const guild = member.guild;
-  const settings = getSettings(guild.id);
+  const settings = await getSettings(guild.id);
   const now = Date.now();
 
   if (!joinMap.has(guild.id)) joinMap.set(guild.id, []);
@@ -129,9 +124,8 @@ async function checkRaid(member) {
 
   if (joins.length >= settings.raid_threshold) {
     joinMap.set(guild.id, []);
-    const logCh = getLogChannel(guild);
+    const logCh = await getLogChannel(guild);
 
-    // Lockdown — désactiver les invitations et kick les nouveaux comptes
     const recentMembers = guild.members.cache
       .filter(m => !m.user.bot && (now - m.joinedTimestamp) < settings.raid_interval * 1000);
 
@@ -149,13 +143,12 @@ async function checkRaid(member) {
   }
 }
 
-// ─── ANTI-NUKE ───────────────────────────────────────────────────────────────
 async function checkNuke(executor, guild, type) {
   if (!executor || executor.bot) return;
   const member = await guild.members.fetch(executor.id).catch(() => null);
   if (!member || member.permissions.has(PermissionFlagsBits.Administrator)) return;
 
-  const settings = getSettings(guild.id);
+  const settings = await getSettings(guild.id);
   const key = `${guild.id}-${executor.id}`;
   const now = Date.now();
 
@@ -172,7 +165,7 @@ async function checkNuke(executor, guild, type) {
 
   if (data.count >= settings.nuke_threshold) {
     nukeMap.delete(key);
-    const logCh = getLogChannel(guild);
+    const logCh = await getLogChannel(guild);
     await muteUser(guild, executor.id, `Anti-nuke : ${data.count} suppressions de ${type} en 30s`, settings.mute_duration, logCh);
   }
 }

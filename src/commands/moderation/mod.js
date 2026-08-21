@@ -1,9 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const { default: db } = require("../../database/db.js");
+const db = require("../../database/db.js").default || require("../../database/db.js");
 const { successEmbed, errorEmbed, warnEmbed, COLORS, parseDuration, formatDuration } = require("../../utils/helpers.js");
 
 async function logAction(interaction, action, targetId, reason) {
-  const settingsRes = await db.exec({ sql: "SELECT log_channel FROM guild_settings WHERE guild_id = ?", args: [interaction.guildId] });
+  const settingsRes = await db.execute({ sql: "SELECT log_channel FROM guild_settings WHERE guild_id = ?", args: [interaction.guildId] });
   const settings = settingsRes.rows[0];
   if (!settings?.log_channel) return;
   const channel = interaction.guild?.channels.cache.get(settings.log_channel);
@@ -18,10 +18,10 @@ const commands = [
     async execute(interaction) {
       const target = interaction.options.getUser("membre", true);
       const reason = interaction.options.getString("raison") ?? "Aucune raison";
-      await db.exec({ sql: "INSERT INTO warnings (guild_id, user_id, moderator_id, reason) VALUES (?, ?, ?, ?)", args: [interaction.guildId, target.id, interaction.user.id, reason] });
-      await db.exec({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason) VALUES (?, ?, ?, 'warn', ?)", args: [interaction.guildId, target.id, interaction.user.id, reason] });
-      
-      const warnsRes = await db.exec({ sql: "SELECT COUNT(*) as count FROM warnings WHERE guild_id = ? AND user_id = ?", args: [interaction.guildId, target.id] });
+      await db.execute({ sql: "INSERT INTO warnings (guild_id, user_id, moderator_id, reason) VALUES (?, ?, ?, ?)", args: [interaction.guildId, target.id, interaction.user.id, reason] });
+      await db.execute({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason) VALUES (?, ?, ?, 'warn', ?)", args: [interaction.guildId, target.id, interaction.user.id, reason] });
+
+      const warnsRes = await db.execute({ sql: "SELECT COUNT(*) as count FROM warnings WHERE guild_id = ? AND user_id = ?", args: [interaction.guildId, target.id] });
       const warns = warnsRes.rows[0];
 
       try { await target.send({ embeds: [new EmbedBuilder().setColor(COLORS.warning).setTitle(`⚠️ Avertissement sur ${interaction.guild?.name}`).addFields({ name: "Raison", value: reason })] }); } catch (_) {}
@@ -33,7 +33,7 @@ const commands = [
     data: new SlashCommandBuilder().setName("warnings").setDescription("Voir les avertissements d'un membre").addUserOption(o => o.setName("membre").setDescription("Le membre").setRequired(true)).setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     async execute(interaction) {
       const target = interaction.options.getUser("membre", true);
-      const warnsRes = await db.exec({ sql: "SELECT * FROM warnings WHERE guild_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 10", args: [interaction.guildId, target.id] });
+      const warnsRes = await db.execute({ sql: "SELECT * FROM warnings WHERE guild_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 10", args: [interaction.guildId, target.id] });
       const warns = warnsRes.rows;
       const embed = new EmbedBuilder().setColor(COLORS.warning).setTitle(`⚠️ Avertissements de ${target.tag}`).setThumbnail(target.displayAvatarURL());
       embed.setDescription(warns.length === 0 ? "Aucun avertissement." : warns.map((w, i) => `**#${i+1}** — <@${w.moderator_id}> • <t:${w.created_at}:R>\n> ${w.reason}`).join("\n\n"));
@@ -44,7 +44,7 @@ const commands = [
     data: new SlashCommandBuilder().setName("clearwarn").setDescription("Supprimer les avertissements").addUserOption(o => o.setName("membre").setDescription("Le membre").setRequired(true)).setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     async execute(interaction) {
       const target = interaction.options.getUser("membre", true);
-      await db.exec({ sql: "DELETE FROM warnings WHERE guild_id = ? AND user_id = ?", args: [interaction.guildId, target.id] });
+      await db.execute({ sql: "DELETE FROM warnings WHERE guild_id = ? AND user_id = ?", args: [interaction.guildId, target.id] });
       await interaction.reply({ embeds: [successEmbed("Avertissements supprimés", `Les avertissements de ${target} ont été supprimés.`)] });
     }
   },
@@ -56,7 +56,7 @@ const commands = [
       if (!target || !target.kickable) return interaction.reply({ embeds: [errorEmbed("Impossible d'expulser ce membre.")], ephemeral: true });
       try { await target.send({ embeds: [new EmbedBuilder().setColor(COLORS.error).setTitle(`👢 Expulsé de ${interaction.guild?.name}`).addFields({ name: "Raison", value: reason })] }); } catch (_) {}
       await target.kick(reason);
-      await db.exec({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason) VALUES (?, ?, ?, 'kick', ?)", args: [interaction.guildId, target.id, interaction.user.id, reason] });
+      await db.execute({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason) VALUES (?, ?, ?, 'kick', ?)", args: [interaction.guildId, target.id, interaction.user.id, reason] });
       await logAction(interaction, "kick", target.id, reason);
       await interaction.reply({ embeds: [successEmbed("Membre expulsé", `${target.user} expulsé.\n**Raison :** ${reason}`)] });
     }
@@ -71,7 +71,7 @@ const commands = [
       if (dureeStr && dureeStr !== "permanent") { duration = parseDuration(dureeStr); if (!duration) return interaction.reply({ embeds: [errorEmbed("Format invalide")], ephemeral: true }); }
       try { await target.send({ embeds: [new EmbedBuilder().setColor(COLORS.error).setTitle(`🔨 Banni de ${interaction.guild?.name}`).addFields({ name: "Raison", value: reason }, { name: "Durée", value: duration ? formatDuration(duration) : "Permanent" })] }); } catch (_) {}
       await interaction.guild?.members.ban(target, { reason });
-      await db.exec({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason, duration, expires_at) VALUES (?, ?, ?, 'ban', ?, ?, ?)", args: [interaction.guildId, target.id, interaction.user.id, reason, duration, duration ? Math.floor(Date.now()/1000)+duration : null] });
+      await db.execute({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason, duration, expires_at) VALUES (?, ?, ?, 'ban', ?, ?, ?)", args: [interaction.guildId, target.id, interaction.user.id, reason, duration, duration ? Math.floor(Date.now()/1000)+duration : null] });
       await logAction(interaction, "ban", target.id, reason);
       await interaction.reply({ embeds: [successEmbed("Membre banni", `${target} banni${duration ? ` pour ${formatDuration(duration)}` : " définitivement"}.\n**Raison :** ${reason}`)] });
     }
@@ -106,7 +106,7 @@ const commands = [
       if (!duration) return interaction.reply({ embeds: [errorEmbed("Format invalide. Ex: 10m, 2h, 1d")], ephemeral: true });
       if (duration > 28*86400) return interaction.reply({ embeds: [errorEmbed("Maximum 28 jours.")], ephemeral: true });
       await target.timeout(duration * 1000, reason);
-      await db.exec({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason, duration) VALUES (?, ?, ?, 'mute', ?, ?)", args: [interaction.guildId, target.id, interaction.user.id, reason, duration] });
+      await db.execute({ sql: "INSERT INTO sanctions (guild_id, user_id, moderator_id, type, reason, duration) VALUES (?, ?, ?, 'mute', ?, ?)", args: [interaction.guildId, target.id, interaction.user.id, reason, duration] });
       await logAction(interaction, "mute", target.id, reason);
       await interaction.reply({ embeds: [successEmbed("Mis en sourdine", `${target} en sourdine pour **${formatDuration(duration)}**.\n**Raison :** ${reason}`)] });
     }
@@ -123,7 +123,7 @@ const commands = [
     data: new SlashCommandBuilder().setName("sanctions").setDescription("Voir les sanctions d'un membre").addUserOption(o => o.setName("membre").setDescription("Le membre").setRequired(true)).setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
     async execute(interaction) {
       const target = interaction.options.getUser("membre", true);
-      const listRes = await db.exec({ sql: "SELECT * FROM sanctions WHERE guild_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 15", args: [interaction.guildId, target.id] });
+      const listRes = await db.execute({ sql: "SELECT * FROM sanctions WHERE guild_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 15", args: [interaction.guildId, target.id] });
       const list = listRes.rows;
       const typeEmoji = { warn: "⚠️", mute: "🔇", kick: "👢", ban: "🔨" };
       const embed = new EmbedBuilder().setColor(COLORS.error).setTitle(`🔨 Sanctions de ${target.tag}`).setThumbnail(target.displayAvatarURL());
@@ -181,12 +181,12 @@ const commands = [
     data: new SlashCommandBuilder().setName("logconfig").setDescription("Configurer le salon des logs").addChannelOption(o => o.setName("salon").setDescription("Salon des logs").setRequired(true)).setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction) {
       const channel = interaction.options.getChannel("salon", true);
-      
-      const existingRes = await db.exec({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [interaction.guildId] });
+
+      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [interaction.guildId] });
       if (existingRes.rows.length > 0) {
-        await db.exec({ sql: "UPDATE guild_settings SET log_channel = ? WHERE guild_id = ?", args: [channel.id, interaction.guildId] });
+        await db.execute({ sql: "UPDATE guild_settings SET log_channel = ? WHERE guild_id = ?", args: [channel.id, interaction.guildId] });
       } else {
-        await db.exec({ sql: "INSERT INTO guild_settings (guild_id, log_channel) VALUES (?, ?)", args: [interaction.guildId, channel.id] });
+        await db.execute({ sql: "INSERT INTO guild_settings (guild_id, log_channel) VALUES (?, ?)", args: [interaction.guildId, channel.id] });
       }
       await interaction.reply({ embeds: [successEmbed("Logs configurés", `Les logs seront envoyés dans ${channel}.`)] });
     }

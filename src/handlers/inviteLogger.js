@@ -1,20 +1,21 @@
 const { EmbedBuilder } = require("discord.js");
-const db = require("../database/db.js");
+const db = require("../database/db.js").default || require("../database/db.js");
 
 const inviteCache = new Map();
 
-function getLogChannelId(guildId) {
-  const row = db.prepare("SELECT invite_log_channel FROM guild_settings WHERE guild_id = ?").get(guildId);
-  return row?.invite_log_channel || null;
+async function getLogChannelId(guildId) {
+  const res = await db.execute({ sql: "SELECT invite_log_channel FROM guild_settings WHERE guild_id = ?", args: [guildId] });
+  return res.rows[0]?.invite_log_channel || null;
 }
 
-function incrementInviterCount(guildId, inviterId) {
-  db.prepare(`
-    INSERT INTO invite_stats (guild_id, inviter_id, count) VALUES (?, ?, 1)
-    ON CONFLICT(guild_id, inviter_id) DO UPDATE SET count = count + 1
-  `).run(guildId, inviterId);
-  const row = db.prepare("SELECT count FROM invite_stats WHERE guild_id = ? AND inviter_id = ?").get(guildId, inviterId);
-  return row?.count || 1;
+async function incrementInviterCount(guildId, inviterId) {
+  await db.execute({
+    sql: `INSERT INTO invite_stats (guild_id, inviter_id, count) VALUES (?, ?, 1)
+          ON CONFLICT(guild_id, inviter_id) DO UPDATE SET count = count + 1`,
+    args: [guildId, inviterId]
+  });
+  const res = await db.execute({ sql: "SELECT count FROM invite_stats WHERE guild_id = ? AND inviter_id = ?", args: [guildId, inviterId] });
+  return res.rows[0]?.count || 1;
 }
 
 async function initInviteCache(client) {
@@ -48,13 +49,13 @@ async function getUsedInvite(member) {
 
 async function logInvite(member) {
   const guild = member.guild;
-  const channelId = getLogChannelId(guild.id);
+  const channelId = await getLogChannelId(guild.id);
 
   const usedInvite = await getUsedInvite(member);
   let totalInvites = null;
 
   if (usedInvite?.inviter) {
-    totalInvites = incrementInviterCount(guild.id, usedInvite.inviter.id);
+    totalInvites = await incrementInviterCount(guild.id, usedInvite.inviter.id);
   }
 
   if (!channelId) return;

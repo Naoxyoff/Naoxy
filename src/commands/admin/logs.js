@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const { default: db } = require("../../database/db.js");
+const db = require("../../database/db.js").default || require("../../database/db.js");
 const { successEmbed, errorEmbed, COLORS } = require("../../utils/helpers.js");
 
 module.exports = {
@@ -34,17 +34,17 @@ module.exports = {
       if (moderation) updates.log_moderation_channel  = moderation.id;
       if (serveur)    updates.log_serveur_channel     = serveur.id;
 
-      const existingRes = await db.exec({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
       const existing = existingRes.rows[0];
 
       if (existing) {
         const setClauses = Object.keys(updates).map(k => `${k} = ?`).join(", ");
-        await db.exec({ sql: `UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`, args: [...Object.values(updates), gid] });
+        await db.execute({ sql: `UPDATE guild_settings SET ${setClauses} WHERE guild_id = ?`, args: [...Object.values(updates), gid] });
       } else {
         updates.guild_id = gid;
         const keys = Object.keys(updates).join(", ");
         const placeholders = Object.keys(updates).map(() => "?").join(", ");
-        await db.exec({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
+        await db.execute({ sql: `INSERT INTO guild_settings (${keys}) VALUES (${placeholders})`, args: Object.values(updates) });
       }
 
       await interaction.reply({ embeds: [new EmbedBuilder()
@@ -59,7 +59,7 @@ module.exports = {
         .setTimestamp()], ephemeral: true });
 
     } else if (sub === "status") {
-      const rowRes = await db.exec({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
+      const rowRes = await db.execute({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
       const row = rowRes.rows[0] || {};
       await interaction.reply({ embeds: [new EmbedBuilder()
         .setColor(COLORS.info)
@@ -72,9 +72,9 @@ module.exports = {
         )], ephemeral: true });
 
     } else if (sub === "reset") {
-      await db.exec({ 
-        sql: "UPDATE guild_settings SET log_messages_channel = NULL, log_membres_channel = NULL, log_moderation_channel = NULL, log_serveur_channel = NULL WHERE guild_id = ?", 
-        args: [gid] 
+      await db.execute({
+        sql: "UPDATE guild_settings SET log_messages_channel = NULL, log_membres_channel = NULL, log_moderation_channel = NULL, log_serveur_channel = NULL WHERE guild_id = ?",
+        args: [gid]
       });
       await interaction.reply({ embeds: [successEmbed("✅ Logs réinitialisés !")], ephemeral: true });
     }

@@ -3,7 +3,7 @@ const {
   ButtonBuilder, ButtonStyle, RoleSelectMenuBuilder, StringSelectMenuBuilder,
   ChannelType
 } = require("discord.js");
-const { default: db } = require("../../database/db.js");
+const db = require("../../database/db.js").default || require("../../database/db.js");
 const { successEmbed, errorEmbed, infoEmbed, COLORS } = require("../../utils/helpers.js");
 
 module.exports = {
@@ -66,16 +66,16 @@ module.exports = {
         const role = interaction.options.getRole("role");
         const type = interaction.options.getString("type") || "all";
         if (role.managed) return interaction.reply({ embeds: [errorEmbed("Ce rôle est géré par une intégration.")], ephemeral: true });
-        await db.exec({ sql: "INSERT OR REPLACE INTO autoroles (guild_id, role_id, type) VALUES (?, ?, ?)", args: [guild.id, role.id, type] });
+        await db.execute({ sql: "INSERT OR REPLACE INTO autoroles (guild_id, role_id, type) VALUES (?, ?, ?)", args: [guild.id, role.id, type] });
         return interaction.reply({ embeds: [successEmbed("✅ Autorole ajouté !", `${role} sera donné automatiquement aux **${type === "all" ? "tous" : type === "human" ? "humains" : "bots"}**.`)], ephemeral: true });
       }
       if (sub === "remove") {
         const role = interaction.options.getRole("role");
-        await db.exec({ sql: "DELETE FROM autoroles WHERE guild_id = ? AND role_id = ?", args: [guild.id, role.id] });
+        await db.execute({ sql: "DELETE FROM autoroles WHERE guild_id = ? AND role_id = ?", args: [guild.id, role.id] });
         return interaction.reply({ embeds: [successEmbed("✅ Autorole retiré !", `${role} ne sera plus donné automatiquement.`)], ephemeral: true });
       }
       if (sub === "list") {
-        const rowsRes = await db.exec({ sql: "SELECT * FROM autoroles WHERE guild_id = ?", args: [guild.id] });
+        const rowsRes = await db.execute({ sql: "SELECT * FROM autoroles WHERE guild_id = ?", args: [guild.id] });
         const rows = rowsRes.rows;
         if (!rows.length) return interaction.reply({ embeds: [infoEmbed("Aucun autorole configuré.")], ephemeral: true });
         const desc = rows.map(r => `<@&${r.role_id}> — \`${r.type}\``).join("\n");
@@ -93,7 +93,7 @@ module.exports = {
         const embed = new EmbedBuilder().setColor(0x4e2bd9).setTitle(titre).setDescription(description);
         const msg = await salon.send({ embeds: [embed] });
 
-        await db.exec({ sql: "INSERT INTO reactionroles (guild_id, message_id, channel_id, mode) VALUES (?, ?, ?, ?)", args: [guild.id, msg.id, salon.id, mode] });
+        await db.execute({ sql: "INSERT INTO reactionroles (guild_id, message_id, channel_id, mode) VALUES (?, ?, ?, ?)", args: [guild.id, msg.id, salon.id, mode] });
         return interaction.reply({ embeds: [successEmbed("✅ Message créé !", `Message de rôles créé dans ${salon}.\nID : \`${msg.id}\`\nUtilise \`/roles reactionrole add\` pour ajouter des rôles.`)], ephemeral: true });
       }
 
@@ -103,11 +103,11 @@ module.exports = {
         const label = interaction.options.getString("label") || role.name;
         const emoji = interaction.options.getString("emoji") || null;
 
-        const rrRowRes = await db.exec({ sql: "SELECT * FROM reactionroles WHERE guild_id = ? AND message_id = ?", args: [guild.id, messageId] });
+        const rrRowRes = await db.execute({ sql: "SELECT * FROM reactionroles WHERE guild_id = ? AND message_id = ?", args: [guild.id, messageId] });
         const rrRow = rrRowRes.rows[0];
         if (!rrRow) return interaction.reply({ embeds: [errorEmbed("Message de rôles introuvable.")], ephemeral: true });
 
-        await db.exec({ sql: "INSERT OR REPLACE INTO reactionrole_items (message_id, role_id, label, emoji) VALUES (?, ?, ?, ?)", args: [messageId, role.id, label, emoji] });
+        await db.execute({ sql: "INSERT OR REPLACE INTO reactionrole_items (message_id, role_id, label, emoji) VALUES (?, ?, ?, ?)", args: [messageId, role.id, label, emoji] });
 
         await refreshReactionRoleMessage(guild, rrRow);
         return interaction.reply({ embeds: [successEmbed("✅ Rôle ajouté !", `${role} ajouté au message de rôles.`)], ephemeral: true });
@@ -116,17 +116,17 @@ module.exports = {
       if (sub === "remove") {
         const messageId = interaction.options.getString("message_id");
         const role = interaction.options.getRole("role");
-        const rrRowRes = await db.exec({ sql: "SELECT * FROM reactionroles WHERE guild_id = ? AND message_id = ?", args: [guild.id, messageId] });
+        const rrRowRes = await db.execute({ sql: "SELECT * FROM reactionroles WHERE guild_id = ? AND message_id = ?", args: [guild.id, messageId] });
         const rrRow = rrRowRes.rows[0];
         if (!rrRow) return interaction.reply({ embeds: [errorEmbed("Message introuvable.")], ephemeral: true });
-        await db.exec({ sql: "DELETE FROM reactionrole_items WHERE message_id = ? AND role_id = ?", args: [messageId, role.id] });
+        await db.execute({ sql: "DELETE FROM reactionrole_items WHERE message_id = ? AND role_id = ?", args: [messageId, role.id] });
         await refreshReactionRoleMessage(guild, rrRow);
         return interaction.reply({ embeds: [successEmbed("✅ Rôle retiré du message.")], ephemeral: true });
       }
 
       if (sub === "delete") {
         const messageId = interaction.options.getString("message_id");
-        const rrRowRes = await db.exec({ sql: "SELECT * FROM reactionroles WHERE guild_id = ? AND message_id = ?", args: [guild.id, messageId] });
+        const rrRowRes = await db.execute({ sql: "SELECT * FROM reactionroles WHERE guild_id = ? AND message_id = ?", args: [guild.id, messageId] });
         const rrRow = rrRowRes.rows[0];
         if (!rrRow) return interaction.reply({ embeds: [errorEmbed("Message introuvable.")], ephemeral: true });
         try {
@@ -134,8 +134,8 @@ module.exports = {
           const msg = await channel.messages.fetch(messageId);
           await msg.delete();
         } catch {}
-        await db.exec({ sql: "DELETE FROM reactionrole_items WHERE message_id = ?", args: [messageId] });
-        await db.exec({ sql: "DELETE FROM reactionroles WHERE message_id = ?", args: [messageId] });
+        await db.execute({ sql: "DELETE FROM reactionrole_items WHERE message_id = ?", args: [messageId] });
+        await db.execute({ sql: "DELETE FROM reactionroles WHERE message_id = ?", args: [messageId] });
         return interaction.reply({ embeds: [successEmbed("✅ Message de rôles supprimé.")], ephemeral: true });
       }
     }
@@ -143,14 +143,14 @@ module.exports = {
     if (group === "mute") {
       if (sub === "set") {
         const role = interaction.options.getRole("role");
-        await db.exec({ sql: "INSERT OR REPLACE INTO guild_settings (guild_id, mute_role) VALUES (?, ?)", args: [guild.id, role.id] });
+        await db.execute({ sql: "INSERT OR REPLACE INTO guild_settings (guild_id, mute_role) VALUES (?, ?)", args: [guild.id, role.id] });
         return interaction.reply({ embeds: [successEmbed("✅ Rôle muet défini !", `${role} sera utilisé pour les mutes.`)], ephemeral: true });
       }
       if (sub === "give") {
         const member = await guild.members.fetch(interaction.options.getUser("membre").id);
         const raison = interaction.options.getString("raison") || "Aucune raison";
         const duree = interaction.options.getInteger("duree") || 0;
-        const rowRes = await db.exec({ sql: "SELECT mute_role FROM guild_settings WHERE guild_id = ?", args: [guild.id] });
+        const rowRes = await db.execute({ sql: "SELECT mute_role FROM guild_settings WHERE guild_id = ?", args: [guild.id] });
         const row = rowRes.rows[0];
         if (!row || !row.mute_role) return interaction.reply({ embeds: [errorEmbed("Aucun rôle muet configuré. Utilise `/roles mute set`.")], ephemeral: true });
         await member.roles.add(row.mute_role, raison);
@@ -163,7 +163,7 @@ module.exports = {
       }
       if (sub === "remove") {
         const member = await guild.members.fetch(interaction.options.getUser("membre").id);
-        const rowRes = await db.exec({ sql: "SELECT mute_role FROM guild_settings WHERE guild_id = ?", args: [guild.id] });
+        const rowRes = await db.execute({ sql: "SELECT mute_role FROM guild_settings WHERE guild_id = ?", args: [guild.id] });
         const row = rowRes.rows[0];
         if (!row || !row.mute_role) return interaction.reply({ embeds: [errorEmbed("Aucun rôle muet configuré.")], ephemeral: true });
         await member.roles.remove(row.mute_role, "Unmute");
@@ -206,9 +206,10 @@ module.exports = {
 
 async function refreshReactionRoleMessage(guild, rrRow) {
   try {
+    const db = require("../../database/db.js").default || require("../../database/db.js");
     const channel = await guild.channels.fetch(rrRow.channel_id);
     const msg = await channel.messages.fetch(rrRow.message_id);
-    const itemsRes = await db.exec({ sql: "SELECT * FROM reactionrole_items WHERE message_id = ?", args: [rrRow.message_id] });
+    const itemsRes = await db.execute({ sql: "SELECT * FROM reactionrole_items WHERE message_id = ?", args: [rrRow.message_id] });
     const items = itemsRes.rows;
     if (!items.length) { await msg.edit({ components: [] }); return; }
 

@@ -1,13 +1,8 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+const { createClient } = require("@libsql/client");
 
-const dbDir = path.join(__dirname, '../../data');
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-const dbPath = path.join(dbDir, 'bot.db');
-const db = new Database(dbPath);
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
 module.exports = db;

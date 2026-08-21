@@ -1,17 +1,20 @@
 const { AuditLogEvent, EmbedBuilder } = require("discord.js");
-const { db } = require("../database/db.js");
+const db = require("../database/db.js").default || require("../database/db.js");
 
 const WINDOW = 10_000;
 const actionLog = new Map();
 
-function getSettings(guildId) {
-  return db.prepare("SELECT * FROM guild_settings WHERE guild_id = ?").get(guildId);
+async function getSettings(guildId) {
+  const res = await db.execute({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [guildId] });
+  return res.rows[0] || null;
 }
 
-function logAlert(guildId, userId, type, detail, action) {
+async function logAlert(guildId, userId, type, detail, action) {
   try {
-    db.prepare("INSERT INTO antinuke_alerts (guild_id, user_id, type, detail, action) VALUES (?,?,?,?,?)")
-      .run(guildId, userId, type, detail, action);
+    await db.execute({
+      sql: "INSERT INTO antinuke_alerts (guild_id, user_id, type, detail, action) VALUES (?,?,?,?,?)",
+      args: [guildId, userId, type, detail, action]
+    });
   } catch (_) {}
 }
 
@@ -70,7 +73,7 @@ async function getAuditExecutor(guild, auditEvent, targetId = null) {
 
 async function checkChannelDelete(channel) {
   const { guild } = channel;
-  const s = getSettings(guild.id);
+  const s = await getSettings(guild.id);
   if (!s?.antinuke_enabled || !s?.an_delchan) return;
   const executorId = await getAuditExecutor(guild, AuditLogEvent.ChannelDelete, channel.id);
   if (!executorId || executorId === guild.client.user.id || executorId === guild.ownerId) return;
@@ -78,13 +81,13 @@ async function checkChannelDelete(channel) {
   if (count < (s.an_chan_thresh || 2)) return;
   const action = s.an_action || "ban";
   await punish(guild, executorId, action, s.an_punish_role, "Anti-Nuke: suppression massive de salons");
-  logAlert(guild.id, executorId, "delchan", `${count} salons supprimés en ${WINDOW/1000}s`, action);
+  await logAlert(guild.id, executorId, "delchan", `${count} salons supprimés en ${WINDOW/1000}s`, action);
   await sendAlert(guild, s, "MASS CHANNEL DELETE", executorId, `\`${count}\` salons supprimés en \`${WINDOW/1000}s\``, action);
 }
 
 async function checkRoleDelete(role) {
   const { guild } = role;
-  const s = getSettings(guild.id);
+  const s = await getSettings(guild.id);
   if (!s?.antinuke_enabled || !s?.an_delrole) return;
   const executorId = await getAuditExecutor(guild, AuditLogEvent.RoleDelete, role.id);
   if (!executorId || executorId === guild.client.user.id || executorId === guild.ownerId) return;
@@ -92,12 +95,12 @@ async function checkRoleDelete(role) {
   if (count < (s.an_chan_thresh || 2)) return;
   const action = s.an_action || "ban";
   await punish(guild, executorId, action, s.an_punish_role, "Anti-Nuke: suppression massive de rôles");
-  logAlert(guild.id, executorId, "delrole", `${count} rôles supprimés en ${WINDOW/1000}s`, action);
+  await logAlert(guild.id, executorId, "delrole", `${count} rôles supprimés en ${WINDOW/1000}s`, action);
   await sendAlert(guild, s, "MASS ROLE DELETE", executorId, `\`${count}\` rôles supprimés en \`${WINDOW/1000}s\``, action);
 }
 
 async function checkMemberBan(guild, user) {
-  const s = getSettings(guild.id);
+  const s = await getSettings(guild.id);
   if (!s?.antinuke_enabled || !s?.an_massban) return;
   const executorId = await getAuditExecutor(guild, AuditLogEvent.MemberBanAdd, user.id);
   if (!executorId || executorId === guild.client.user.id || executorId === guild.ownerId) return;
@@ -105,13 +108,13 @@ async function checkMemberBan(guild, user) {
   if (count < (s.an_ban_thresh || 3)) return;
   const action = s.an_action || "ban";
   await punish(guild, executorId, action, s.an_punish_role, "Anti-Nuke: ban massif");
-  logAlert(guild.id, executorId, "massban", `${count} bans en ${WINDOW/1000}s`, action);
+  await logAlert(guild.id, executorId, "massban", `${count} bans en ${WINDOW/1000}s`, action);
   await sendAlert(guild, s, "MASS BAN", executorId, `\`${count}\` membres bannis en \`${WINDOW/1000}s\``, action);
 }
 
 async function checkMemberKick(member) {
   const { guild } = member;
-  const s = getSettings(guild.id);
+  const s = await getSettings(guild.id);
   if (!s?.antinuke_enabled || !s?.an_masskick) return;
   const executorId = await getAuditExecutor(guild, AuditLogEvent.MemberKick, member.id);
   if (!executorId || executorId === guild.client.user.id || executorId === guild.ownerId) return;
@@ -123,13 +126,13 @@ async function checkMemberKick(member) {
   if (count < (s.an_kick_thresh || 5)) return;
   const action = s.an_action || "ban";
   await punish(guild, executorId, action, s.an_punish_role, "Anti-Nuke: kick massif");
-  logAlert(guild.id, executorId, "masskick", `${count} kicks en ${WINDOW/1000}s`, action);
+  await logAlert(guild.id, executorId, "masskick", `${count} kicks en ${WINDOW/1000}s`, action);
   await sendAlert(guild, s, "MASS KICK", executorId, `\`${count}\` membres expulsés en \`${WINDOW/1000}s\``, action);
 }
 
 async function checkWebhookCreate(channel) {
   const { guild } = channel;
-  const s = getSettings(guild.id);
+  const s = await getSettings(guild.id);
   if (!s?.antinuke_enabled || !s?.an_webhook) return;
   const executorId = await getAuditExecutor(guild, AuditLogEvent.WebhookCreate);
   if (!executorId || executorId === guild.client.user.id || executorId === guild.ownerId) return;
@@ -137,7 +140,7 @@ async function checkWebhookCreate(channel) {
   if (count < 2) return;
   const action = s.an_action || "ban";
   await punish(guild, executorId, action, s.an_punish_role, "Anti-Nuke: webhooks suspects");
-  logAlert(guild.id, executorId, "webhook", `${count} webhooks créés en ${WINDOW/1000}s`, action);
+  await logAlert(guild.id, executorId, "webhook", `${count} webhooks créés en ${WINDOW/1000}s`, action);
   await sendAlert(guild, s, "WEBHOOK SPAM", executorId, `\`${count}\` webhooks créés en \`${WINDOW/1000}s\``, action);
 }
 

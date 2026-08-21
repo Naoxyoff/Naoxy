@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
-const db = require("../../database/db.js");
+const db = require("../../database/db.js").default || require("../../database/db.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,11 +16,11 @@ module.exports = {
     const channel = interaction.options.getChannel("salon");
     const gid = interaction.guildId;
 
-    const existing = db.prepare("SELECT guild_id FROM guild_settings WHERE guild_id = ?").get(gid);
-    if (existing) {
-      db.prepare("UPDATE guild_settings SET invite_log_channel = ? WHERE guild_id = ?").run(channel.id, gid);
+    const existing = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
+    if (existing.rows.length > 0) {
+      await db.execute({ sql: "UPDATE guild_settings SET invite_log_channel = ? WHERE guild_id = ?", args: [channel.id, gid] });
     } else {
-      db.prepare("INSERT INTO guild_settings (guild_id, invite_log_channel) VALUES (?, ?)").run(gid, channel.id);
+      await db.execute({ sql: "INSERT INTO guild_settings (guild_id, invite_log_channel) VALUES (?, ?)", args: [gid, channel.id] });
     }
 
     const embed = new EmbedBuilder()

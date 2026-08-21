@@ -1,12 +1,9 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, StringSelectMenuBuilder } = require("discord.js");
-const { default: db } = require("../database/db.js");
+const db = require("../database/db.js").default || require("../database/db.js");
 
 async function handleTicketButton(interaction) {
   const gid = interaction.guildId;
-  const panelsRes = await db.exec({
-    sql: 'SELECT * FROM ticket_panels WHERE guild_id = ?',
-    args: [gid]
-  });
+  const panelsRes = await db.execute({ sql: 'SELECT * FROM ticket_panels WHERE guild_id = ?', args: [gid] });
   const panels = panelsRes.rows;
   if (!panels.length) return interaction.reply({ content: '❌ Aucun panel configuré.', flags: 64 });
 
@@ -44,10 +41,7 @@ async function handleTicketButton(interaction) {
 async function handleTicketSelect(interaction) {
   const gid = interaction.guildId;
   const panelId = interaction.values[0];
-  const panelRes = await db.exec({
-    sql: 'SELECT * FROM ticket_panels WHERE id = ? AND guild_id = ?',
-    args: [panelId, gid]
-  });
+  const panelRes = await db.execute({ sql: 'SELECT * FROM ticket_panels WHERE id = ? AND guild_id = ?', args: [panelId, gid] });
   const panel = panelRes.rows[0];
   if (!panel) return interaction.reply({ content: '❌ Panel introuvable.', flags: 64 });
   await createTicket(interaction, panel);
@@ -57,7 +51,7 @@ async function createTicket(interaction, panel) {
   const guild = interaction.guild;
   const gid = guild.id;
 
-  const existingRes = await db.exec({
+  const existingRes = await db.execute({
     sql: "SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open'",
     args: [gid, interaction.user.id]
   });
@@ -66,10 +60,7 @@ async function createTicket(interaction, panel) {
   if (existing) {
     const existingChannel = guild.channels.cache.get(existing.channel_id);
     if (!existingChannel) {
-      await db.exec({
-        sql: "UPDATE tickets SET status = 'closed' WHERE id = ?",
-        args: [existing.id]
-      });
+      await db.execute({ sql: "UPDATE tickets SET status = 'closed' WHERE id = ?", args: [existing.id] });
     } else {
       return interaction.reply({ content: `❌ Tu as déjà un ticket ouvert : <#${existing.channel_id}>`, flags: 64 });
     }
@@ -77,12 +68,9 @@ async function createTicket(interaction, panel) {
 
   await interaction.deferReply({ flags: 64 });
 
-  const countRes = await db.exec({
-    sql: "SELECT COUNT(*) as c FROM tickets WHERE guild_id = ?",
-    args: [gid]
-  });
-  const count = (countRes.rows[0]?.c ?? 0) + 1;
-  
+  const countRes = await db.execute({ sql: "SELECT COUNT(*) as c FROM tickets WHERE guild_id = ?", args: [gid] });
+  const count = (Number(countRes.rows[0]?.c) || 0) + 1;
+
   const nameFormat = panel.ticket_open_name || 'ticket-{count}';
   const channelName = nameFormat
     .replace('{count}', String(count).padStart(panel.ticket_padding || 4, '0'))
@@ -106,7 +94,7 @@ async function createTicket(interaction, panel) {
     reason: `Ticket ouvert par ${interaction.user.tag}`,
   });
 
-  await db.exec({
+  await db.execute({
     sql: "INSERT INTO tickets (guild_id, channel_id, user_id, subject, status) VALUES (?, ?, ?, ?, 'open')",
     args: [gid, channel.id, interaction.user.id, panel.name || 'Support']
   });
@@ -141,25 +129,15 @@ async function createTicket(interaction, panel) {
 }
 
 async function closeTicket(interaction) {
-  const ticketRes = await db.exec({
-    sql: "SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'",
-    args: [interaction.channelId]
-  });
+  const ticketRes = await db.execute({ sql: "SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'", args: [interaction.channelId] });
   const ticket = ticketRes.rows[0];
   if (!ticket) return interaction.reply({ content: "❌ Ce salon n'est pas un ticket ouvert.", flags: 64 });
 
-  await db.exec({
-    sql: "UPDATE tickets SET status = 'closed' WHERE channel_id = ?",
-    args: [interaction.channelId]
-  });
+  await db.execute({ sql: "UPDATE tickets SET status = 'closed' WHERE channel_id = ?", args: [interaction.channelId] });
 
-  // Log si configuré
-  const panelRes = await db.exec({
-    sql: "SELECT * FROM ticket_panels WHERE guild_id = ?",
-    args: [interaction.guildId]
-  });
+  const panelRes = await db.execute({ sql: "SELECT * FROM ticket_panels WHERE guild_id = ?", args: [interaction.guildId] });
   const panel = panelRes.rows[0];
-  
+
   if (panel?.log_channel_id) {
     const logCh = interaction.guild.channels.cache.get(panel.log_channel_id);
     if (logCh) {

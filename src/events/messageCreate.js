@@ -1,7 +1,23 @@
 const { Events, EmbedBuilder } = require("discord.js");
-const { db, getGuildSettings } = require("../database/db.js");
+const db = require("../database/db.js").default || require("../database/db.js");
 const { checkSpam, checkMentions } = require("../handlers/protection.js");
 const { COLORS } = require("../utils/helpers.js");
+
+async function getGuildSettings(gid) {
+  const res = await db.execute({ sql: "SELECT * FROM guild_settings WHERE guild_id = ?", args: [gid] });
+  return res.rows[0] || {};
+}
+
+async function getMemberLevel(gid, uid) {
+  const res = await db.execute({ sql: "SELECT * FROM member_levels WHERE guild_id = ? AND user_id = ?", args: [gid, uid] });
+  if (res.rows[0]) return res.rows[0];
+  await db.execute({ sql: "INSERT INTO member_levels (guild_id, user_id, xp, messages, last_xp) VALUES (?, ?, 0, 0, 0)", args: [gid, uid] });
+  return { guild_id: gid, user_id: uid, xp: 0, messages: 0, last_xp: 0 };
+}
+
+function levelFromXp(xp) {
+  return Math.floor(0.1 * Math.sqrt(xp || 0));
+}
 
 const aiMemoryMap = new Map();
 function getAiHistory(channelId) {
@@ -32,14 +48,13 @@ RÈGLES ABSOLUES :
 - Être naturel, amical et conversationnel. Pas robotique.
 - Ne jamais prétendre être un humain.
 - Ne jamais inventer d'informations (météo, actualités, etc.) que tu n'as pas.
-- Pour mentionner l'utilisateur, utilise son mention Discord (fourni dans le message).
+- Pour mentionner l'utilisateur, utilise sa mention Discord (fourni dans le message).
 ${customPrompt ? `\nInstructions supplémentaires :\n${customPrompt}` : ""}`;
 }
 
 module.exports = {
   name: Events.MessageCreate,
   async execute(message) {
-    // Bloquage direct et réponse courte
     const testMsg = message.content.toLowerCase();
     if (message.mentions.has(message.client.user) && (testMsg.includes("créé par qui") || testMsg.includes("cree par qui") || testMsg.includes("qui t'a créé") || testMsg.includes("qui t a cree") || testMsg.includes("ton créateur") || testMsg.includes("ton createur"))) {
       await message.reply("Mon créateur c'est @naoxy.off !");
@@ -47,16 +62,19 @@ module.exports = {
     }
     if (message.author.bot || !message.guildId) return;
     const gid = message.guildId, uid = message.author.id;
-    const settings = getGuildSettings(gid);
+    const settings = await getGuildSettings(gid);
     const now = Math.floor(Date.now() / 1000);
 
     if (settings.levels_enabled) {
-      const data = getMemberLevel(gid, uid);
+      const data = await getMemberLevel(gid, uid);
       if (now - data.last_xp >= 60) {
         const xpGain = Math.floor(Math.random() * 15) + 10;
         const oldLevel = levelFromXp(data.xp);
         const newLevel = levelFromXp(data.xp + xpGain);
-        db.prepare("UPDATE member_levels SET xp = xp + ?, messages = messages + 1, last_xp = ? WHERE guild_id = ? AND user_id = ?").run(xpGain, now, gid, uid);
+        await db.execute({
+          sql: "UPDATE member_levels SET xp = xp + ?, messages = messages + 1, last_xp = ? WHERE guild_id = ? AND user_id = ?",
+          args: [xpGain, now, gid, uid]
+        });
         if (newLevel > oldLevel) {
           const msg = (settings.levels_message ?? "{user} vient de passer au niveau **{level}** !").replace("{user}", message.author.toString()).replace("{level}", `${newLevel}`).replace("{guild}", message.guild?.name ?? "");
           const ch = settings.levels_channel ? message.guild?.channels.cache.get(settings.levels_channel) : message.channel;
@@ -68,7 +86,8 @@ module.exports = {
     const prefix = settings.prefix ?? "!";
     if (message.content.startsWith(prefix)) {
       const cmdName = message.content.slice(prefix.length).split(" ")[0].toLowerCase();
-      const cmd = db.prepare("SELECT * FROM custom_commands WHERE guild_id = ? AND name = ?").get(gid, cmdName);
+      const cmdRes = await db.execute({ sql: "SELECT * FROM custom_commands WHERE guild_id = ? AND name = ?", args: [gid, cmdName] });
+      const cmd = cmdRes.rows[0];
       if (cmd) await message.channel.send(cmd.response.replace("{user}", message.author.toString()));
     }
 
@@ -91,28 +110,28 @@ module.exports = {
       }
     }
 
-    const countingGame = db.prepare("SELECT * FROM counting WHERE guild_id = ?").get(gid);
+    const countingRes = await db.execute({ sql: "SELECT * FROM counting WHERE guild_id = ?", args: [gid] });
+    const countingGame = countingRes.rows[0];
     if (countingGame?.channel_id === message.channelId) {
       const num = parseInt(message.content.trim());
       if (isNaN(num) || num !== countingGame.current_number + 1) {
         await message.react("❌").catch(() => {});
         if (!isNaN(num)) {
           await message.channel.send({ embeds: [new EmbedBuilder().setColor(COLORS.error).setDescription(`❌ ${message.author} a cassé la séquence ! Recommencez depuis **1** !`)] });
-          db.prepare("UPDATE counting SET current_number = 0, last_user_id = NULL WHERE guild_id = ?").run(gid);
+          await db.execute({ sql: "UPDATE counting SET current_number = 0, last_user_id = NULL WHERE guild_id = ?", args: [gid] });
         }
       } else if (countingGame.last_user_id === uid) {
         await message.react("⚠️").catch(() => {});
       } else {
         await message.react("✅").catch(() => {});
-        db.prepare("UPDATE counting SET current_number = ?, last_user_id = ?, record = MAX(record, ?) WHERE guild_id = ?").run(num, uid, num, gid);
+        await db.execute({ sql: "UPDATE counting SET current_number = ?, last_user_id = ?, record = MAX(record, ?) WHERE guild_id = ?", args: [num, uid, num, gid] });
       }
     }
 
     if (settings.ai_enabled && message.mentions.has(message.client.user)) {
       if (settings.ai_channel && settings.ai_channel !== message.channelId) return;
       const userMsg = message.content.replace(/<@!?\d+>/g, "").trim();
-      
-      // Réponse simple et efficace directe
+
       const lowerMsg = userMsg.toLowerCase();
       if (lowerMsg.includes("créé par qui") || lowerMsg.includes("cree par qui") || lowerMsg.includes("qui t'a créé") || lowerMsg.includes("qui t a cree") || lowerMsg.includes("ton createur") || lowerMsg.includes("ton créateur")) {
         await message.reply("Mon créateur c'est @naoxy.off !");
@@ -152,9 +171,7 @@ module.exports = {
           await message.reply(chunks[0]);
           for (let i = 1; i < chunks.length; i++) await message.channel.send(chunks[i]);
         } else {
-          
-            await message.reply(reply);
-          
+          await message.reply(reply);
         }
       } catch (e) {
         console.error("[IA]", e.response?.data?.error?.message || e.message);

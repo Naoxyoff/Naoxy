@@ -1,13 +1,12 @@
 process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', err));
 process.on('uncaughtException', (err) => console.error('[Exception non gérée]', err));
 
-require('../update-db.js');
+require("dotenv").config();
 const { initDatabase } = require('./database/init.js'); // Import de l'initialisation Turso
 const express = require('express');
 const path = require('path');
 const { Client, GatewayIntentBits, Partials, Collection, REST, Routes } = require("discord.js");
 const fs = require("fs");
-require("dotenv").config();
 
 const client = new Client({
   intents: [
@@ -72,7 +71,6 @@ client.once("clientReady", async () => {
 
   const rest = new REST().setToken(TOKEN);
   try {
-    
     await rest.put(Routes.applicationCommands(CLIENT_ID), { body: slashCommandsData });
     console.log(`✅ ${slashCommandsData.length} slash commands enregistrées globalement.`);
   } catch (e) { console.error(e); }
@@ -105,25 +103,18 @@ client.on("guildCreate", async (guild) => {
   }
 });
 
-
 // Fonction principale pour démarrer le bot et initialiser Turso
 async function startBot() {
   try {
-    
     await initDatabase();
 
     console.log('✅ Connexion à Discord...');
-    await client.login(process.env.DISCORD_TOKEN);
+    await client.login(TOKEN);
     console.log('✅ Connecté à Discord avec succès !');
   } catch (err) {
     console.error('❌ ERREUR CRITIQUE DÉMARRAGE:', err.message);
+    process.exit(1);
   }
 }
 
 startBot();
-
-
-client.login(process.env.DISCORD_TOKEN).catch(e => console.error('ERREUR EXACTE:', e));
-
-
-client.login(process.env.DISCORD_TOKEN).catch(e => console.error('❌ ERREUR LOGIN RENDER :', e.message));

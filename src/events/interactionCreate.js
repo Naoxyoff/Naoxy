@@ -1,6 +1,6 @@
 const { Events, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
 const { handleTicketButton, handleTicketSelect, closeTicket } = require("../handlers/ticketHandler.js");
-const { default: db, getGuildSettings } = require("../database/db.js");
+const db = require("../database/db.js").default || require("../database/db.js");
 const { COLORS, successEmbed, errorEmbed } = require("../utils/helpers.js");
 
 module.exports = {
@@ -15,9 +15,12 @@ module.exports = {
       return;
     }
 
-    const gid = interaction.guildId;
-    if (gid) {
-      await getGuildSettings(gid);
+    // ── Autocomplete ──
+    if (interaction.isAutocomplete()) {
+      const command = interaction.client.commands.get(interaction.commandName);
+      if (!command?.autocomplete) return;
+      try { await command.autocomplete(interaction); } catch (e) { console.error(e); }
+      return;
     }
 
     // ── Select Menu (Tickets) ──
@@ -35,12 +38,12 @@ module.exports = {
       }
 
       if (interaction.customId === "ticket_close_btn") {
-        const ticketRes = await db.exec({
+        const ticketRes = await db.execute({
           sql: "SELECT * FROM tickets WHERE channel_id = ? AND status = 'open'",
           args: [interaction.channelId]
         });
         const ticket = ticketRes.rows[0];
-        
+
         if (!ticket) return interaction.reply({ embeds: [errorEmbed("Ce salon n'est pas un ticket ouvert.")], flags: 64 });
 
         const closeBtn = new ButtonBuilder().setCustomId("ticket_confirm_close").setLabel("✅ Confirmer").setStyle(ButtonStyle.Danger);
@@ -80,7 +83,7 @@ module.exports = {
 
       // ── Giveaway ──
       if (interaction.customId === "giveaway_join") {
-        const gawRes = await db.exec({
+        const gawRes = await db.execute({
           sql: "SELECT * FROM giveaways WHERE message_id = ? AND ended = 0",
           args: [interaction.message.id]
         });
@@ -92,12 +95,12 @@ module.exports = {
           return interaction.reply({ embeds: [errorEmbed("Vous participez déjà !")], flags: 64 });
         }
         entries.push(interaction.user.id);
-        
-        await db.exec({
+
+        await db.execute({
           sql: "UPDATE giveaways SET entries = ? WHERE id = ?",
           args: [JSON.stringify(entries), gaw.id]
         });
-        
+
         await interaction.reply({ embeds: [successEmbed("🎉 Participation enregistrée !", `Vous participez au giveaway **${gaw.prize}** !`)], flags: 64 });
       }
     }

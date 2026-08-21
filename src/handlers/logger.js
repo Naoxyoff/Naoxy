@@ -1,14 +1,15 @@
 const { EmbedBuilder } = require('discord.js');
 const db = require('../database/db.js').default || require('../database/db.js');
 
-function getSettings(guildId) {
-  return db.prepare('SELECT * FROM guild_settings WHERE guild_id = ?').get(guildId);
+async function getSettings(guildId) {
+  const res = await db.execute({ sql: 'SELECT * FROM guild_settings WHERE guild_id = ?', args: [guildId] });
+  return res.rows[0] || null;
 }
 
-function logMessageUpdate(oldMessage, newMessage) {
+async function logMessageUpdate(oldMessage, newMessage) {
   if (!oldMessage.guild || oldMessage.author?.bot) return;
   if (oldMessage.content === newMessage.content) return;
-  const settings = getSettings(oldMessage.guild.id);
+  const settings = await getSettings(oldMessage.guild.id);
   const channelId = settings?.log_messages_channel;
   if (!channelId) return;
   const ch = oldMessage.guild.channels.cache.get(channelId);
@@ -27,9 +28,9 @@ function logMessageUpdate(oldMessage, newMessage) {
   ch.send({ embeds: [embed] }).catch(() => {});
 }
 
-function logMessageDelete(message) {
+async function logMessageDelete(message) {
   if (!message.guild || message.author?.bot) return;
-  const settings = getSettings(message.guild.id);
+  const settings = await getSettings(message.guild.id);
   const channelId = settings?.log_messages_channel;
   if (!channelId) return;
   const ch = message.guild.channels.cache.get(channelId);
@@ -44,9 +45,9 @@ function logMessageDelete(message) {
   ch.send({ embeds: [embed] }).catch(() => {});
 }
 
-function logChannelCreate(channel) {
+async function logChannelCreate(channel) {
   if (!channel.guild) return;
-  const settings = getSettings(channel.guild.id);
+  const settings = await getSettings(channel.guild.id);
   const channelId = settings?.log_serveur_channel;
   if (!channelId) return;
   const ch = channel.guild.channels.cache.get(channelId);
@@ -58,9 +59,9 @@ function logChannelCreate(channel) {
     .setTimestamp()] }).catch(() => {});
 }
 
-function logChannelDelete(channel) {
+async function logChannelDelete(channel) {
   if (!channel.guild) return;
-  const settings = getSettings(channel.guild.id);
+  const settings = await getSettings(channel.guild.id);
   const channelId = settings?.log_serveur_channel;
   if (!channelId) return;
   const ch = channel.guild.channels.cache.get(channelId);
@@ -72,9 +73,24 @@ function logChannelDelete(channel) {
     .setTimestamp()] }).catch(() => {});
 }
 
+async function logRoleDelete(role) {
+  if (!role.guild) return;
+  const settings = await getSettings(role.guild.id);
+  const channelId = settings?.log_serveur_channel;
+  if (!channelId) return;
+  const ch = role.guild.channels.cache.get(channelId);
+  if (!ch) return;
+
+  ch.send({ embeds: [new EmbedBuilder()
+    .setColor(0xef4444)
+    .setDescription(`🗑️ Rôle supprimé : **${role.name}**`)
+    .setTimestamp()] }).catch(() => {});
+}
+
 module.exports = {
   logChannelCreate,
   logChannelDelete,
   logMessageUpdate,
-  logMessageDelete
+  logMessageDelete,
+  logRoleDelete
 };

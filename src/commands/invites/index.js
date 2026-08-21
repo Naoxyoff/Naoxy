@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const db = require("../../database/db.js");
+const db = require("../../database/db.js").default || require("../../database/db.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -15,8 +15,8 @@ module.exports = {
 
     if (sub === "voir") {
       const user = interaction.options.getUser("membre") || interaction.user;
-      const row = db.prepare("SELECT count FROM invite_stats WHERE guild_id = ? AND inviter_id = ?").get(gid, user.id);
-      const count = row?.count || 0;
+      const res = await db.execute({ sql: "SELECT count FROM invite_stats WHERE guild_id = ? AND inviter_id = ?", args: [gid, user.id] });
+      const count = res.rows[0]?.count || 0;
 
       await interaction.reply({
         embeds: [new EmbedBuilder()
@@ -26,7 +26,8 @@ module.exports = {
       });
 
     } else if (sub === "classement") {
-      const rows = db.prepare("SELECT * FROM invite_stats WHERE guild_id = ? ORDER BY count DESC LIMIT 10").all(gid);
+      const res = await db.execute({ sql: "SELECT * FROM invite_stats WHERE guild_id = ? ORDER BY count DESC LIMIT 10", args: [gid] });
+      const rows = res.rows;
       if (!rows.length) {
         return interaction.reply({ embeds: [new EmbedBuilder().setColor('#7c3aed').setDescription("Aucune invitation enregistrée pour l'instant.")], ephemeral: true });
       }

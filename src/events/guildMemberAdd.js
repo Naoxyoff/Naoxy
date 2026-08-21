@@ -15,7 +15,11 @@ module.exports = {
     setTimeout(() => recentlyProcessed.delete(key), 10000);
 
     try {
-      const settings = db.prepare("SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?").get(member.guild.id);
+      const res = await db.execute({
+        sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
+        args: [member.guild.id]
+      });
+      const settings = res.rows[0];
       if (!settings || !settings.welcome_channel) return;
 
       const ch = member.guild.channels.cache.get(settings.welcome_channel);
