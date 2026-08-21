@@ -187,7 +187,17 @@ module.exports = {
         }
         addToHistory(message.channelId, "assistant", reply);
         if (reply.length > 1990) {
-          const chunks = reply.match(/.{1,1990}/gs);
+          const chunks = [];
+          let remaining = reply;
+          while (remaining.length > 1990) {
+            let cut = remaining.lastIndexOf("\n", 1990);
+            if (cut <= 0) cut = remaining.lastIndexOf(" ", 1990);
+            if (cut <= 0) cut = 1990;
+            chunks.push(remaining.slice(0, cut));
+            remaining = remaining.slice(cut).replace(/^\n+/, "");
+          }
+          if (remaining.length > 0) chunks.push(remaining);
+
           await message.reply(chunks[0]);
           for (let i = 1; i < chunks.length; i++) await message.channel.send(chunks[i]);
         } else {
