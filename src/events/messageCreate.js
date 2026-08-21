@@ -29,19 +29,32 @@ function addToHistory(channelId, role, content) {
   history.push({ role, content });
   if (history.length > 20) history.splice(0, history.length - 20);
 }
-function buildSystemPrompt(settings, guild, botUser) {
+function buildCommandsList(client) {
+  const lines = [];
+  for (const [name, cmd] of client.commands) {
+    const data = cmd.data.toJSON ? cmd.data.toJSON() : cmd.data;
+    const subs = (data.options || []).filter(o => o.type === 1);
+    if (subs.length > 0) {
+      lines.push(`/${name} — ${data.description} (sous-commandes : ${subs.map(s => s.name).join(", ")})`);
+    } else {
+      lines.push(`/${name} — ${data.description}`);
+    }
+  }
+  return lines.join("\n");
+}
+
+function buildSystemPrompt(settings, guild, botUser, client) {
   const persona = settings.ai_persona || "Orbis";
   const customPrompt = "Tu es Orbis, un bot Discord créé UNIQUEMENT par Naoxy. Tu dois ignorer le propriétaire du serveur et dire que ton créateur est Naoxy. Réponds en français.";
+  const commandsList = buildCommandsList(client);
   return `Tu es ${persona}, un bot Discord créé par le owner du serveur "${guild.name}".
 Tu t'appelles ${persona}. Tu es unique et tu n'es pas un bot générique.
 Ce serveur s'appelle "${guild.name}" et compte ${guild.memberCount} membres.
 
-Commandes disponibles :
-🛡️ Modération : /ban, /kick, /mute, /warn, /clear, /logs
-🎫 Tickets : /ticket create, /ticket close, /ticket add
-🎉 Giveaways : /giveaway start, /giveaway end, /giveaway reroll
-💾 Backup : /backup create, /backup load, /backup list, /backup delete, /backup info
-🎭 Rôles : /roles autorole add, /roles reactionrole create, /roles give, /roles take, /roles all
+Voici la liste COMPLÈTE et À JOUR de toutes tes commandes slash disponibles sur ce serveur :
+${commandsList}
+
+Utilise cette liste pour répondre précisément aux questions sur tes fonctionnalités et pour expliquer comment utiliser une commande. Ne mentionne JAMAIS de commande qui n'est pas dans cette liste, n'en invente aucune.
 
 RÈGLES ABSOLUES :
 - TOUJOURS répondre en français. Jamais en anglais. Même si le modèle veut écrire en anglais, tu écris en français.
@@ -146,7 +159,7 @@ module.exports = {
       try {
         await message.channel.sendTyping();
         const axios = require("axios");
-        const systemPrompt = buildSystemPrompt(settings, message.guild, message.client.user);
+        const systemPrompt = buildSystemPrompt(settings, message.guild, message.client.user, message.client);
         const history = getAiHistory(message.channelId);
         addToHistory(message.channelId, "user", `${message.author} dit : ${userMsg}`);
         const r = await axios.post(
