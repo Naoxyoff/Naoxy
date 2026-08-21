@@ -59,7 +59,7 @@ if (!TOKEN || !CLIENT_ID) { console.error("❌ DISCORD_TOKEN et DISCORD_CLIENT_I
 client.once("clientReady", async () => {
   const statuses = [
     { name: "En développement", type: 3 },
-    { name: "V.1.3.7", type: 3 },
+    { name: "1.4.2", type: 3 },
     { name: "Crée par Naoxy", type: 3 },
   ];
   let statusIndex = 0;
