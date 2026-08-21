@@ -2,6 +2,7 @@ const { Events, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const db = require('../database/db.js').default || require('../database/db.js');
 const { COLORS } = require('../utils/helpers.js');
 const { createWelcomeImage } = require('../utils/canvas.js');
+const { logInvite } = require('../handlers/inviteLogger.js');
 const path = require('path');
 
 const recentlyProcessed = new Set();
@@ -14,6 +15,14 @@ module.exports = {
     recentlyProcessed.add(key);
     setTimeout(() => recentlyProcessed.delete(key), 10000);
 
+    // ── Logs d'invitation ──
+    try {
+      await logInvite(member);
+    } catch (e) {
+      console.error("Erreur logInvite:", e);
+    }
+
+    // ── Message de bienvenue ──
     try {
       const res = await db.execute({
         sql: "SELECT welcome_channel, welcome_message FROM guild_settings WHERE guild_id = ?",
