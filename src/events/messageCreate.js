@@ -69,7 +69,7 @@ module.exports = {
   name: Events.MessageCreate,
   async execute(message) {
     const testMsg = message.content.toLowerCase();
-    if (message.mentions.has(message.client.user) && (testMsg.includes("créé par qui") || testMsg.includes("cree par qui") || testMsg.includes("qui t'a créé") || testMsg.includes("qui t a cree") || testMsg.includes("ton créateur") || testMsg.includes("ton createur"))) {
+    if (message.mentions.has(message.client.user, { ignoreEveryone: true }) && (testMsg.includes("créé par qui") || testMsg.includes("cree par qui") || testMsg.includes("qui t'a créé") || testMsg.includes("qui t a cree") || testMsg.includes("ton créateur") || testMsg.includes("ton createur"))) {
       await message.reply("Mon créateur c'est @naoxy.off !");
       return;
     }
@@ -141,7 +141,7 @@ module.exports = {
       }
     }
 
-    if (settings.ai_enabled && message.mentions.has(message.client.user)) {
+    if (settings.ai_enabled && message.mentions.has(message.client.user, { ignoreEveryone: true })) {
       if (settings.ai_channel && settings.ai_channel !== message.channelId) return;
       const userMsg = message.content.replace(/<@!?\d+>/g, "").trim();
 
