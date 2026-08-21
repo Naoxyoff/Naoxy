@@ -140,6 +140,11 @@ async function initDatabase() {
     try { await db.execute(sql); } catch (e) {}
   }
 
+  await db.execute({
+    sql: "UPDATE guild_settings SET ai_model = 'openai/gpt-oss-20b' WHERE ai_model = 'llama-3.3-70b-versatile'",
+    args: []
+  }).catch(() => {});
+
   console.log("✅ Connecté à Turso avec succès !");
 }
 
