@@ -33,9 +33,18 @@ function buildCommandsList(client) {
   const lines = [];
   for (const [name, cmd] of client.commands) {
     const data = cmd.data.toJSON ? cmd.data.toJSON() : cmd.data;
-    const subs = (data.options || []).filter(o => o.type === 1);
-    if (subs.length > 0) {
-      lines.push(`/${name} — ${data.description} (sous-commandes : ${subs.map(s => s.name).join(", ")})`);
+    const options = data.options || [];
+    const directSubs = options.filter(o => o.type === 1).map(s => s.name);
+    const groups = options.filter(o => o.type === 2);
+    const groupSubs = [];
+    for (const g of groups) {
+      for (const s of (g.options || []).filter(o => o.type === 1)) {
+        groupSubs.push(`${g.name} ${s.name}`);
+      }
+    }
+    const allSubs = [...directSubs, ...groupSubs];
+    if (allSubs.length > 0) {
+      lines.push(`/${name} — ${data.description} (sous-commandes : ${allSubs.join(", ")})`);
     } else {
       lines.push(`/${name} — ${data.description}`);
     }
