@@ -8,17 +8,6 @@ async function getGuildSettings(gid) {
   return res.rows[0] || {};
 }
 
-async function getMemberLevel(gid, uid) {
-  const res = await db.execute({ sql: "SELECT * FROM member_levels WHERE guild_id = ? AND user_id = ?", args: [gid, uid] });
-  if (res.rows[0]) return res.rows[0];
-  await db.execute({ sql: "INSERT INTO member_levels (guild_id, user_id, xp, messages, last_xp) VALUES (?, ?, 0, 0, 0)", args: [gid, uid] });
-  return { guild_id: gid, user_id: uid, xp: 0, messages: 0, last_xp: 0 };
-}
-
-function levelFromXp(xp) {
-  return Math.floor(0.1 * Math.sqrt(xp || 0));
-}
-
 const aiMemoryMap = new Map();
 function getAiHistory(channelId) {
   if (!aiMemoryMap.has(channelId)) aiMemoryMap.set(channelId, []);
@@ -93,23 +82,6 @@ module.exports = {
     const gid = message.guildId, uid = message.author.id;
     const settings = await getGuildSettings(gid);
     const now = Math.floor(Date.now() / 1000);
-
-    if (settings.levels_enabled) {
-      const data = await getMemberLevel(gid, uid);
-      if (now - data.last_xp >= 60) {
-        const xpGain = Math.floor(Math.random() * 15) + 10;
-        const oldLevel = levelFromXp(data.xp);
-        const newLevel = levelFromXp(data.xp + xpGain);
-        await db.execute({
-          sql: "UPDATE member_levels SET xp = xp + ?, messages = messages + 1, last_xp = ? WHERE guild_id = ? AND user_id = ?",
-          args: [xpGain, now, gid, uid]
-        });
-        if (newLevel > oldLevel) {
-          const msg = (settings.levels_message ?? "{user} vient de passer au niveau **{level}** !").replace("{user}", message.author.toString()).replace("{level}", `${newLevel}`).replace("{guild}", message.guild?.name ?? "");
-          const ch = settings.levels_channel ? message.guild?.channels.cache.get(settings.levels_channel) : message.channel;
-          if (ch) await ch.send({ embeds: [new EmbedBuilder().setColor(COLORS.gold).setDescription(`🎉 ${msg}`).setThumbnail(message.author.displayAvatarURL())] });
-        }
-      }
     }
 
     const prefix = settings.prefix ?? "!";
