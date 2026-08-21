@@ -156,26 +156,53 @@ const commands = [
   {
     data: new SlashCommandBuilder().setName("clear").setDescription("Supprimer des messages").addIntegerOption(o => o.setName("nombre").setDescription("Nombre (1-500)").setMinValue(1).setMaxValue(500).setRequired(true)).addUserOption(o => o.setName("membre").setDescription("Seulement ce membre").setRequired(false)).setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
     async execute(interaction) {
-      const amount = interaction.options.getInteger("nombre", true);
-      const target = interaction.options.getUser("membre");
-      await interaction.deferReply({ flags: 64 });
-      let deleted = 0;
-      let remaining = amount;
-      while (remaining > 0) {
-        const fetchLimit = Math.min(remaining, 100);
-        const messages = await interaction.channel.messages.fetch({ limit: fetchLimit });
-        if (messages.size === 0) break;
-        let toDelete = [...messages.values()];
-        if (target) toDelete = toDelete.filter(m => m.author.id === target.id);
-        if (toDelete.length === 0) break;
-        const bulked = await interaction.channel.bulkDelete(toDelete, true).catch(() => new Map());
-        deleted += bulked.size;
-        remaining -= bulked.size;
-        if (bulked.size < fetchLimit) break;
-        await new Promise(r => setTimeout(r, 1000));
+        const amount = interaction.options.getInteger("nombre", true);
+        const target = interaction.options.getUser("membre");
+        await interaction.deferReply({ flags: 64 });
+        let deleted = 0;
+        let remaining = amount;
+        let lastId = null;
+        const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
+
+        while (remaining > 0) {
+          const fetchOptions = { limit: 100 };
+          if (lastId) fetchOptions.before = lastId;
+          const messages = await interaction.channel.messages.fetch(fetchOptions);
+          if (messages.size === 0) break;
+          lastId = messages.last().id;
+
+          let toDelete = [...messages.values()];
+          if (target) toDelete = toDelete.filter(m => m.author.id === target.id);
+          toDelete = toDelete.slice(0, remaining);
+
+          if (toDelete.length > 0) {
+            const now = Date.now();
+            const recent = toDelete.filter(m => now - m.createdTimestamp < TWO_WEEKS);
+            const old = toDelete.filter(m => now - m.createdTimestamp >= TWO_WEEKS);
+
+            if (recent.length > 0) {
+              const bulked = await interaction.channel.bulkDelete(recent, true).catch(() => new Map());
+              deleted += bulked.size;
+              remaining -= bulked.size;
+            }
+
+            for (const msg of old) {
+              if (remaining <= 0) break;
+              try {
+                await msg.delete();
+                deleted++;
+                remaining--;
+                await new Promise(r => setTimeout(r, 1000));
+              } catch (_) {}
+            }
+          }
+
+          if (messages.size < 100) break;
+          await new Promise(r => setTimeout(r, 1000));
+        }
+
+        await interaction.editReply({ embeds: [successEmbed("Messages supprimés", `**${deleted}** message(s) supprimé(s).`)]});
       }
-      await interaction.editReply({ embeds: [successEmbed("Messages supprimés", `**${deleted}** message(s) supprimé(s).`)] });
-    }
   },
   {
     data: new SlashCommandBuilder().setName("logconfig").setDescription("Configurer le salon des logs").addChannelOption(o => o.setName("salon").setDescription("Salon des logs").setRequired(true)).setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
