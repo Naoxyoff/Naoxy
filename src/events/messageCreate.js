@@ -181,7 +181,7 @@ module.exports = {
         const r = await axios.post(
           "https://api.groq.com/openai/v1/chat/completions",
           {
-            model: settings.ai_model || "llama-3.3-70b-versatile",
+            model: settings.ai_model || "openai/gpt-oss-20b",
             max_tokens: parseInt(settings.ai_max_tokens) || 500,
             messages: [{ role: "system", content: systemPrompt }, ...history]
           },
