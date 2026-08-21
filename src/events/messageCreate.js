@@ -82,7 +82,6 @@ module.exports = {
     const gid = message.guildId, uid = message.author.id;
     const settings = await getGuildSettings(gid);
     const now = Math.floor(Date.now() / 1000);
-    }
 
     const prefix = settings.prefix ?? "!";
     if (message.content.startsWith(prefix)) {
