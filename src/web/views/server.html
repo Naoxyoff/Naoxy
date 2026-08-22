@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orbis.sys — Gestion du serveur</title>
+    <title>Orbis.sys — Centre de Commandement</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #040508;
-            --card-bg: rgba(13, 17, 28, 0.75);
+            --card-bg: rgba(13, 17, 28, 0.8);
             --card-border: rgba(255, 255, 255, 0.07);
             --card-border-hover: rgba(139, 92, 246, 0.4);
             --text-main: #f8fafc;
@@ -16,6 +16,7 @@
             --accent-primary: #8b5cf6;
             --accent-glow: rgba(139, 92, 246, 0.15);
             --success: #10b981;
+            --danger: #ef4444;
         }
 
         * {
@@ -37,14 +38,14 @@
 
         .ambient-glow {
             position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, transparent 70%);
             border-radius: 50%;
-            top: -100px;
-            right: -100px;
+            top: -150px;
+            right: -150px;
             z-index: -1;
-            filter: blur(60px);
+            filter: blur(80px);
             pointer-events: none;
         }
 
@@ -54,8 +55,8 @@
             align-items: center;
             padding: 22px 50px;
             border-bottom: 1px solid var(--card-border);
-            backdrop-filter: blur(10px);
-            background: rgba(4, 5, 8, 0.8);
+            backdrop-filter: blur(12px);
+            background: rgba(4, 5, 8, 0.85);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -111,14 +112,14 @@
         }
 
         .sidebar {
-            width: 280px;
+            width: 290px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 20px;
             padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             height: fit-content;
             backdrop-filter: blur(12px);
         }
@@ -129,7 +130,7 @@
             gap: 14px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--card-border);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .server-avatar {
@@ -174,21 +175,23 @@
             color: var(--text-muted);
             letter-spacing: 1.2px;
             font-weight: 600;
-            margin-top: 10px;
-            margin-bottom: 4px;
+            margin-top: 12px;
+            margin-bottom: 6px;
         }
 
         .menu-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 11px 16px;
+            padding: 12px 16px;
             border-radius: 12px;
             color: var(--text-muted);
             text-decoration: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 0.9rem;
             font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
         }
 
         .menu-item:hover {
@@ -199,7 +202,7 @@
         .menu-item.active {
             background: var(--accent-glow);
             color: var(--text-main);
-            border: 1px solid var(--card-border-hover);
+            border-color: var(--card-border-hover);
             box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
         }
 
@@ -222,6 +225,16 @@
             font-size: 0.95rem;
         }
 
+        .section-view {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .section-view.active {
+            display: flex;
+        }
+
         .grid-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -237,6 +250,11 @@
             flex-direction: column;
             gap: 12px;
             backdrop-filter: blur(12px);
+            transition: border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
         }
 
         .card-header-flex {
@@ -248,14 +266,14 @@
         .card h4 {
             color: var(--text-muted);
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .card-icon {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.03);
             display: flex;
@@ -272,37 +290,72 @@
         }
 
         .card-subtext {
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
+            line-height: 1.4;
         }
 
-        .analytics-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
+        /* Form elements for settings */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
         }
 
         @media (max-width: 1024px) {
             .main-container { flex-direction: column; padding: 20px; }
             .sidebar { width: 100%; }
-            .analytics-row { grid-template-columns: 1fr; }
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .progress-bar-fill {
-            width: 88%;
-            height: 100%;
-            background: linear-gradient(90deg, #8b5cf6, #c084fc);
-            border-radius: 4px;
-            box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
         }
     </style>
 </head>
@@ -314,99 +367,179 @@
         <a href="/dashboard" class="logo">ORBIS.SYS</a>
         <div class="nav-links">
             <a href="/">Accueil</a>
-            <a href="/dashboard" class="active">Dashboard</a>
+            <a href="/dashboard" class="active">Espace Serveur</a>
             <div class="user-badge" id="user-badge">
                 <span class="status-dot"></span>
-                <span id="username-text">Chargement...</span>
+                <span id="username-text">Authentification...</span>
             </div>
             <a href="/auth/logout" style="color: #f87171; font-weight: 600;">Déconnexion</a>
         </div>
     </header>
 
     <div class="main-container">
+        <!-- Sidebar -->
         <div class="sidebar">
             <div class="server-profile">
-                <img src="" alt="Server Icon" class="server-avatar" id="sidebar-server-icon">
+                <img src="" alt="Icône du serveur" class="server-avatar" id="sidebar-server-icon">
                 <div class="server-info">
                     <h3 id="sidebar-server-name">Chargement...</h3>
                     <div class="status-pill">
                         <div class="status-dot"></div>
-                        <span>Opérationnel</span>
+                        <span>Système Opérationnel</span>
                     </div>
                 </div>
             </div>
 
-            <span class="menu-category">Navigation</span>
-            <a href="#" class="menu-item active">📊 Vue d'ensemble</a>
-            <a href="#" class="menu-item">🎫 Tickets</a>
-            <a href="#" class="menu-item">📜 Journaux & Logs</a>
-            <a href="#" class="menu-item">🛡️ Modération</a>
-            <a href="#" class="menu-item">⚙️ Modules & IA</a>
+            <span class="menu-category">Modules de Gestion</span>
+            <div class="menu-item active" onclick="switchTab('overview', this)">📊 Vue d'ensemble</div>
+            <div class="menu-item" onclick="switchTab('tickets', this)">🎫 Gestion des Tickets</div>
+            <div class="menu-item" onclick="switchTab('logs', this)">📜 Journaux & Audit Logs</div>
+            <div class="menu-item" onclick="switchTab('moderation', this)">🛡️ Sécurité & Modération</div>
+            <div class="menu-item" onclick="switchTab('ai', this)">🤖 Intelligence Artificielle</div>
         </div>
 
+        <!-- Content Area -->
         <div class="content-area">
-            <div class="page-header">
-                <h1>Vue d'ensemble</h1>
-                <p>État actuel du bot et de l'activité globale sur votre espace.</p>
-            </div>
-
-            <div class="grid-cards">
-                <div class="card">
-                    <div class="card-header-flex">
-                        <h4>Tickets Ouverts</h4>
-                        <div class="card-icon">📂</div>
-                    </div>
-                    <div class="value" style="color: #60a5fa;">0</div>
-                    <div class="card-subtext">Demandes en attente de prise en charge</div>
+            
+            <!-- 1. VUE D'ENSEMBLE -->
+            <div id="overview" class="section-view active">
+                <div class="page-header">
+                    <h1>Vue d'ensemble</h1>
+                    <p>Synthèse de l'activité en temps réel et métriques de performance du bot.</p>
                 </div>
 
-                <div class="card">
-                    <div class="card-header-flex">
-                        <h4>Tickets Fermés</h4>
-                        <div class="card-icon">✅</div>
+                <div class="grid-cards">
+                    <div class="card">
+                        <div class="card-header-flex">
+                            <h4>Flux Actif</h4>
+                            <div class="card-icon">📂</div>
+                        </div>
+                        <div class="value" style="color: #60a5fa;">0</div>
+                        <div class="card-subtext">Requêtes et dossiers ouverts nécessitant une intervention immédiate.</div>
                     </div>
-                    <div class="value" style="color: #34d399;">14</div>
-                    <div class="card-subtext">Traités avec succès ce mois-ci</div>
-                </div>
 
-                <div class="card">
-                    <div class="card-header-flex">
-                        <h4>Module IA (Groq)</h4>
-                        <div class="card-icon">🤖</div>
+                    <div class="card">
+                        <div class="card-header-flex">
+                            <h4>Dossiers Clôturés</h4>
+                            <div class="card-icon">✅</div>
+                        </div>
+                        <div class="value" style="color: #34d399;">14</div>
+                        <div class="card-subtext">Incidents et réquisitions résolus avec succès au cours de la période.</div>
                     </div>
-                    <div class="value" style="font-size: 1.6rem; color: #a78bfa; margin-top: 6px;">Actif</div>
-                    <div class="card-subtext">Réponses intelligentes activées</div>
-                </div>
-            </div>
 
-            <div class="analytics-row">
-                <div class="card">
-                    <div class="card-header-flex">
-                        <h4>Activité des requêtes</h4>
-                        <div class="card-icon">📈</div>
+                    <div class="card">
+                        <div class="card-header-flex">
+                            <h4>Noyau IA (Groq)</h4>
+                            <div class="card-icon">🤖</div>
+                        </div>
+                        <div class="value" style="font-size: 1.6rem; color: #a78bfa; margin-top: 6px;">Optimisé</div>
+                        <div class="card-subtext">Modèles de traitement sémantique et d'assistance activés.</div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.9rem;">
-                        <span style="color: var(--text-muted);">Taux de résolution global</span>
-                        <span style="font-weight: 600; color: #34d399;">88%</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill"></div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header-flex">
-                        <h4>Configuration</h4>
-                        <div class="card-icon">⚙️</div>
-                    </div>
-                    <div class="value" style="font-size: 1.8rem; color: #facc15;">100%</div>
-                    <div class="card-subtext">Système entièrement opérationnel</div>
                 </div>
             </div>
+
+            <!-- 2. TICKETS -->
+            <div id="tickets" class="section-view">
+                <div class="page-header">
+                    <h1>Configuration des Tickets</h1>
+                    <p>Paramétrez les salons d'accueil, les rôles de support assignés et les protocoles de réponse.</p>
+                </div>
+
+                <div class="card">
+                    <h4>Paramètres du Dispatch</h4>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Salon cible pour les panels de tickets</label>
+                        <input type="text" class="form-control" placeholder="ex: #support-général">
+                    </div>
+                    <div class="form-group">
+                        <label>Rôle Staff habilité à la modération des tickets</label>
+                        <input type="text" class="form-control" placeholder="ex: @Moderateur / @Staff">
+                    </div>
+                    <button class="btn-primary" style="width: fit-content; margin-top: 10px;">Enregistrer les modifications</button>
+                </div>
+            </div>
+
+            <!-- 3. LOGS -->
+            <div id="logs" class="section-view">
+                <div class="page-header">
+                    <h1>Journaux & Audit Logs</h1>
+                    <p>Centralisez l'historique des actions administratives, connexions et modifications de rôles.</p>
+                </div>
+
+                <div class="card">
+                    <h4>Flux des Journaux d'Événements</h4>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Salon de destination des logs de modération</label>
+                        <input type="text" class="form-control" placeholder="ex: #logs-admin">
+                    </div>
+                    <div class="toggle-switch">
+                        <div>
+                            <strong>Activer la journalisation avancée</strong>
+                            <div class="card-subtext">Enregistre chaque modification de canal et d'attribution de rôle.</div>
+                        </div>
+                        <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--accent-primary);">
+                    </div>
+                    <button class="btn-primary" style="width: fit-content; margin-top: 10px;">Mettre à jour les flux</button>
+                </div>
+            </div>
+
+            <!-- 4. MODERATION -->
+            <div id="moderation" class="section-view">
+                <div class="page-header">
+                    <h1>Sécurité & Modération</h1>
+                    <p>Configurez les filtres automatisés, la gestion des sanctions et la protection des salons.</p>
+                </div>
+
+                <div class="card">
+                    <h4>Règles de Filtrage Automatique</h4>
+                    <div class="toggle-switch" style="margin-top: 15px;">
+                        <div>
+                            <strong>Filtre Anti-Spam & Liens Malveillants</strong>
+                            <div class="card-subtext">Bloque et supprime automatiquement les invitations Discord non autorisées.</div>
+                        </div>
+                        <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--accent-primary);">
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Sanction par défaut en cas d'infraction grave</label>
+                        <select class="form-control">
+                            <option>Exclusion temporaire (Timeout 24h)</option>
+                            <option>Bannissement définitif du serveur</option>
+                            <option>Avertissement simple en MP</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" style="width: fit-content; margin-top: 10px;">Appliquer les protocoles</button>
+                </div>
+            </div>
+
+            <!-- 5. MODULES & IA -->
+            <div id="ai" class="section-view">
+                <div class="page-header">
+                    <h1>Intelligence Artificielle & Automatisation</h1>
+                    <p>Ajustez les instructions système et le comportement du module conversationnel propulsé par Groq.</p>
+                </div>
+
+                <div class="card">
+                    <h4>Prompt Système & Comportement</h4>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Directives de personnalité de l'assistant</label>
+                        <textarea class="form-control" rows="4">Tu es Orbis.sys, l'assistant intelligent et rigoureux du serveur. Tu aides les utilisateurs avec précision et professionnalisme.</textarea>
+                    </div>
+                    <button class="btn-primary" style="width: fit-content; margin-top: 10px;">Mettre à jour l'intelligence</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
         const pathSegments = window.location.pathname.split('/');
         const guildId = pathSegments[pathSegments.length - 1];
 
