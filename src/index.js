@@ -138,29 +138,9 @@ app.get('/api/user', (req, res) => {
 });
 
 
-// Route dynamique pour la configuration d'un serveur spécifique
-});
-
-
-app.get('/dashboard', (req, res) => {
-    if (!req.session || !req.session.user) {
-        return res.redirect('/auth/discord');
-    }
-    res.sendFile(path.join(__dirname, 'web', 'views', 'dashboard.html'));
-});
-
-
-} catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
-    }
-});
-} catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error");
-    }
-});
-
+// Route dashboard dynamique propre
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "web/views"));
 
 app.get("/dashboard/:guildId", async (req, res) => {
     try {
@@ -174,29 +154,3 @@ app.get("/dashboard/:guildId", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
-
-app.listen(PORT, "0.0.0.0", () => console.log('🌐 Serveur sur le port ' + PORT));
-
-client.on("guildCreate", async (guild) => {
-  console.log("✅ Nouveau serveur : " + guild.name + " (" + guild.id + ")");
-});
-
-// Fonction principale pour démarrer le bot et initialiser Turso
-async function startBot() {
-  try {
-    await initDatabase();
-
-    console.log('✅ Connexion à Discord...');
-    await client.login(TOKEN);
-    console.log('✅ Connecté à Discord avec succès !');
-  } catch (err) {
-    console.error('❌ ERREUR CRITIQUE DÉMARRAGE:', err.message);
-    process.exit(1);
-  }
-}
-
-startBot();
-
-// Configuration du moteur de vues EJS pour le web
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, "web/views"));
