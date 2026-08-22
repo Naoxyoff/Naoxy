@@ -89,64 +89,6 @@ app.get("/", (req, res) => {
 });
 
 
-const session = require('express-session');
-const authRoutes = require('./web/auth');
-
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'orbis_super_secret_key_9988',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-        secure: process.env.NODE_ENV === 'production' || true, 
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000 
-    }
-}));
-
-app.use(authRoutes);
-
-app.set('trust proxy', 1);
-app.use(express.json());
-app.set('client', client);
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'web', 'views', 'index.html'));
-});
-
-
-// API Dashboard : renvoie l'utilisateur connecté et ses serveurs filtrés (Admin)
-app.get('/api/user', (req, res) => {
-    if (!req.session || !req.session.user) {
-        return res.json({ user: null });
-    }
-
-    const botClient = req.app.get('client');
-    const userGuilds = req.session.guilds || [];
-
-    // Filtrer les serveurs où l'utilisateur est Admin (Permission MANAGE_GUILD 0x20 ou ADMINISTRATOR 0x8)
-    const adminGuilds = userGuilds.filter(guild => {
-        const permissions = BigInt(guild.permissions);
-        const isAdmin = (permissions & 0x8n) === 0x8n || (permissions & 0x20n) === 0x20n;
-        return isAdmin;
-    }).map(guild => {
-        // Vérifier si le bot est présent sur ce serveur
-        const hasBot = botClient.guilds.cache.has(guild.id);
-        return {
-            id: guild.id,
-            name: guild.name,
-            icon: guild.icon,
-            hasBot: hasBot
-        };
-    });
-
-    res.json({
-        user: req.session.user,
-        guilds: adminGuilds
-    });
-});
-
-
 // Route dashboard dynamique propre
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "web/views"));
@@ -167,8 +109,15 @@ app.get("/dashboard/:guildId", async (req, res) => {
 
     // Routes du Dashboard Express
     app.get("/", (req, res) => {
-    res.render("index");
-});
+        const guilds = Array.from(client.guilds.cache.values());
+        let html = "<h1>Bot & Dashboard Orbis est en ligne !</h1>";
+        html += "<h3>Serveurs connectés :</h3><ul>";
+        if (guilds.length === 0) {
+            html += "<li>Aucun serveur trouvé ou bot en cours de chargement...</li>";
+        } else {
+            guilds.forEach(g => {
+                html += `<li>${g.name} (ID: ${g.id}) - <a href="/dashboard/${g.id}">Accéder au Dashboard</a></li>`;
+            });
         }
         html += "</ul>";
         res.send(html);
@@ -206,8 +155,24 @@ app.get("/dashboard/:guildId", async (req, res) => {
     app.set('views', path.join(__dirname, '..', 'views'));
 
     app.get("/", (req, res) => {
-    res.render("index");
-});
+        const guilds = Array.from(client.guilds.cache.values());
+        let html = `
+            <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #1e1e1e; color: #fff; border-radius: 8px;">
+                <h1 style="color: #5865F2;">🤖 Orbis Dashboard</h1>
+                <p>Le bot est en ligne et connecté à Discord !</p>
+                <h3>Serveurs connectés (${guilds.length}) :</h3>
+                <ul style="list-style: none; padding: 0;">
+        `;
+        
+        if (guilds.length === 0) {
+            html += "<li style='padding: 10px; background: #2f3136; margin-bottom: 5px; border-radius: 4px;'>Aucun serveur trouvé ou bot en cours de chargement...</li>";
+        } else {
+            guilds.forEach(g => {
+                html += `<li style="padding: 10px; background: #2f3136; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>${g.name}</strong> <small style="color: #b9bbbe;">(ID: ${g.id})</small></span>
+                    <a href="/dashboard/${g.id}" style="background: #5865F2; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none;">Accéder au Dashboard</a>
+                </li>`;
+            });
         }
         html += "</ul></div>";
         res.send(html);
@@ -268,8 +233,15 @@ app.get("/dashboard/:guildId", async (req, res) => {
 })();
 
 app.get("/", (req, res) => {
-    res.render("index");
-});
+    const guilds = Array.from(client.guilds.cache.values());
+    let html = "<h1>Bot & Dashboard Orbis est en ligne !</h1>";
+    html += "<h3>Serveurs connectés :</h3><ul>";
+    if (guilds.length === 0) {
+        html += "<li>Aucun serveur trouvé ou bot en cours de chargement...</li>";
+    } else {
+        guilds.forEach(g => {
+            html += `<li>${g.name} (ID: ${g.id}) - <a href="/dashboard/${g.id}">Accéder au Dashboard</a></li>`;
+        });
     }
     html += "</ul>";
     res.send(html);
