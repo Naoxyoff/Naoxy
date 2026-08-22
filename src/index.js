@@ -1,5 +1,4 @@
 
-console.log("[DEBUG] Début de execution globale...");
 (async () => {
     try {
         process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', err));
@@ -82,6 +81,11 @@ client.once("clientReady", async () => {
 
 // ── Dashboard Configuration Propre ──
 const app = express();
+
+app.get("/", (req, res) => {
+    res.status(200).send("Bot & Dashboard Orbis is online!");
+});
+
 
 const session = require('express-session');
 const authRoutes = require('./web/auth');
