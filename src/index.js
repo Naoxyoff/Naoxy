@@ -86,7 +86,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'orbis_super_secret_key_9988',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 1 jour
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production' || true, 
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 
+    }
 }));
 
 app.use(authRoutes);
