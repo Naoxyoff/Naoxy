@@ -525,5 +525,5 @@ router.get('/dashboard/:guildId', async (req, res) => {
     const channels = guild.channels.cache.map(c => ({ id: c.id, name: c.name, type: c.type }));
     const roles = guild.roles.cache.map(r => ({ id: r.id, name: r.name }));
 
-    res.render('server.ejs', { channels, roles });
+    res.render("server.ejs", { channels, roles });
 });
