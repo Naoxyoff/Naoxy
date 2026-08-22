@@ -85,7 +85,7 @@ client.once("clientReady", async () => {
 
 
 app.get("/", (req, res) => {
-    res.status(200).send("Bot & Dashboard Orbis is online!");
+    res.render("index");
 });
 
 
@@ -167,15 +167,8 @@ app.get("/dashboard/:guildId", async (req, res) => {
 
     // Routes du Dashboard Express
     app.get("/", (req, res) => {
-        const guilds = Array.from(client.guilds.cache.values());
-        let html = "<h1>Bot & Dashboard Orbis est en ligne !</h1>";
-        html += "<h3>Serveurs connectés :</h3><ul>";
-        if (guilds.length === 0) {
-            html += "<li>Aucun serveur trouvé ou bot en cours de chargement...</li>";
-        } else {
-            guilds.forEach(g => {
-                html += `<li>${g.name} (ID: ${g.id}) - <a href="/dashboard/${g.id}">Accéder au Dashboard</a></li>`;
-            });
+    res.render("index");
+});
         }
         html += "</ul>";
         res.send(html);
@@ -213,24 +206,8 @@ app.get("/dashboard/:guildId", async (req, res) => {
     app.set('views', path.join(__dirname, '..', 'views'));
 
     app.get("/", (req, res) => {
-        const guilds = Array.from(client.guilds.cache.values());
-        let html = `
-            <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #1e1e1e; color: #fff; border-radius: 8px;">
-                <h1 style="color: #5865F2;">🤖 Orbis Dashboard</h1>
-                <p>Le bot est en ligne et connecté à Discord !</p>
-                <h3>Serveurs connectés (${guilds.length}) :</h3>
-                <ul style="list-style: none; padding: 0;">
-        `;
-        
-        if (guilds.length === 0) {
-            html += "<li style='padding: 10px; background: #2f3136; margin-bottom: 5px; border-radius: 4px;'>Aucun serveur trouvé ou bot en cours de chargement...</li>";
-        } else {
-            guilds.forEach(g => {
-                html += `<li style="padding: 10px; background: #2f3136; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                    <span><strong>${g.name}</strong> <small style="color: #b9bbbe;">(ID: ${g.id})</small></span>
-                    <a href="/dashboard/${g.id}" style="background: #5865F2; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none;">Accéder au Dashboard</a>
-                </li>`;
-            });
+    res.render("index");
+});
         }
         html += "</ul></div>";
         res.send(html);
@@ -291,15 +268,8 @@ app.get("/dashboard/:guildId", async (req, res) => {
 })();
 
 app.get("/", (req, res) => {
-    const guilds = Array.from(client.guilds.cache.values());
-    let html = "<h1>Bot & Dashboard Orbis est en ligne !</h1>";
-    html += "<h3>Serveurs connectés :</h3><ul>";
-    if (guilds.length === 0) {
-        html += "<li>Aucun serveur trouvé ou bot en cours de chargement...</li>";
-    } else {
-        guilds.forEach(g => {
-            html += `<li>${g.name} (ID: ${g.id}) - <a href="/dashboard/${g.id}">Accéder au Dashboard</a></li>`;
-        });
+    res.render("index");
+});
     }
     html += "</ul>";
     res.send(html);
