@@ -14,11 +14,11 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent-primary: #8b5cf6;
+            --accent-secondary: #3b82f6;
             --accent-glow: rgba(139, 92, 246, 0.15);
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --gold-accent: #eab308;
         }
 
         * {
@@ -42,7 +42,7 @@
             position: absolute;
             width: 700px;
             height: 700px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(59, 130, 246, 0.04) 50%, transparent 70%);
             border-radius: 50%;
             top: -150px;
             right: -150px;
@@ -68,7 +68,7 @@
             font-weight: 700;
             font-size: 1.2rem;
             letter-spacing: 0.8px;
-            background: linear-gradient(135deg, #ffffff, #a78bfa);
+            background: linear-gradient(135deg, #ffffff, #a78bfa, #60a5fa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
@@ -326,8 +326,8 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #eab308, #ca8a04);
-            color: #040508;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #ffffff;
             border: none;
             padding: 14px 28px;
             border-radius: 12px;
@@ -335,13 +335,14 @@
             font-size: 0.92rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(234, 179, 8, 0.2);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
             width: fit-content;
         }
 
         .btn-primary:hover {
             opacity: 0.92;
             transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
         }
 
         .btn-danger-outline {
@@ -385,7 +386,7 @@
         .preview-bar {
             height: 4px;
             width: 100%;
-            background: var(--gold-accent);
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
             border-radius: 2px;
             margin-top: 4px;
         }
@@ -426,12 +427,12 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: #10b981;
+            background: var(--accent-primary);
             color: white;
             padding: 14px 24px;
             border-radius: 12px;
             font-weight: 600;
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
             display: none;
             z-index: 1000;
         }
@@ -630,8 +631,8 @@
                         <div class="form-group">
                             <label>Couleur</label>
                             <div style="display: flex; gap: 10px; align-items: center;">
-                                <div style="width: 44px; height: 44px; background: #eab308; border-radius: 10px; border: 1px solid var(--card-border);"></div>
-                                <input type="text" class="form-control" value="#EAB308" style="font-family: monospace; font-weight: 700;">
+                                <div style="width: 44px; height: 44px; background: #8b5cf6; border-radius: 10px; border: 1px solid var(--card-border);"></div>
+                                <input type="text" class="form-control" value="#8B5CF6" style="font-family: monospace; font-weight: 700;">
                             </div>
                         </div>
                     </div>
