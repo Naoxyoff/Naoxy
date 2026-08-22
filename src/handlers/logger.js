@@ -144,7 +144,7 @@ async function logVoiceStateUpdate(oldState, newState) {
   const guild = newState.guild || oldState.guild;
   if (!guild) return;
   const settings = await getSettings(guild.id);
-  const channelId = settings?.log_serveur_channel || settings?.log_voice_channel;
+  const channelId = settings?.log_channel;
   if (!channelId) return;
   const ch = guild.channels.cache.get(channelId);
   if (!ch) return;
