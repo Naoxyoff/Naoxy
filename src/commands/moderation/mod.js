@@ -205,19 +205,50 @@ const commands = [
       }
   },
   {
-    data: new SlashCommandBuilder().setName("logconfig").setDescription("Configurer le salon des logs").addChannelOption(o => o.setName("salon").setDescription("Salon des logs").setRequired(true)).setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    data: new SlashCommandBuilder()
+      .setName("logconfig")
+      .setDescription("Configurer le salon unique pour tous les logs du serveur")
+      .addChannelOption(o => o.setName("salon").setDescription("Salon cible pour centraliser tous les logs").setRequired(true).addChannelTypes(ChannelType.GuildText))
+      .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction) {
-      const channel = interaction.options.getChannel("salon", true);
+      const channel = interaction.options.getChannel("salon");
+      const gid = interaction.guildId;
 
-      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [interaction.guildId] });
+      const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
       if (existingRes.rows.length > 0) {
-        await db.execute({ sql: "UPDATE guild_settings SET log_channel = ? WHERE guild_id = ?", args: [channel.id, interaction.guildId] });
+        await db.execute({ 
+          sql: "UPDATE guild_settings SET log_channel = ?, log_serveur_channel = ?, log_messages_channel = ?, log_voice_channel = ? WHERE guild_id = ?", 
+          args: [channel.id, channel.id, channel.id, channel.id, gid] 
+        });
       } else {
-        await db.execute({ sql: "INSERT INTO guild_settings (guild_id, log_channel) VALUES (?, ?)", args: [interaction.guildId, channel.id] });
+        await db.execute({ 
+          sql: "INSERT INTO guild_settings (guild_id, log_channel, log_serveur_channel, log_messages_channel, log_voice_channel) VALUES (?, ?, ?, ?, ?)", 
+          args: [gid, channel.id, channel.id, channel.id, channel.id] 
+        });
       }
-      await interaction.reply({ embeds: [successEmbed("Logs configurés", `Les logs seront envoyés dans ${channel}.`)] });
+
+      await interaction.reply({ 
+        embeds: [successEmbed("✅ Système de logs unifié", `Tous les événements du serveur seront désormais enregistrés dans ${channel}.`)], 
+        ephemeral: true 
+      });
+
+      const { EmbedBuilder } = require("discord.js");
+      const panelEmbed = new EmbedBuilder()
+        .setColor(0x3B82F6)
+        .setTitle("📋 Panneau centralisé des Logs")
+        .setDescription("Ce salon centralise l'ensemble des activités et de la sécurité du serveur. Voici la liste des éléments surveillés en temps réel :")
+        .addFields(
+          { name: "💬 Messages", value: "• Modifications de messages\n• Suppressions de messages", inline: true },
+          { name: "🛡️ Serveur & Sécurité", value: "• Créations/Suppressions de salons\n• Suppressions de rôles\n• Modifications de pseudos & rôles", inline: true },
+          { name: "🔊 Vocaux", value: "• Connexions et déconnexions\n• Changements de salons vocaux", inline: false },
+          { name: "🎫 Tickets & Modération", value: "• Ouverture, gestion et fermeture des tickets\n• Sanctions, bans et avertissements", inline: false }
+        )
+        .setFooter({ text: `Configuré par ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+        .setTimestamp();
+
+      await channel.send({ embeds: [panelEmbed] }).catch(() => {});
     }
-  }
+  },
 ];
 
 module.exports = commands;
