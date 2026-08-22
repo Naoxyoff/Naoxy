@@ -3,7 +3,7 @@ const session = require("express-session");
 const axios = require("axios");
 const path = require("path");
 const router = express.Router();
-const { db, getGuildSettings } = require("../database/db.js");
+const { db, getGuildSettings } = require("./src/database/db.js");
 
 module.exports = (client, app) => {
 
