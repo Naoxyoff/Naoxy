@@ -42,7 +42,8 @@ module.exports = {
       const msg = rawMsg
         .replace(/{user}/g, member.toString())
         .replace(/{guild}/g, member.guild.name)
-        .replace(/{count}/g, `${member.guild.memberCount}`);
+        .replace(/{count}/g, `${member.guild.memberCount}`)
+        .replace(/\\n/g, '\n');
 
       const embed = new EmbedBuilder()
         .setColor(COLORS?.success || 0x10b981)

@@ -73,7 +73,8 @@ module.exports = {
         const msg = rawMsg
           .replace(/{user}/g, interaction.user.toString())
           .replace(/{guild}/g, interaction.guild?.name ?? "")
-          .replace(/{count}/g, `${interaction.guild?.memberCount}`);
+          .replace(/{count}/g, `${interaction.guild?.memberCount}`)
+          .replace(/\\n/g, '\n');
 
         const embed = new EmbedBuilder()
           .setColor(COLORS?.success || 0x10b981)
