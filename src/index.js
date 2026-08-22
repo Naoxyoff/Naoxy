@@ -143,7 +143,10 @@ app.get('/dashboard/:guildId', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/discord');
     }
-    res.render('server');
+    const guild = client.guilds.cache.get(req.params.guildId);
+    const channels = guild ? Array.from(guild.channels.cache.values()) : [];
+    const roles = guild ? Array.from(guild.roles.cache.values()) : [];
+    res.render('server', { channels, roles });
 });
 
 
