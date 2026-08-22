@@ -217,13 +217,13 @@ const commands = [
       const existingRes = await db.execute({ sql: "SELECT guild_id FROM guild_settings WHERE guild_id = ?", args: [gid] });
       if (existingRes.rows.length > 0) {
         await db.execute({ 
-          sql: "UPDATE guild_settings SET log_channel = ?, log_serveur_channel = ?, log_messages_channel = ?, log_voice_channel = ? WHERE guild_id = ?", 
-          args: [channel.id, channel.id, channel.id, channel.id, gid] 
+          sql: "UPDATE guild_settings SET log_channel = ? WHERE guild_id = ?", 
+          args: [channel.id, gid] 
         });
       } else {
         await db.execute({ 
-          sql: "INSERT INTO guild_settings (guild_id, log_channel, log_serveur_channel, log_messages_channel, log_voice_channel) VALUES (?, ?, ?, ?, ?)", 
-          args: [gid, channel.id, channel.id, channel.id, channel.id] 
+          sql: "INSERT INTO guild_settings (guild_id, log_channel) VALUES (?, ?)", 
+          args: [gid, channel.id] 
         });
       }
 
