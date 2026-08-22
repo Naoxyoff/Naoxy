@@ -139,14 +139,6 @@ app.get('/api/user', (req, res) => {
 
 
 // Route dynamique pour la configuration d'un serveur spécifique
-app.get('/dashboard/:guildId', (req, res) => {
-    if (!req.session || !req.session.user) {
-        return res.redirect('/auth/discord');
-    }
-    const guild = client.guilds.cache.get(req.params.guildId);
-    const channels = guild ? Array.from(guild.channels.cache.values()) : [];
-    const roles = guild ? Array.from(guild.roles.cache.values()) : [];
-    res.render('server', { channels, roles });
 });
 
 
@@ -158,19 +150,26 @@ app.get('/dashboard', (req, res) => {
 });
 
 
-app.get("/dashboard/:guildId", async (req, res) => {
-    try {
-        const guild = client.guilds.cache.get(req.params.guildId);
-        if (!guild) return res.status(404).send("Serveur introuvable ou le bot n'y est pas.");
-        const channels = Array.from(guild.channels.cache.values());
-        const roles = Array.from(guild.roles.cache.values());
-        res.render("server", { guild, channels, roles });
-    } catch (error) {
+} catch (error) {
         console.error(error);
         res.status(500).send("Internal Server Error");
     }
 });
 } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+
+app.get("/dashboard/:guildId", async (req, res) => {
+    try {
+        const guild = client.guilds.cache.get(req.params.guildId);
+        if (!guild) return res.status(404).send("Serveur introuvable ou le bot n y est pas.");
+        const channels = Array.from(guild.channels.cache.values());
+        const roles = Array.from(guild.roles.cache.values());
+        res.render("server", { guild, channels, roles });
+    } catch (error) {
         console.error(error);
         res.status(500).send("Internal Server Error");
     }
