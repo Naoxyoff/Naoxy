@@ -143,7 +143,7 @@ app.get('/dashboard/:guildId', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/discord');
     }
-    res.sendFile(path.join(__dirname, 'web', 'views', 'server.html'));
+    res.render('server');
 });
 
 
