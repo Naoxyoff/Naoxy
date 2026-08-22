@@ -32,7 +32,8 @@ module.exports = {
       const rawMsg = settings.leave_message ?? "Au revoir **{user}** ! On espère te revoir sur **{guild}** 👏";
       const msg = rawMsg
         .replace(/{user}/g, member.user.username)
-        .replace(/{guild}/g, member.guild.name);
+        .replace(/{guild}/g, member.guild.name)
+        .replace(/\\n/g, '\n');
 
       const embed = new EmbedBuilder()
         .setColor(COLORS?.error || 0xef4444)
