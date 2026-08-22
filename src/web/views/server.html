@@ -10,11 +10,11 @@
             --bg-color: #040508;
             --card-bg: rgba(12, 14, 20, 0.85);
             --card-border: rgba(255, 255, 255, 0.06);
-            --card-border-hover: rgba(234, 179, 8, 0.4);
+            --card-border-hover: rgba(139, 92, 246, 0.4);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent-primary: #eab308; /* Accent jaune/doré élégant */
-            --accent-glow: rgba(234, 179, 8, 0.12);
+            --accent-primary: #8b5cf6; /* Violet néon principal */
+            --accent-glow: rgba(139, 92, 246, 0.15);
             --success: #10b981;
         }
 
@@ -39,7 +39,7 @@
             position: absolute;
             width: 700px;
             height: 700px;
-            background: radial-gradient(circle, rgba(234, 179, 8, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, transparent 70%);
             border-radius: 50%;
             top: -150px;
             right: -150px;
@@ -65,7 +65,7 @@
             font-weight: 700;
             font-size: 1.2rem;
             letter-spacing: 0.8px;
-            background: linear-gradient(135deg, #ffffff, #facc15);
+            background: linear-gradient(135deg, #ffffff, #a78bfa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
@@ -110,7 +110,7 @@
             margin: 0 auto;
         }
 
-        /* Sidebar exacte */
+        /* Sidebar avec design violet/bleu */
         .sidebar {
             width: 290px;
             background: var(--card-bg);
@@ -176,12 +176,12 @@
         .menu-item.active {
             background: var(--accent-glow);
             color: var(--text-main);
-            border-color: rgba(234, 179, 8, 0.3);
-            box-shadow: 0 0 20px rgba(234, 179, 8, 0.08);
+            border-color: rgba(139, 92, 246, 0.35);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.12);
         }
 
         .menu-item.active .menu-icon {
-            background: rgba(234, 179, 8, 0.1);
+            background: rgba(139, 92, 246, 0.12);
             border-color: var(--accent-primary);
             color: var(--accent-primary);
         }
@@ -269,22 +269,23 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #eab308, #ca8a04);
-            color: #040508;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
             border: none;
             padding: 14px 28px;
             border-radius: 12px;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 0.92rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(234, 179, 8, 0.25);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
             width: fit-content;
         }
 
         .btn-primary:hover {
             opacity: 0.92;
             transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.45);
         }
 
         #toast {
@@ -326,7 +327,7 @@
     </header>
 
     <div class="main-container">
-        <!-- Sidebar avec le design exact demandé -->
+        <!-- Sidebar Navigation -->
         <div class="sidebar">
             <div class="nav-title">Navigation</div>
 
@@ -367,7 +368,6 @@
         <!-- Contenu Dynamique -->
         <div class="content-area">
             
-            <!-- 1. VUE D'ENSEMBLE -->
             <div id="overview" class="section-view active">
                 <div class="page-header">
                     <h1>Vue d'ensemble</h1>
@@ -379,7 +379,6 @@
                 </div>
             </div>
 
-            <!-- 2. TICKETS -->
             <div id="tickets" class="section-view">
                 <div class="page-header">
                     <h1>Gestion des Tickets</h1>
@@ -395,7 +394,6 @@
                 </div>
             </div>
 
-            <!-- 3. LOGS -->
             <div id="logs" class="section-view">
                 <div class="page-header">
                     <h1>Journaux & Logs</h1>
@@ -411,7 +409,6 @@
                 </div>
             </div>
 
-            <!-- 4. PERMISSIONS -->
             <div id="permissions" class="section-view">
                 <div class="page-header">
                     <h1>Gestion des Permissions</h1>
@@ -423,7 +420,6 @@
                 </div>
             </div>
 
-            <!-- 5. MODERATION -->
             <div id="moderation" class="section-view">
                 <div class="page-header">
                     <h1>Modération & Sanctions</h1>
@@ -435,7 +431,6 @@
                 </div>
             </div>
 
-            <!-- 6. SECURITE -->
             <div id="security" class="section-view">
                 <div class="page-header">
                     <h1>Sécurité du Serveur</h1>
@@ -447,7 +442,6 @@
                 </div>
             </div>
 
-            <!-- 7. SAUVEGARDES -->
             <div id="backups" class="section-view">
                 <div class="page-header">
                     <h1>Sauvegardes (Backups)</h1>
@@ -459,7 +453,6 @@
                 </div>
             </div>
 
-            <!-- 8. MODULES -->
             <div id="modules" class="section-view">
                 <div class="page-header">
                     <h1>Modules & Extensions</h1>
