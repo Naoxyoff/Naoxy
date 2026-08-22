@@ -1,3 +1,4 @@
+console.log("[DEBUG] Lancement de index.js...");
 process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', err));
 process.on('uncaughtException', (err) => console.error('[Exception non gérée]', err));
 
