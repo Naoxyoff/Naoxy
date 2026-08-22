@@ -104,9 +104,7 @@ const PORT = process.env.PORT || 3001;
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'web', 'views', 'index.html'));
 });
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'web', 'views', 'index.html'));
-});
+
 
 // API Dashboard : renvoie l'utilisateur connecté et ses serveurs filtrés (Admin)
 app.get('/api/user', (req, res) => {
