@@ -1,3 +1,5 @@
+const express = require("express");
+const app = express();
 
 (async () => {
     try {
@@ -80,7 +82,7 @@ client.once("clientReady", async () => {
 });
 
 // ── Dashboard Configuration Propre ──
-const app = express();
+
 
 app.get("/", (req, res) => {
     res.status(200).send("Bot & Dashboard Orbis is online!");
@@ -171,6 +173,9 @@ app.get("/dashboard/:guildId", async (req, res) => {
 
 
 const PORT = process.env.PORT || 3000;
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
-    console.log("🚀 Serveur Express en écoute sur le port " + PORT);
+    console.log("🌐 Serveur Express en écoute sur le port " + PORT);
 });
