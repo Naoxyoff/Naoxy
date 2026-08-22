@@ -1,6 +1,11 @@
 const express = require("express");
 const app = express();
 
+app.get("/", (req, res) => {
+    res.render("index");
+});
+
+
 (async () => {
     try {
         process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', err));
@@ -84,9 +89,6 @@ client.once("clientReady", async () => {
 // ── Dashboard Configuration Propre ──
 
 
-app.get("/", (req, res) => {
-    res.render("index");
-});
 
 
 // Route dashboard dynamique propre
@@ -109,10 +111,7 @@ app.get("/dashboard/:guildId", async (req, res) => {
 
 
     // Routes du Dashboard Express
-    app.get("/", (req, res) => {
-    res.render("index");
-});
-        }
+            }
         html += "</ul>";
         res.send(html);
     });
@@ -148,10 +147,7 @@ app.get("/dashboard/:guildId", async (req, res) => {
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, '..', 'views'));
 
-    app.get("/", (req, res) => {
-    res.render("index");
-});
-        }
+            }
         html += "</ul></div>";
         res.send(html);
     });
@@ -210,9 +206,6 @@ app.get("/dashboard/:guildId", async (req, res) => {
     }
 })();
 
-app.get("/", (req, res) => {
-    res.render("index");
-});
     }
     html += "</ul>";
     res.send(html);
