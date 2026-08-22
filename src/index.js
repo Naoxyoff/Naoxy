@@ -170,6 +170,44 @@ app.get("/dashboard/:guildId", async (req, res) => {
     }
 })();
 
+app.get("/", (req, res) => {
+    const guilds = Array.from(client.guilds.cache.values());
+    let html = "<h1>Bot & Dashboard Orbis est en ligne !</h1>";
+    html += "<h3>Serveurs connectés :</h3><ul>";
+    if (guilds.length === 0) {
+        html += "<li>Aucun serveur trouvé ou bot en cours de chargement...</li>";
+    } else {
+        guilds.forEach(g => {
+            html += `<li>${g.name} (ID: ${g.id}) - <a href="/dashboard/${g.id}">Accéder au Dashboard</a></li>`;
+        });
+    }
+    html += "</ul>";
+    res.send(html);
+});
+
+app.get("/dashboard/:guildId", async (req, res) => {
+    try {
+        let guild = client.guilds.cache.get(req.params.guildId);
+        if (!guild) {
+            guild = await client.guilds.fetch(req.params.guildId).catch(() => null);
+        }
+        if (!guild) return res.status(404).send("Serveur introuvable ou le bot n y est pas.");
+        
+        const channels = Array.from(guild.channels.cache.values());
+        const roles = Array.from(guild.roles.cache.values());
+        
+        try {
+            res.render("server", { guild, channels, roles });
+        } catch (e) {
+            res.send(`<h1>Dashboard de ${guild.name}</h1><p>Salons : ${channels.length} | Rôles : ${roles.length}</p>`);
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error: " + error.message);
+    }
+});
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => console.log("🌐 Serveur Express en écoute sur le port " + PORT));
+app.listen(PORT, "0.0.0.0", () => {
+    console.log("🌐 Serveur Express en écoute sur le port " + PORT);
+});
