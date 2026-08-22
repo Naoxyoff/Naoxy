@@ -170,6 +170,11 @@ app.get("/dashboard/:guildId", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+} catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 app.listen(PORT, "0.0.0.0", () => console.log('🌐 Serveur sur le port ' + PORT));
 
