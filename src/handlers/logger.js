@@ -87,10 +87,46 @@ async function logRoleDelete(role) {
     .setTimestamp()] }).catch(() => {});
 }
 
+
+async function logMemberUpdate(oldMember, newMember) {
+  if (!newMember.guild) return;
+  const settings = await getSettings(newMember.guild.id);
+  const channelId = settings?.log_serveur_channel;
+  if (!channelId) return;
+  const ch = newMember.guild.channels.cache.get(channelId);
+  if (!ch) return;
+
+  if (oldMember.nickname !== newMember.nickname) {
+    ch.send({ embeds: [new EmbedBuilder()
+      .setColor(0xf59e0b)
+      .setDescription(`✏️ Pseudo modifié pour ${newMember.user} : **${oldMember.nickname || oldMember.user.username}** → **${newMember.nickname || newMember.user.username}**`)
+      .setTimestamp()] }).catch(() => {});
+    return;
+  }
+
+  const addedRoles = newMember.roles.cache.filter(r => !oldMember.roles.cache.has(r.id));
+  const removedRoles = oldMember.roles.cache.filter(r => !newMember.roles.cache.has(r.id));
+
+  if (addedRoles.size > 0) {
+    ch.send({ embeds: [new EmbedBuilder()
+      .setColor(0x10b981)
+      .setDescription(`➕ Rôle(s) ajouté(s) à ${newMember.user} : ${addedRoles.map(r => r.name).join(', ')}`)
+      .setTimestamp()] }).catch(() => {});
+  }
+
+  if (removedRoles.size > 0) {
+    ch.send({ embeds: [new EmbedBuilder()
+      .setColor(0xef4444)
+      .setDescription(`➖ Rôle(s) retiré(s) à ${newMember.user} : ${removedRoles.map(r => r.name).join(', ')}`)
+      .setTimestamp()] }).catch(() => {});
+  }
+}
+
 module.exports = {
   logChannelCreate,
   logChannelDelete,
   logMessageUpdate,
   logMessageDelete,
-  logRoleDelete
+  logRoleDelete,
+  logMemberUpdate
 };

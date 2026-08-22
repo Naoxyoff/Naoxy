@@ -88,20 +88,8 @@ const PORT = process.env.PORT || 3001;
 app.get('/', (req, res) => res.send('OK'));
 app.listen(PORT, "0.0.0.0", () => console.log('🌐 Serveur sur le port ' + PORT));
 
-// ── Whitelist ──
-const WHITELIST = [
-  "1469110978028245168",
-  "1499908548585459792",
-  "1509358317862916218",
-];
-
 client.on("guildCreate", async (guild) => {
-  if (!WHITELIST.includes(guild.id)) {
-    console.log("❌ Serveur non autorisé : " + guild.name + " (" + guild.id + ") — départ automatique");
-    await guild.leave();
-  } else {
-    console.log("✅ Nouveau serveur autorisé : " + guild.name);
-  }
+  console.log("✅ Nouveau serveur : " + guild.name + " (" + guild.id + ")");
 });
 
 // Fonction principale pour démarrer le bot et initialiser Turso
