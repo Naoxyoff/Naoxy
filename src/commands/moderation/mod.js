@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = require("discord.js");
 const db = require("../../database/db.js").default || require("../../database/db.js");
 const { successEmbed, errorEmbed, warnEmbed, COLORS, parseDuration, formatDuration } = require("../../utils/helpers.js");
 
