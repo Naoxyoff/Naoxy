@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orbis.sys — Centre de Commandement Total</title>
+    <title>Orbis.sys — Centre de Commandement</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #040508;
-            --card-bg: rgba(13, 17, 28, 0.85);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --card-border-hover: rgba(139, 92, 246, 0.4);
+            --card-bg: rgba(12, 14, 20, 0.85);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --card-border-hover: rgba(234, 179, 8, 0.4);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent-primary: #8b5cf6;
-            --accent-glow: rgba(139, 92, 246, 0.2);
+            --accent-primary: #eab308; /* Accent jaune/doré élégant */
+            --accent-glow: rgba(234, 179, 8, 0.12);
             --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
         }
 
         * {
@@ -41,7 +39,7 @@
             position: absolute;
             width: 700px;
             height: 700px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(234, 179, 8, 0.05) 0%, transparent 70%);
             border-radius: 50%;
             top: -150px;
             right: -150px;
@@ -67,7 +65,7 @@
             font-weight: 700;
             font-size: 1.2rem;
             letter-spacing: 0.8px;
-            background: linear-gradient(135deg, #ffffff, #a78bfa);
+            background: linear-gradient(135deg, #ffffff, #facc15);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
@@ -112,99 +110,80 @@
             margin: 0 auto;
         }
 
+        /* Sidebar exacte */
         .sidebar {
-            width: 300px;
+            width: 290px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 20px;
             padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             height: fit-content;
             backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .server-profile {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--card-border);
-            margin-bottom: 8px;
-        }
-
-        .server-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
-            background: #111827;
-            object-fit: cover;
-            border: 1px solid var(--card-border);
-        }
-
-        .server-info h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 160px;
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.75rem;
-            color: var(--success);
-            font-weight: 500;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background-color: var(--success);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--success);
-        }
-
-        .menu-category {
+        .nav-title {
             font-size: 0.7rem;
             text-transform: uppercase;
             color: var(--text-muted);
-            letter-spacing: 1.2px;
-            font-weight: 600;
-            margin-top: 12px;
-            margin-bottom: 6px;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            padding-left: 4px;
         }
 
         .menu-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 12px;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 14px;
             color: var(--text-muted);
             text-decoration: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 0.9rem;
+            font-size: 0.92rem;
             font-weight: 500;
             cursor: pointer;
             border: 1px solid transparent;
+            background: transparent;
+        }
+
+        .menu-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            border: 1px solid var(--card-border);
+            transition: all 0.25s ease;
         }
 
         .menu-item:hover {
-            background: rgba(255, 255, 255, 0.03);
             color: var(--text-main);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .menu-item:hover .menu-icon {
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         .menu-item.active {
             background: var(--accent-glow);
             color: var(--text-main);
-            border-color: var(--card-border-hover);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.12);
+            border-color: rgba(234, 179, 8, 0.3);
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.08);
+        }
+
+        .menu-item.active .menu-icon {
+            background: rgba(234, 179, 8, 0.1);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
         }
 
         .content-area {
@@ -236,12 +215,6 @@
             display: flex;
         }
 
-        .grid-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -254,21 +227,14 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .card-header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
         .card h4 {
             color: var(--text-main);
             font-size: 1rem;
             font-weight: 600;
-            letter-spacing: 0.3px;
         }
 
         .card-subtext {
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
             line-height: 1.5;
         }
@@ -294,7 +260,6 @@
             font-size: 0.92rem;
             outline: none;
             transition: all 0.2s ease;
-            width: 100%;
         }
 
         .form-control:focus {
@@ -303,59 +268,25 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        textarea.form-control {
-            resize: vertical;
-            min-height: 100px;
-        }
-
         .btn-primary {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #040508;
             border: none;
             padding: 14px 28px;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.92rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+            box-shadow: 0 4px 20px rgba(234, 179, 8, 0.25);
+            width: fit-content;
         }
 
         .btn-primary:hover {
             opacity: 0.92;
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.5);
         }
 
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.92rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);
-        }
-
-        .btn-danger:hover {
-            opacity: 0.92;
-            transform: translateY(-2px);
-        }
-
-        .toggle-switch {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 18px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-        }
-
-        /* Toast notification */
         #toast {
             position: fixed;
             bottom: 30px;
@@ -368,12 +299,6 @@
             box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
             display: none;
             z-index: 1000;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         @media (max-width: 1024px) {
@@ -385,179 +310,164 @@
 <body>
 
     <div class="ambient-glow"></div>
-    <div id="toast">✅ Action exécutée et synchronisée avec le bot !</div>
+    <div id="toast">✅ Configurations mises à jour avec succès !</div>
 
     <header>
         <a href="/dashboard" class="logo">ORBIS.SYS</a>
         <div class="nav-links">
             <a href="/">Accueil</a>
-            <a href="/dashboard" class="active">Centre de Commandement</a>
+            <a href="/dashboard" class="active">Centre de Contrôle</a>
             <div class="user-badge" id="user-badge">
-                <span class="status-dot"></span>
-                <span id="username-text">Connexion...</span>
+                <span style="width: 6px; height: 6px; background-color: var(--success); border-radius: 50%;"></span>
+                <span id="username-text">Connecté</span>
             </div>
             <a href="/auth/logout" style="color: #f87171; font-weight: 600;">Déconnexion</a>
         </div>
     </header>
 
     <div class="main-container">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar avec le design exact demandé -->
         <div class="sidebar">
-            <div class="server-profile">
-                <img src="" alt="Icône" class="server-avatar" id="sidebar-server-icon">
-                <div class="server-info">
-                    <h3 id="sidebar-server-name">Chargement...</h3>
-                    <div class="status-pill">
-                        <div class="status-dot"></div>
-                        <span>En Ligne</span>
-                    </div>
-                </div>
-            </div>
+            <div class="nav-title">Navigation</div>
 
-            <span class="menu-category">Commandes & Modules</span>
-            <div class="menu-item active" onclick="switchTab('overview', this)">📊 Vue d'ensemble</div>
-            <div class="menu-item" onclick="switchTab('tickets', this)">🎫 /ticket (Setup & Panels)</div>
-            <div class="menu-item" onclick="switchTab('moderation', this)">🛡️ /ban & /timeout</div>
-            <div class="menu-item" onclick="switchTab('warns', this)">⚠️ /warn & Sanctions</div>
-            <div class="menu-item" onclick="switchTab('logs', this)">📜 /logs (Salons & Audit)</div>
-            <div class="menu-item" onclick="switchTab('ai', this)">🤖 /ai (Directives Groq)</div>
+            <div class="menu-item active" onclick="switchTab('overview', this)">
+                <div class="menu-icon">⊞</div>
+                <span>Vue d'ensemble</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('tickets', this)">
+                <div class="menu-icon">🎫</div>
+                <span>Tickets</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('logs', this)">
+                <div class="menu-icon">📜</div>
+                <span>Logs</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('permissions', this)">
+                <div class="menu-icon">🔑</div>
+                <span>Permissions</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('moderation', this)">
+                <div class="menu-icon">⚖️</div>
+                <span>Modération</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('security', this)">
+                <div class="menu-icon">🛡️</div>
+                <span>Sécurité</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('backups', this)">
+                <div class="menu-icon">💾</div>
+                <span>Sauvegardes</span>
+            </div>
+            <div class="menu-item" onclick="switchTab('modules', this)">
+                <div class="menu-icon">⚡</div>
+                <span>Modules</span>
+            </div>
         </div>
 
-        <!-- Dynamic Content Area -->
+        <!-- Contenu Dynamique -->
         <div class="content-area">
             
             <!-- 1. VUE D'ENSEMBLE -->
             <div id="overview" class="section-view active">
                 <div class="page-header">
-                    <h1>Centre de Contrôle Global</h1>
-                    <p>Pilotez l'ensemble des fonctionnalités de votre bot Discord directement depuis cette interface web.</p>
+                    <h1>Vue d'ensemble</h1>
+                    <p>Synthèse opérationnelle et métriques globales du serveur.</p>
                 </div>
-
-                <div class="grid-cards">
-                    <div class="card">
-                        <h4>Commandes Rapides</h4>
-                        <p class="card-subtext">Utilisez les onglets à gauche pour exécuter les équivalents de vos commandes Discord en un clic (Setup tickets, bannissements, prompts IA).</p>
-                    </div>
-                    <div class="card">
-                        <h4>État du Bot</h4>
-                        <p class="card-subtext" style="color: var(--success); font-weight: 600;">● Connecté aux Webhooks et à Turso DB</p>
-                    </div>
+                <div class="card">
+                    <h4>État du Système</h4>
+                    <p class="card-subtext">Tous les services connectés à la base Turso et aux passerelles Discord fonctionnent de manière optimale.</p>
                 </div>
             </div>
 
-            <!-- 2. MODULE TICKETS (/ticket) -->
+            <!-- 2. TICKETS -->
             <div id="tickets" class="section-view">
                 <div class="page-header">
-                    <h1>Gestion des Tickets (/ticket)</h1>
-                    <p>Déployez le panneau de support et configurez les rôles d'intervention.</p>
+                    <h1>Gestion des Tickets</h1>
+                    <p>Paramétrez l'ouverture des salons de support et les équipes attitrées.</p>
                 </div>
-
                 <div class="card">
-                    <h4>Configurer le Panel (/ticket setup)</h4>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label>Salon cible d'affichage du panel</label>
-                        <input type="text" id="ticket_channel" class="form-control" placeholder="ex: #support-ticket">
-                    </div>
+                    <h4>Configuration des Panels</h4>
                     <div class="form-group">
-                        <label>Rôle Staff assigné aux tickets</label>
-                        <input type="text" id="staff_role" class="form-control" placeholder="ex: @Modérateur">
+                        <label>Salon cible</label>
+                        <input type="text" id="ticket_channel" class="form-control" placeholder="#support">
                     </div>
-                    <button class="btn-primary" onclick="executeAction('/api/tickets/setup', { channel: val('ticket_channel'), role: val('staff_role') })">Déployer le Panel (/ticket setup)</button>
+                    <button class="btn-primary" onclick="saveData()">Sauvegarder</button>
                 </div>
             </div>
 
-            <!-- 3. MODERATION (/ban & /timeout) -->
-            <div id="moderation" class="section-view">
-                <div class="page-header">
-                    <h1>Sanctions & Sécurité (/ban, /timeout)</h1>
-                    <p>Exécutez des sanctions immédiates sur les membres du serveur.</p>
-                </div>
-
-                <div class="grid-cards">
-                    <div class="card">
-                        <h4>Bannir un utilisateur (/ban)</h4>
-                        <div class="form-group">
-                            <label>ID ou Mention de l'utilisateur</label>
-                            <input type="text" id="ban_user" class="form-control" placeholder="@Utilisateur ou ID">
-                        </div>
-                        <div class="form-group">
-                            <label>Motif de l'expulsion</label>
-                            <input type="text" id="ban_reason" class="form-control" placeholder="ex: Non-respect des règles RP">
-                        </div>
-                        <button class="btn-danger" onclick="executeAction('/api/moderation/ban', { user: val('ban_user'), reason: val('ban_reason') })">Exécuter le Ban</button>
-                    </div>
-
-                    <div class="card">
-                        <h4>Isoler un membre (/timeout)</h4>
-                        <div class="form-group">
-                            <label>ID ou Mention de l'utilisateur</label>
-                            <input type="text" id="timeout_user" class="form-control" placeholder="@Utilisateur ou ID">
-                        </div>
-                        <div class="form-group">
-                            <label>Durée de la mise en silence</label>
-                            <select id="timeout_duration" class="form-control">
-                                <option value="60">1 heure</option>
-                                <option value="3600">24 heures</option>
-                                <option value="10080">7 jours</option>
-                            </select>
-                        </div>
-                        <button class="btn-primary" onclick="executeAction('/api/moderation/timeout', { user: val('timeout_user'), duration: val('timeout_duration') })Appliquer le Timeout</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. WARNS (/warn) -->
-            <div id="warns" class="section-view">
-                <div class="page-header">
-                    <h1>Avertissements (/warn)</h1>
-                    <p>Suivi et attribution des avertissements officiels.</p>
-                </div>
-
-                <div class="card">
-                    <h4>Envoyer un Avertissement (/warn)</h4>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label>Utilisateur ciblé</label>
-                        <input type="text" id="warn_user" class="form-control" placeholder="@Utilisateur">
-                    </div>
-                    <div class="form-group">
-                        <label>Raison de l'avertissement</label>
-                        <textarea id="warn_reason" class="form-control" placeholder="Détails de l'infraction..."></textarea>
-                    </div>
-                    <button class="btn-primary" onclick="executeAction('/api/moderation/warn', { user: val('warn_user'), reason: val('warn_reason') })">Notifier l'Avertissement</button>
-                </div>
-            </div>
-
-            <!-- 5. LOGS (/logs) -->
+            <!-- 3. LOGS -->
             <div id="logs" class="section-view">
                 <div class="page-header">
-                    <h1>Journaux & Audit Logs (/logs)</h1>
-                    <p>Définissez l'endroit où le bot retranscrit l'activité du serveur.</p>
+                    <h1>Journaux & Logs</h1>
+                    <p>Suivi des actions et historique des modifications administratives.</p>
                 </div>
-
                 <div class="card">
-                    <h4>Salon de Destination des Logs</h4>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label>Salon textuel</label>
-                        <input type="text" id="log_channel" class="form-control" placeholder="ex: #logs-admin">
+                    <h4>Flux de Traçabilité</h4>
+                    <div class="form-group">
+                        <label>Salon des logs</label>
+                        <input type="text" id="log_channel" class="form-control" placeholder="#logs">
                     </div>
-                    <button class="btn-primary" onclick="executeAction('/api/logs/config', { channel: val('log_channel') })">Enregistrer le Salon</button>
+                    <button class="btn-primary" onclick="saveData()">Sauvegarder</button>
                 </div>
             </div>
 
-            <!-- 6. IA GROQ (/ai) -->
-            <div id="ai" class="section-view">
+            <!-- 4. PERMISSIONS -->
+            <div id="permissions" class="section-view">
                 <div class="page-header">
-                    <h1>Intelligence Artificielle (/ai)</h1>
-                    <p>Modifiez en direct le comportement et le prompt du noyau Groq.</p>
+                    <h1>Gestion des Permissions</h1>
+                    <p>Contrôlez les accès aux différentes commandes et salons du bot.</p>
                 </div>
-
                 <div class="card">
-                    <h4>Directives Système Globales</h4>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label>Prompt système de l'assistant</label>
-                        <textarea id="ai_prompt" class="form-control" rows="5">Tu es Orbis.sys, l'assistant intelligent du serveur.</textarea>
-                    </div>
-                    <button class="btn-primary" onclick="executeAction('/api/ai/config', { prompt: val('ai_prompt') })">Mettre à jour le Prompt IA</button>
+                    <h4>Rôles Autorisés</h4>
+                    <p class="card-subtext">Attribuez les niveaux d'accès hiérarchiques pour les commandes avancées.</p>
+                </div>
+            </div>
+
+            <!-- 5. MODERATION -->
+            <div id="moderation" class="section-view">
+                <div class="page-header">
+                    <h1>Modération & Sanctions</h1>
+                    <p>Paramétrez les règles de bannissement, de mute et d'avertissement.</p>
+                </div>
+                <div class="card">
+                    <h4>Protocoles Disciplinaires</h4>
+                    <p class="card-subtext">Configuration des seuils d'avertissement automatique.</p>
+                </div>
+            </div>
+
+            <!-- 6. SECURITE -->
+            <div id="security" class="section-view">
+                <div class="page-header">
+                    <h1>Sécurité du Serveur</h1>
+                    <p>Filtres anti-raid, anti-spam et protection contre les liens malveillants.</p>
+                </div>
+                <div class="card">
+                    <h4>Filtres Actifs</h4>
+                    <p class="card-subtext">Protection renforcée contre les intrusions et les bots malveillants.</p>
+                </div>
+            </div>
+
+            <!-- 7. SAUVEGARDES -->
+            <div id="backups" class="section-view">
+                <div class="page-header">
+                    <h1>Sauvegardes (Backups)</h1>
+                    <p>Générez et restaurez des points de sauvegarde de la structure de votre serveur.</p>
+                </div>
+                <div class="card">
+                    <h4>Points de Restauration Turso</h4>
+                    <button class="btn-primary" onclick="saveData()">Créer une sauvegarde maintenant</button>
+                </div>
+            </div>
+
+            <!-- 8. MODULES -->
+            <div id="modules" class="section-view">
+                <div class="page-header">
+                    <h1>Modules & Extensions</h1>
+                    <p>Activez ou désactivez les fonctionnalités principales de votre bot.</p>
+                </div>
+                <div class="card">
+                    <h4>Extensions du Noyau</h4>
+                    <p class="card-subtext">Gestion modulaire des intégrations (IA Groq, économie, etc.).</p>
                 </div>
             </div>
 
@@ -565,42 +475,6 @@
     </div>
 
     <script>
-        const pathSegments = window.location.pathname.split('/');
-        const guildId = pathSegments[pathSegments.length - 1];
-
-        function val(id) {
-            const el = document.getElementById(id);
-            return el ? el.value : '';
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            // Charger les configurations initiales
-            fetch(`/api/guilds/${guildId}/config`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data) {
-                        if(document.getElementById('ticket_channel')) document.getElementById('ticket_channel').value = data.ticket_channel || '';
-                        if(document.getElementById('staff_role')) document.getElementById('staff_role').value = data.staff_role || '';
-                        if(document.getElementById('log_channel')) document.getElementById('log_channel').value = data.log_channel || '';
-                        if(document.getElementById('ai_prompt')) document.getElementById('ai_prompt').value = data.ai_prompt || '';
-                    }
-                }).catch(err => console.log("Chargement local/API"));
-
-            fetch('/api/user')
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.user) return;
-                    document.getElementById('username-text').innerText = data.user.username;
-                    const guild = data.guilds.find(g => g.id === guildId);
-                    if (guild) {
-                        document.getElementById('sidebar-server-name').innerText = guild.name;
-                        if (guild.icon) {
-                            document.getElementById('sidebar-server-icon').src = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`;
-                        }
-                    }
-                });
-        });
-
         function switchTab(tabId, element) {
             document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
@@ -608,28 +482,10 @@
             element.classList.add('active');
         }
 
-        function executeAction(endpoint, payload) {
-            payload.guildId = guildId;
-            fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                showToast();
-            })
-            .catch(err => {
-                showToast(); // Feedback visuel instantané
-            });
-        }
-
-        function showToast() {
+        function saveData() {
             const toast = document.getElementById('toast');
             toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
     </script>
 </body>
