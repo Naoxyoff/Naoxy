@@ -57,6 +57,29 @@ module.exports = {
         .addChoices({ name: "Donner", value: "give" }, { name: "Retirer", value: "take" }))),
 
   async execute(interaction) {
+    // ── Vérification de la hiérarchie des rôles ──
+    const targetRole = interaction.options.getRole("role");
+    if (targetRole && interaction.guild.ownerId !== interaction.user.id) {
+        const memberHighestRole = interaction.member.roles.highest;
+        const botHighestRole = interaction.guild.members.me.roles.highest;
+
+        // 1. Vérifie si le rôle cible est supérieur ou égal au rôle de l'exécutant
+        if (targetRole.position >= memberHighestRole.position) {
+            return interaction.reply({
+                embeds: [{ color: 0xff0000, title: "❌ Action interdite", description: "Tu ne peux pas gérer un rôle qui est supérieur ou égal à ton propre rôle le plus haut." }],
+                ephemeral: true
+            });
+        }
+
+        // 2. Vérifie si le rôle cible est supérieur ou égal au rôle du bot
+        if (targetRole.position >= botHighestRole.position) {
+            return interaction.reply({
+                embeds: [{ color: 0xff0000, title: "❌ Action interdite", description: "Je ne peux pas gérer ce rôle car il est supérieur ou égal à mon propre rôle le plus haut." }],
+                ephemeral: true
+            });
+        }
+    }
+
     const group = interaction.options.getSubcommandGroup(false);
     const sub = interaction.options.getSubcommand();
     const guild = interaction.guild;
