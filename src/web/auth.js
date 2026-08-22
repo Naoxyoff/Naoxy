@@ -55,7 +55,10 @@ router.get('/auth/discord/callback', async (req, res) => {
         // On stocke les serveurs bruts dans la session pour le dashboard
         req.session.guilds = guildsData;
 
-        res.redirect('/dashboard');
+        req.session.save((err) => {
+            if (err) console.error("Erreur sauvegarde session:", err);
+            res.redirect('/dashboard');
+        });
     } catch (err) {
         console.error("Erreur OAuth2 Discord:", err);
         res.redirect('/?error=server_error');
