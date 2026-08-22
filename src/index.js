@@ -1,5 +1,8 @@
-console.log("[DEBUG] Lancement de index.js...");
-process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', err));
+
+console.log("[DEBUG] Début de execution globale...");
+(async () => {
+    try {
+        process.on('unhandledRejection', (err) => console.error('[Erreur non gérée]', err));
 process.on('uncaughtException', (err) => console.error('[Exception non gérée]', err));
 
 require("dotenv").config();
@@ -155,3 +158,9 @@ app.get("/dashboard/:guildId", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
+    } catch (err) {
+        console.error("[FATAL CRASH] Une erreur critique est survenue au démarrage :", err);
+        process.exit(1);
+    }
+})();
