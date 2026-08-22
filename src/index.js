@@ -158,6 +158,19 @@ app.get('/dashboard', (req, res) => {
 });
 
 
+app.get("/dashboard/:guildId", async (req, res) => {
+    try {
+        const guild = client.guilds.cache.get(req.params.guildId);
+        if (!guild) return res.status(404).send("Serveur introuvable ou le bot n'y est pas.");
+        const channels = Array.from(guild.channels.cache.values());
+        const roles = Array.from(guild.roles.cache.values());
+        res.render("server", { guild, channels, roles });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 app.listen(PORT, "0.0.0.0", () => console.log('🌐 Serveur sur le port ' + PORT));
 
 client.on("guildCreate", async (guild) => {
