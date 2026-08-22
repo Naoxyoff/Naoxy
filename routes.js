@@ -514,3 +514,16 @@ module.exports = (client, app) => {
   app.use(router);
   return router;
 };
+
+// Route dynamique pour le dashboard serveur (EJS)
+router.get('/dashboard/:guildId', async (req, res) => {
+    const guildId = req.params.guildId;
+    const guild = req.client.guilds.cache.get(guildId);
+    
+    if (!guild) return res.redirect('/dashboard');
+
+    const channels = guild.channels.cache.map(c => ({ id: c.id, name: c.name, type: c.type }));
+    const roles = guild.roles.cache.map(r => ({ id: r.id, name: r.name }));
+
+    res.render('server.ejs', { channels, roles });
+});
