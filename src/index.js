@@ -137,6 +137,16 @@ app.get('/api/user', (req, res) => {
     });
 });
 
+
+// Route dynamique pour la configuration d'un serveur spécifique
+app.get('/dashboard/:guildId', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/auth/discord');
+    }
+    res.sendFile(path.join(__dirname, 'web', 'views', 'dashboard.html'));
+});
+
+
 app.get('/dashboard', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/discord');
