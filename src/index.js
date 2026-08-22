@@ -79,12 +79,69 @@ client.once("clientReady", async () => {
 // ── Dashboard Configuration Propre ──
 const app = express();
 
+const session = require('express-session');
+const authRoutes = require('./web/auth');
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'orbis_super_secret_key_9988',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 1 jour
+}));
+
+app.use(authRoutes);
+
 app.set('trust proxy', 1);
 app.use(express.json());
 app.set('client', client);
 
 const PORT = process.env.PORT || 3001;
-app.get('/', (req, res) => res.send('OK'));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'web', 'views', 'index.html'));
+});
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'web', 'views', 'index.html'));
+});
+
+// API Dashboard : renvoie l'utilisateur connecté et ses serveurs filtrés (Admin)
+app.get('/api/user', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.json({ user: null });
+    }
+
+    const botClient = req.app.get('client');
+    const userGuilds = req.session.guilds || [];
+
+    // Filtrer les serveurs où l'utilisateur est Admin (Permission MANAGE_GUILD 0x20 ou ADMINISTRATOR 0x8)
+    const adminGuilds = userGuilds.filter(guild => {
+        const permissions = BigInt(guild.permissions);
+        const isAdmin = (permissions & 0x8n) === 0x8n || (permissions & 0x20n) === 0x20n;
+        return isAdmin;
+    }).map(guild => {
+        // Vérifier si le bot est présent sur ce serveur
+        const hasBot = botClient.guilds.cache.has(guild.id);
+        return {
+            id: guild.id,
+            name: guild.name,
+            icon: guild.icon,
+            hasBot: hasBot
+        };
+    });
+
+    res.json({
+        user: req.session.user,
+        guilds: adminGuilds
+    });
+});
+
+app.get('/dashboard', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/auth/discord');
+    }
+    res.sendFile(path.join(__dirname, 'web', 'views', 'dashboard.html'));
+});
+
+
 app.listen(PORT, "0.0.0.0", () => console.log('🌐 Serveur sur le port ' + PORT));
 
 client.on("guildCreate", async (guild) => {

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbis - Dashboard Officiel</title>
+    <style>
+        :root {
+            --bg-color: #06070b;
+            --primary-glow: #3b82f6;
+            --secondary-glow: #8b5cf6;
+            --accent-magenta: #ec4899;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --border-glow: rgba(59, 130, 246, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Effets d'orbes lumineux en arrière-plan (Style Orbis) */
+        .orb-bg {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 70%, transparent 100%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            top: 10%;
+            left: 15%;
+            animation: floatOrb 10s ease-in-out infinite alternate;
+        }
+
+        .orb-bg-2 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(139, 92, 246, 0.05) 70%, transparent 100%);
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            bottom: 10%;
+            right: 10%;
+            animation: floatOrb 14s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(6, 7, 11, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-dot {
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle, #60a5fa, #8b5cf6, #ec4899);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.8);
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--text-main);
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Petite sphère centrale déco */
+        .hero-orb-visual {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #60a5fa, #8b5cf6, #ec4899);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.4);
+            margin-bottom: 30px;
+            animation: pulseOrb 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseOrb {
+            0% { transform: scale(1); box-shadow: 0 0 30px rgba(139, 92, 246, 0.5); }
+            100% { transform: scale(1.08); box-shadow: 0 0 50px rgba(236, 72, 153, 0.8); }
+        }
+
+        .hero h1 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #60a5fa, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: #ffffff;
+            box-shadow: 0 4px 25px rgba(139, 92, 246, 0.4);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        /* Grille des modules gérés */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            width: 90%;
+            margin: 0 auto 60px auto;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: left;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .feature-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        footer {
+            display: flex;
+            justify-content: space-around;
+            padding: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(4, 5, 8, 0.9);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot-live {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb-bg"></div>
+    <div class="orb-bg-2"></div>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-dot"></div>
+            ORBIS.SYS
+        </div>
+        <nav>
+            <a href="/" class="active">Accueil</a>
+            <a href="/dashboard">Dashboard</a>
+        </nav>
+        <div class="user-badge">
+            <span>🟢 Connecté</span>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="hero-orb-visual"></div>
+        <h1>Contrôlez votre écosystème avec <span>ORBIS</span></h1>
+        <p>Centralisez vos salons de logs, automatisez vos tickets et gérez la sécurité de votre serveur Discord depuis une interface futuriste et fluide.</p>
+        <div class="cta-buttons">
+            <a href="/auth/discord" class="btn btn-primary">Accéder au Dashboard</a>
+            <a href="https://discord.com/oauth2/authorize?client_id=1360828232471150628" target="_blank" class="btn btn-outline">➕ Ajouter Orbis</a>
+        </div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3>📋 Logs Unifiés</h3>
+            <p>Suivi en temps réel des messages, des salons vocaux et de la sécurité du serveur dans un salon dédié.</p>
+        </div>
+        <div class="feature-card">
+            <h3>🎫 Système de Tickets</h3>
+            <p>Gestion rapide et structurée des demandes d'assistance avec archivage automatique.</p>
+        </div>
+        <div class="feature-card">
+            <h3>🛡️ Modération Avancée</h3>
+            <p>Protections actives contre les infractions, gestion des sanctions et filtrage intelligent.</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="stat-item">📁 <span>MODULES : Actifs & Synchronisés</span></div>
+        <div class="stat-item">⚙️ <span>VERSION : v1.2.6</span></div>
+        <div class="stat-item">⚡ <span>LATENCE : 38ms</span></div>
+        <div class="stat-item"><div class="dot-live"></div> <span>ÉTAT : Opérationnel</span></div>
+    </footer>
+
+</body>
+</html>

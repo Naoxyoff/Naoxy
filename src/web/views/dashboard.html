@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbis - Mes Serveurs</title>
+    <style>
+        :root {
+            --bg-color: #06070b;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --border-glow: rgba(139, 92, 246, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .orb-bg {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            top: 5%;
+            left: 10%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(6, 7, 11, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-dot {
+            width: 12px;
+            height: 12px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #8b5cf6;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: var(--text-main); }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .user-profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .logout-btn {
+            color: #f43f5e;
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 90%;
+            margin: 40px auto;
+            flex-grow: 1;
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { color: var(--text-main); }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .servers-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .server-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            transition: border-color 0.3s, transform 0.2s;
+        }
+
+        .server-card:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .server-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .server-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #1e293b;
+            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-muted);
+        }
+
+        .server-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .server-status {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .status-dot.active { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .status-dot.inactive { background: #64748b; }
+
+        .btn-manage {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+        .btn-manage:hover { opacity: 0.9; }
+
+        .btn-invite {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .btn-invite:hover { background: rgba(255, 255, 255, 0.1); }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(4, 5, 8, 0.9);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb-bg"></div>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-dot"></div>
+            ORBIS.SYS
+        </div>
+        <nav>
+            <a href="/">Accueil</a>
+            <a href="/dashboard" style="color: #fff; font-weight: 600;">Dashboard</a>
+        </nav>
+        <div class="user-profile">
+            <img id="user-avatar" src="" alt="Avatar">
+            <span id="user-name">Chargement...</span>
+            <a href="/logout" class="logout-btn">Déconnexion</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <a href="/" class="back-link">← RETOUR À L'ACCUEIL</a>
+        
+        <div class="dashboard-header">
+            <div>
+                <h1>Mes serveurs</h1>
+                <p>Sélectionnez l'espace que vous souhaitez administrer.</p>
+            </div>
+        </div>
+
+        <div id="servers-list" class="servers-grid">
+            <!-- Rempli dynamiquement via script -->
+            <p style="color: var(--text-muted);">Chargement de vos serveurs...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>ORBIS SYSTEM © 2026 — Tous droits réservés</p>
+    </footer>
+
+    <script>
+        fetch('/api/user')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.user) {
+                    window.location.href = '/auth/discord';
+                    return;
+                }
+                document.getElementById('user-name').innerText = data.user.username;
+                document.getElementById('user-avatar').src = data.user.avatar;
+
+                const listContainer = document.getElementById('servers-list');
+                listContainer.innerHTML = '';
+
+                if (!data.guilds || data.guilds.length === 0) {
+                    listContainer.innerHTML = '<p>Aucun serveur trouvé.</p>';
+                    return;
+                }
+
+                data.guilds.forEach(guild => {
+                    const card = document.createElement('div');
+                    card.className = 'server-card';
+
+                    const iconUrl = guild.icon 
+                        ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` 
+                        : null;
+                    
+                    const initials = guild.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+
+                    card.innerHTML = `
+                        <div class="server-info">
+                            <div class="server-icon">
+                                ${iconUrl ? `<img src="${iconUrl}" style="width:100%;height:100%;border-radius:50%;" />` : initials}
+                            </div>
+                            <div class="server-details">
+                                <h3>${guild.name}</h3>
+                                <div class="server-status">
+                                    <div class="status-dot ${guild.hasBot ? 'active' : 'inactive'}"></div>
+                                    <span style="color: var(--text-muted);">${guild.hasBot ? 'Orbis connecté' : 'Orbis absent'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            ${guild.hasBot 
+                                ? `<a href="/dashboard/${guild.id}" class="btn-manage">Configurer</a>` 
+                                : `<a href="https://discord.com/oauth2/authorize?client_id=1360828232471150628&scope=bot&permissions=8&guild_id=${guild.id}" target="_blank" class="btn-invite">Ajouter le bot</a>`
+                            }
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('servers-list').innerHTML = '<p style="color: #f43f5e;">Erreur lors du chargement des serveurs.</p>';
+            });
+    </script>
+</body>
+</html>
