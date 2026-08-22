@@ -13,9 +13,12 @@
             --card-border-hover: rgba(139, 92, 246, 0.4);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent-primary: #8b5cf6; /* Violet néon principal */
+            --accent-primary: #8b5cf6;
             --accent-glow: rgba(139, 92, 246, 0.15);
             --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gold-accent: #eab308;
         }
 
         * {
@@ -110,7 +113,6 @@
             margin: 0 auto;
         }
 
-        /* Sidebar avec design violet/bleu */
         .sidebar {
             width: 290px;
             background: var(--card-bg);
@@ -123,6 +125,8 @@
             height: fit-content;
             backdrop-filter: blur(12px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 100px;
         }
 
         .nav-title {
@@ -169,10 +173,6 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        .menu-item:hover .menu-icon {
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-
         .menu-item.active {
             background: var(--accent-glow);
             color: var(--text-main);
@@ -194,7 +194,7 @@
         }
 
         .page-header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             letter-spacing: -0.5px;
             margin-bottom: 6px;
@@ -215,6 +215,36 @@
             display: flex;
         }
 
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 0.8px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -222,21 +252,36 @@
             padding: 30px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
             backdrop-filter: blur(12px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .card h4 {
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card h3, .card h4 {
             color: var(--text-main);
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 600;
         }
 
-        .card-subtext {
-            font-size: 0.88rem;
+        .section-sublabel {
+            font-size: 0.72rem;
+            text-transform: uppercase;
             color: var(--text-muted);
-            line-height: 1.5;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
         .form-group {
@@ -246,13 +291,15 @@
         }
 
         .form-group label {
-            font-size: 0.88rem;
-            font-weight: 500;
-            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .form-control {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--card-border);
             padding: 14px 16px;
             border-radius: 12px;
@@ -260,32 +307,119 @@
             font-size: 0.92rem;
             outline: none;
             transition: all 0.2s ease;
+            width: 100%;
         }
 
         .form-control:focus {
             border-color: var(--accent-primary);
             box-shadow: 0 0 12px var(--accent-glow);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        select.form-control {
+            cursor: pointer;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #040508;
             border: none;
             padding: 14px 28px;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.92rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 4px 20px rgba(234, 179, 8, 0.2);
             width: fit-content;
         }
 
         .btn-primary:hover {
             opacity: 0.92;
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.45);
+        }
+
+        .btn-danger-outline {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger-outline:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
+        }
+
+        .panel-preview-box {
+            background: #090b10;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preview-inner {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .preview-bar {
+            height: 4px;
+            width: 100%;
+            background: var(--gold-accent);
+            border-radius: 2px;
+            margin-top: 4px;
+        }
+
+        .ticket-item-row {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-badge-archived {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .ticket-badge-closed {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         #toast {
@@ -304,14 +438,16 @@
 
         @media (max-width: 1024px) {
             .main-container { flex-direction: column; padding: 20px; }
-            .sidebar { width: 100%; }
+            .sidebar { width: 100%; position: relative; top: 0; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
     <div class="ambient-glow"></div>
-    <div id="toast">✅ Configurations mises à jour avec succès !</div>
+    <div id="toast">✅ Enregistré avec succès !</div>
 
     <header>
         <a href="/dashboard" class="logo">ORBIS.SYS</a>
@@ -327,15 +463,13 @@
     </header>
 
     <div class="main-container">
-        <!-- Sidebar Navigation -->
         <div class="sidebar">
             <div class="nav-title">Navigation</div>
-
-            <div class="menu-item active" onclick="switchTab('overview', this)">
+            <div class="menu-item" onclick="switchTab('overview', this)">
                 <div class="menu-icon">⊞</div>
                 <span>Vue d'ensemble</span>
             </div>
-            <div class="menu-item" onclick="switchTab('tickets', this)">
+            <div class="menu-item active" onclick="switchTab('tickets', this)">
                 <div class="menu-icon">🎫</div>
                 <span>Tickets</span>
             </div>
@@ -365,32 +499,305 @@
             </div>
         </div>
 
-        <!-- Contenu Dynamique -->
         <div class="content-area">
             
-            <div id="overview" class="section-view active">
+            <div id="overview" class="section-view">
                 <div class="page-header">
                     <h1>Vue d'ensemble</h1>
                     <p>Synthèse opérationnelle et métriques globales du serveur.</p>
                 </div>
                 <div class="card">
-                    <h4>État du Système</h4>
+                    <h3>État du Système</h3>
                     <p class="card-subtext">Tous les services connectés à la base Turso et aux passerelles Discord fonctionnent de manière optimale.</p>
                 </div>
             </div>
 
-            <div id="tickets" class="section-view">
+            <div id="tickets" class="section-view active">
                 <div class="page-header">
-                    <h1>Gestion des Tickets</h1>
-                    <p>Paramétrez l'ouverture des salons de support et les équipes attitrées.</p>
+                    <h1>Tickets</h1>
+                    <p>Personnalise le panneau public et choisis où les tickets seront créés.</p>
                 </div>
-                <div class="card">
-                    <h4>Configuration des Panels</h4>
-                    <div class="form-group">
-                        <label>Salon cible</label>
-                        <input type="text" id="ticket_channel" class="form-control" placeholder="#support">
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-title">Tickets ouverts</span>
+                        <span class="stat-value">0</span>
                     </div>
-                    <button class="btn-primary" onclick="saveData()">Sauvegarder</button>
+                    <div class="stat-card">
+                        <span class="stat-title">Créés 7 jours</span>
+                        <span class="stat-value">1</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-title">Fermés 7 jours</span>
+                        <span class="stat-value">2</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-title">Panels</span>
+                        <span class="stat-value">1</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header-flex">
+                        <h3>Panels</h3>
+                        <button class="btn-primary" style="padding: 10px 18px; font-size: 0.85rem;" onclick="triggerAction('Création d'un nouveau panel')">+ Créer un panel</button>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+                        <div class="card-header-flex">
+                            <div>
+                                <h4 style="margin-bottom: 4px;">Panel principal</h4>
+                                <span style="font-size: 0.82rem; color: var(--text-muted);">Panel principal</span>
+                            </div>
+                            <span style="background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">ACTIF</span>
+                        </div>
+
+                        <div class="panel-preview-box">
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Aperçu direct</span>
+                            <div class="preview-inner">
+                                <span style="font-weight: 700; font-size: 0.95rem;" id="preview_title_text">Support - Seeding Studio</span>
+                                <span style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;" id="preview_desc_text">Appuyez sur le bouton ci-dessous et sélectionnez une catégorie dans le sélecteur pour ouvrir un ticket.</span>
+                                <div class="preview-bar"></div>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" onclick="triggerAction('Mise à jour du message panel envoyée sur Discord')">Mettre à jour le message</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Panneau Discord</h3>
+                    <span class="section-sublabel">Contenu</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); margin-top: -12px;">Textes affichés dans le panneau public.</span>
+
+                    <div class="grid-2" style="margin-top: 6px;">
+                        <div class="form-group">
+                            <label>Titre</label>
+                            <input type="text" id="panel_title" class="form-control" value="Support - Seeding Studio" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Pied de page</label>
+                            <input type="text" id="panel_footer" class="form-control" value="Powered by Seeding Studio">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="panel_description" class="form-control" oninput="updatePreview()">Appuyez sur le bouton ci-dessous et sélectionnez une catégorie dans le sélecteur pour ouvrir un ticket.</textarea>
+                    </div>
+
+                    <hr style="border: none; border-top: 1px solid var(--card-border); margin: 10px 0;">
+
+                    <span class="section-sublabel">Publication et fonctionnement</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); margin-top: -12px;">Emplacement du panneau et parcours utilisé pour ouvrir un ticket.</span>
+
+                    <div class="grid-2" style="margin-top: 6px;">
+                        <div class="form-group">
+                            <label>Salon de publication</label>
+                            <select class="form-control">
+                                <option>Choisir un salon</option>
+                                <option selected># support-ticket</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mode d'affichage</label>
+                            <select class="form-control">
+                                <option selected>Bouton puis menu</option>
+                                <option>Menu déroulant direct</option>
+                                <option>Bouton simple</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Communication du ticket</label>
+                        <select class="form-control">
+                            <option selected>Salon Discord</option>
+                            <option>Fil de discussion (Thread)</option>
+                        </select>
+                    </div>
+
+                    <hr style="border: none; border-top: 1px solid var(--card-border); margin: 10px 0;">
+
+                    <span class="section-sublabel">Bouton et apparence</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); margin-top: -12px;">Libellé de l'action et couleur principale du panneau.</span>
+
+                    <div class="grid-2" style="margin-top: 6px;">
+                        <div class="form-group">
+                            <label>Texte du bouton / Menu</label>
+                            <input type="text" class="form-control" value="Créer un ticket">
+                        </div>
+                        <div class="form-group">
+                            <label>Couleur</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <div style="width: 44px; height: 44px; background: #eab308; border-radius: 10px; border: 1px solid var(--card-border);"></div>
+                                <input type="text" class="form-control" value="#EAB308" style="font-family: monospace; font-weight: 700;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header-flex">
+                        <h3>Catégories de tickets</h3>
+                        <button class="btn-primary" style="padding: 10px 18px; font-size: 0.85rem;" onclick="triggerAction('Ajout d'une catégorie')">+ Ajouter</button>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr auto; gap: 14px; align-items: flex-end;">
+                            <div class="form-group">
+                                <label>Nom</label>
+                                <input type="text" class="form-control" value="Aide">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" class="form-control" value="Besoin d'aide">
+                            </div>
+                            <div class="form-group">
+                                <label>Catégorie Discord</label>
+                                <select class="form-control">
+                                    <option selected>Seeding Tester · #Aide</option>
+                                </select>
+                            </div>
+                            <button class="btn-danger-outline" onclick="triggerAction('Catégorie retirée')">Retirer</button>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr auto; gap: 14px; align-items: flex-end;">
+                            <div class="form-group">
+                                <label>Nom</label>
+                                <input type="text" class="form-control" value="support">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" class="form-control" value="demande d'aide">
+                            </div>
+                            <div class="form-group">
+                                <label>Catégorie Discord</label>
+                                <select class="form-control">
+                                    <option selected>Seeding Studio · # 🌱 / Seeding Studio</option>
+                                </select>
+                            </div>
+                            <button class="btn-danger-outline" onclick="triggerAction('Catégorie retirée')">Retirer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Paramètres avancés par catégorie</h3>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+                        <div class="card-header-flex">
+                            <div>
+                                <h4 style="margin-bottom: 2px;">Aide</h4>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">ID catégorie : aide</span>
+                            </div>
+                            <button class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem;" onclick="triggerAction('Paramètres de la catégorie Aide enregistrés')">Enregistrer</button>
+                        </div>
+
+                        <div class="grid-2" style="grid-template-columns: repeat(4, 1fr);">
+                            <div class="form-group">
+                                <label>Limite utilisateur</label>
+                                <input type="number" class="form-control" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Cooldown secondes</label>
+                                <input type="number" class="form-control" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Panel</label>
+                                <select class="form-control">
+                                    <option selected>Panel principal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Rôles Staff</label>
+                                <input type="text" class="form-control" placeholder="IDs séparés par virg.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Message d'ouverture</label>
+                            <textarea class="form-control" placeholder="Message automatique envoyé dans le ticket..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+                        <div class="card-header-flex">
+                            <div>
+                                <h4 style="margin-bottom: 2px;">support</h4>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">ID catégorie : support</span>
+                            </div>
+                            <button class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem;" onclick="triggerAction('Paramètres de la catégorie Support enregistrés')">Enregistrer</button>
+                        </div>
+
+                        <div class="grid-2" style="grid-template-columns: repeat(4, 1fr);">
+                            <div class="form-group">
+                                <label>Limite utilisateur</label>
+                                <input type="number" class="form-control" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Cooldown secondes</label>
+                                <input type="number" class="form-control" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Panel</label>
+                                <select class="form-control">
+                                    <option selected>Panel principal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Rôles Staff</label>
+                                <input type="text" class="form-control" placeholder="IDs séparés par virg.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Message d'ouverture</label>
+                            <textarea class="form-control" placeholder="Message automatique envoyé dans le ticket..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Tickets récents</h3>
+
+                    <div class="ticket-item-row">
+                        <div>
+                            <span style="font-weight: 700; font-size: 0.92rem;">#8cyjz0 — Aide</span>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">Utilisateur 830114795348688996 · 16/08/2026 12:26:48</div>
+                        </div>
+                        <span class="ticket-badge-archived">ARCHIVED</span>
+                    </div>
+
+                    <div class="ticket-item-row">
+                        <div>
+                            <span style="font-weight: 700; font-size: 0.92rem;">#0tattm — Aide</span>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">Utilisateur 830114795348688996 · 01/08/2026 19:08:41</div>
+                        </div>
+                        <span class="ticket-badge-archived">ARCHIVED</span>
+                    </div>
+
+                    <div class="ticket-item-row">
+                        <div>
+                            <span style="font-weight: 700; font-size: 0.92rem;">#p1b995 — Aide</span>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">Utilisateur 830114795348688996 · 13/07/2026 12:27:25</div>
+                        </div>
+                        <span class="ticket-badge-closed">CLOSED</span>
+                    </div>
+
+                    <div class="ticket-item-row">
+                        <div>
+                            <span style="font-weight: 700; font-size: 0.92rem;">#8f2ihu — Aide</span>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">Utilisateur 830114795348688996 · 13/07/2026 12:07:48</div>
+                        </div>
+                        <span class="ticket-badge-closed">CLOSED</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                    <button class="btn-primary" style="padding: 16px 32px; font-size: 1rem;" onclick="triggerAction('Configuration globale des tickets enregistrée avec succès !')">Enregistrer et mettre à jour le panneau</button>
                 </div>
             </div>
 
@@ -400,12 +807,12 @@
                     <p>Suivi des actions et historique des modifications administratives.</p>
                 </div>
                 <div class="card">
-                    <h4>Flux de Traçabilité</h4>
+                    <h3>Flux de Traçabilité</h3>
                     <div class="form-group">
                         <label>Salon des logs</label>
-                        <input type="text" id="log_channel" class="form-control" placeholder="#logs">
+                        <input type="text" class="form-control" placeholder="#logs">
                     </div>
-                    <button class="btn-primary" onclick="saveData()">Sauvegarder</button>
+                    <button class="btn-primary" onclick="triggerAction('Salon de logs enregistré')">Sauvegarder</button>
                 </div>
             </div>
 
@@ -415,7 +822,7 @@
                     <p>Contrôlez les accès aux différentes commandes et salons du bot.</p>
                 </div>
                 <div class="card">
-                    <h4>Rôles Autorisés</h4>
+                    <h3>Rôles Autorisés</h3>
                     <p class="card-subtext">Attribuez les niveaux d'accès hiérarchiques pour les commandes avancées.</p>
                 </div>
             </div>
@@ -426,7 +833,7 @@
                     <p>Paramétrez les règles de bannissement, de mute et d'avertissement.</p>
                 </div>
                 <div class="card">
-                    <h4>Protocoles Disciplinaires</h4>
+                    <h3>Protocoles Disciplinaires</h3>
                     <p class="card-subtext">Configuration des seuils d'avertissement automatique.</p>
                 </div>
             </div>
@@ -437,7 +844,7 @@
                     <p>Filtres anti-raid, anti-spam et protection contre les liens malveillants.</p>
                 </div>
                 <div class="card">
-                    <h4>Filtres Actifs</h4>
+                    <h3>Filtres Actifs</h3>
                     <p class="card-subtext">Protection renforcée contre les intrusions et les bots malveillants.</p>
                 </div>
             </div>
@@ -448,8 +855,8 @@
                     <p>Générez et restaurez des points de sauvegarde de la structure de votre serveur.</p>
                 </div>
                 <div class="card">
-                    <h4>Points de Restauration Turso</h4>
-                    <button class="btn-primary" onclick="saveData()">Créer une sauvegarde maintenant</button>
+                    <h3>Points de Restauration Turso</h3>
+                    <button class="btn-primary" onclick="triggerAction('Sauvegarde créée avec succès')">Créer une sauvegarde maintenant</button>
                 </div>
             </div>
 
@@ -459,7 +866,7 @@
                     <p>Activez ou désactivez les fonctionnalités principales de votre bot.</p>
                 </div>
                 <div class="card">
-                    <h4>Extensions du Noyau</h4>
+                    <h3>Extensions du Noyau</h3>
                     <p class="card-subtext">Gestion modulaire des intégrations (IA Groq, économie, etc.).</p>
                 </div>
             </div>
@@ -475,8 +882,16 @@
             element.classList.add('active');
         }
 
-        function saveData() {
+        function updatePreview() {
+            const title = document.getElementById('panel_title').value;
+            const desc = document.getElementById('panel_description').value;
+            document.getElementById('preview_title_text').innerText = title || 'Aperçu du panel';
+            document.getElementById('preview_desc_text').innerText = desc || 'Description...';
+        }
+
+        function triggerAction(message) {
             const toast = document.getElementById('toast');
+            toast.innerText = '✅ ' + message;
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
