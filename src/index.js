@@ -25,7 +25,8 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-const slashCommandsData = [];
+const slashCommandsData = [  "1266467715384610857", // Discord Anim
+];
 const commandsPath = path.join(__dirname, "commands");
 for (const folder of fs.readdirSync(commandsPath)) {
   const folderPath = path.join(commandsPath, folder);
