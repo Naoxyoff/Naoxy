@@ -11,6 +11,18 @@ module.exports = {
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);
       if (!command) return;
+
+      // Vérification de sécurité des permissions par défaut de la commande
+      if (command.data && command.data.default_member_permissions) {
+        const requiredPermissions = BigInt(command.data.default_member_permissions);
+        if (interaction.member && !interaction.member.permissions.has(requiredPermissions)) {
+          return interaction.reply({
+            content: "❌ Tu n'as pas la permission d'utiliser cette commande.",
+            ephemeral: true
+          });
+        }
+      }
+
       try { await command.execute(interaction); } catch (e) { console.error(e); }
       return;
     }
